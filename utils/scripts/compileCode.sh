@@ -1,0 +1,1 @@
+./utils/SmartPyBasic/SmartPy.sh compile ./contract/demo.py 'MyContract(1, 30)' ./contract_build

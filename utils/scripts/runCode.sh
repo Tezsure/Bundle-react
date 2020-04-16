@@ -1,0 +1,1 @@
+./utils/SmartPyBasic/SmartPy.sh run ./contract/demo.py
