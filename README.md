@@ -1,6 +1,6 @@
 # Bundle React
 
-<img src="bundle.png" height="100" >
+<img src="bundle.jpg" height="100" >
 
 Compile SmartPy code locally , Deploy in the Testnet / Local tezos node & interact with your Dapps
 
