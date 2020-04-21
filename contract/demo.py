@@ -1,16 +1,25 @@
 # Your Contract goes here 
 
 import smartpy as sp
-class MyContract(sp.Contract):
-    def __init__(self, myParameter1, myParameter2):
-        self.init(myParameter1 = myParameter1,
-                  myParameter2 = myParameter2)
+
+class StoreValue(sp.Contract):
+    def __init__(self, value):
+        self.init(storedValue = value)
+
     @sp.entry_point
-    def myEntryPoint(self, params):
-        sp.verify(self.data.myParameter1 <= 123)
-        self.data.myParameter1 += params
+    def replace(self, params):
+        self.data.storedValue = params.value
+
+    @sp.entry_point
+    def double(self, params):
+        self.data.storedValue *= 2
+
+    @sp.entry_point
+    def divide(self, params):
+        sp.verify(params.divisor > 5)
+        self.data.storedValue /= params.divisor
 # We evaluate a contract with parameters.
-contract = MyContract(12, 13)
+contract = StoreValue(12)
 
 
 # We need to export the compile the contract.

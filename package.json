@@ -4,6 +4,7 @@
   "description": "React-SmartPy Bundle for Tezos dApp Developers",
   "scripts": {
     "sync": "node ./utils/scripts/compileSync.js",
+    "test": "bash ./utils/scripts/checkScenario.sh",
     "compile": "npm run run-code",
     "run-code": "bash ./utils/scripts/runCode.sh",
     "deploy": "node ./utils/ConseilJsUtils/deployContract.js",

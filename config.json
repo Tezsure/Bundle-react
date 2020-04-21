@@ -23,5 +23,8 @@
 
     "compile_config" : {
         "contract_name": "demo.py"
+    },
+    "test_config": {
+        "contract_name": "demo_test.py"
     }
 }
