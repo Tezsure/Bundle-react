@@ -13,16 +13,13 @@
     },
 
     "contract_interaction_config": {
-        "contract_address": "",
-        "amount": 10,
-        "fee": 100000,
-        "derivation_path" : "",
-        "storage_limit" : 1000,
-        "gas_limit": 100000
+        "node" : "https://tezos-dev.cryptonomic-infra.tech",
+        "api-key": ""
     },
 
     "compile_config" : {
-        "contract_name": "demo.py"
+        "contract_name": "demo.py",
+        "michelson_code": "ContractCode.tz"
     },
     "test_config": {
         "contract_name": "demo_test.py"

@@ -8,6 +8,7 @@
     "compile": "npm run run-code",
     "run-code": "bash ./utils/scripts/runCode.sh",
     "deploy": "node ./utils/ConseilJsUtils/deployContract.js",
+    "get-entry-points": "bash ./utils/scripts/getEntryPoints.sh",
     "client-install": "npm install --prefix client",
     "dapp": "npm start --prefix client"
   },
@@ -29,7 +30,7 @@
   "dependencies": {
     "bs58check": "^2.1.2",
     "chalk": "^4.0.0",
-    "conseiljs": "^0.4.2-beta.4",
+    "conseiljs": "^0.4.2-beta.2",
     "libsodium-wrappers-sumo": "^0.7.6"
   }
 }
