@@ -212,10 +212,10 @@ These are the pre-defined config for deployment:
 
   
 
-A Tezos **node** allows you deploy contract, make transaction etc Other Tezos Node
+A Tezos **node** allows you deploy contract, make transaction etc. 
 
+Other Tezos Nodes :
   
-
 -  [https://tezos-dev.cryptonomic-infra.tech](https://tezos-dev.cryptonomic-infra.tech/)
 
 -  [https://carthagenet.SmartPy.io](https://carthagenet.smartpy.io/)
