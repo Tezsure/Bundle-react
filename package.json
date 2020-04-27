@@ -22,6 +22,13 @@
     "SmartPy"
   ],
   "author": "Tezsure Inc.",
+  "contributors": [
+    {
+      "name": "Dibyo Majumder",
+      "email": "dibyomajumder23@gmail.com",
+      "url": "https://github.com/dibyo007dev"
+    }
+  ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/Tezsure/Bundle-react/issues"
