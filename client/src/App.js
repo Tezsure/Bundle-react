@@ -17,7 +17,7 @@ function App() {
           rel="noopener noreferrer"
         >
           Learn React
-        </a> 
+        </a>
         <a className="App-link" href="https://cryptonomic.github.io/ConseilJS/#/">Learn ConseilJs</a>
       </header>
     </div>
