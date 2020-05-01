@@ -1,5 +1,8 @@
+  
 
 # Bundle React
+
+  
 
   
 
@@ -7,13 +10,23 @@
 
   
 
+  
+
 Compile SmartPy code locally , Deploy in the Testnet / Local tezos node & interact with your Dapps
+
+  
 
 ## Improvements :
 
- - Included local testing environment.
- - Entry-Points visualizer.
- - Added scripts for invocations and get-storage operation.
+  
+
+- Included local testing environment.
+
+- Entry-Points visualizer.
+
+- Added scripts for invocations and get-storage operation.
+
+  
 
   
 
@@ -23,7 +36,11 @@ Compile SmartPy code locally , Deploy in the Testnet / Local tezos node & intera
 
   
 
+  
+
 1.  `npm install` it will install all your dependencies
+
+  
 
   
 
@@ -39,7 +56,11 @@ Compile SmartPy code locally , Deploy in the Testnet / Local tezos node & intera
 
   
 
+  
+
 ### Now you are ready to write your SmatPy Smart Contract
+
+  
 
   
 
@@ -49,10 +70,13 @@ This is how a Smart Contract in SmartPy looks like :
 
   
 
-```python
+  
 
+```python
 import smartpy as sp
+
 class  MyContract(sp.Contract):
+
 	def  __init__(self, myParameter1, myParameter2):
 		self.init(myParameter1 = myParameter1,myParameter2 = myParameter2)
 
@@ -62,12 +86,15 @@ class  MyContract(sp.Contract):
 		self.data.myParameter1 += params
 
 contract = MyContract(12, 13)
-
 ```
 
   
 
-**Note:**  *You don't need to explicitly add the initial storage somewhere just initialize the contract class like a normal python class.*
+  
+
+**Note:**  *You don't need to explicitly add the initial storage somewhere just initialize the contract class like a normal python class. We have provided you with a demo.py SmartPy contract.* 
+
+  
 
   
 
@@ -77,19 +104,22 @@ This part should be intact as it helps to build your contract :
 
   
 
-```python
+  
 
+```python
 import smartpybasic as spb
 
 spb.compileContract(contract,targetBaseFilename = "./contract_build/Contract")
-
 print("Contract compiled in ./contract_build/ContractCode.tz")
-
 ```
 
   
 
+  
+
 Once done writing your Smart Contract inside ./contract, You have to configure the compile the config.
+
+  
 
   
 
@@ -103,7 +133,11 @@ Once done writing your Smart Contract inside ./contract, You have to configure t
 
   
 
+  
+
 3.  `npm run sync` this is a syncing command. Whenever the compile_config is changed in config.json this command must be executed from the terminal. This command helps the bundle to reconfigure the compilation parameters according to the changes you have made.
+
+  
 
   
 
@@ -111,7 +145,11 @@ Once done writing your Smart Contract inside ./contract, You have to configure t
 
 4.  `npm run compile` will build the contracts locally inside the folder ./contract_build.
 
+  
+
 ### Editing compile_config :
+
+  
 
   
 
@@ -119,7 +157,11 @@ You have to mention the contract name "demo.py" inside the contract name section
 
   
 
+  
+
 Note : You have to be specific about file name, otherwise it will throw an error. We have provided an initial config which compiles the ./contract/demo.py
+
+  
 
   
 
@@ -133,21 +175,37 @@ Note : You have to be specific about file name, otherwise it will throw an error
 
   
 
+  
+
 Your code will get compiled and stored in ./contract_build folder and the two files you need to focus on is the *Code.tz & *Storage.tz
+
+  
 
   
 
 #### contract_build folder will contain the following files :
 
+  
+
 - ContractCode.tz : Michelson Code of your Smart Contract.
+
+  
 
 - ContractCode.tz.json : Micheline Code of your Smart Contract.
 
+  
+
 - ContractExpression.smlse : an internal expression between SmartPy and SmartML, kept for the record but not directly useful.
+
+  
 
 - ContractStorage.tz : Micheline representation of the Storage.
 
+  
+
 - ConractTypes.tz : It specifies the types of the params used in the contract.
+
+  
 
   
 
@@ -161,7 +219,11 @@ Your code will get compiled and stored in ./contract_build folder and the two fi
 
   
 
-### Configuring Deployment Parameters :
+  
+
+#### Configuring Deployment Parameters :
+
+  
 
   
 
@@ -173,7 +235,11 @@ Inside the deploy_config section
 
   
 
+  
+
 - First is the Tezos node you want to use , It can be local or any remote node
+
+  
 
   
 
@@ -185,13 +251,19 @@ Inside the deploy_config section
 
   
 
+  
+
 - Set the parameters like amount, gas_limit, derivation_path etc
 
   
 
   
 
+  
+
 These are the pre-defined config for deployment:
+
+  
 
   
 
@@ -208,19 +280,30 @@ These are the pre-defined config for deployment:
 	"storage_limit" : 10000,
 	"gas_limit" : 100000
 }
+
 ```
 
   
 
-A Tezos **node** allows you deploy contract, make transaction etc. 
+  
+
+A Tezos **node** allows you deploy contract, make transaction etc.
+
+  
 
 Other Tezos Nodes :
-  
+
 -  [https://tezos-dev.cryptonomic-infra.tech](https://tezos-dev.cryptonomic-infra.tech/)
+
+  
 
 -  [https://carthagenet.SmartPy.io](https://carthagenet.smartpy.io/)
 
+  
+
 -  [http://carthagenet.tezos.cryptium.ch:8732](http://carthagenet.tezos.cryptium.ch:8732/)
+
+  
 
   
 
@@ -228,7 +311,11 @@ Conseil node is used to access conseil services and you need a API Key for that
 
   
 
+  
+
 -  [https://conseil-dev.cryptonomic-infra.tech:443/](https://conseil-dev.cryptonomic-infra.tech/)
+
+  
 
   
 
@@ -236,17 +323,29 @@ Use [https://nautilus.cloud](https://nautilus.cloud/) to access API KEY for Cons
 
   
 
+  
+
 **Contract Specifications:**
 
+  
+
 -  **contract_code** : It should refer to the Michelson Contract code you want to deploy.
+
+  
 
 -  **contract_storage** : refers to the Michelson representation of the initial storage used for deployment
 
   
 
+  
+
 **Bundle is provided with 6 Keys in the Keystore :**
 
+  
+
 - Both test_key1.js & test_key2.js are activated in the Alphanet . One can use that or import your own from the faucet and Activate & Reveal using the ConseilJsUtils.
+
+  
 
   
 
@@ -256,37 +355,57 @@ Use [https://nautilus.cloud](https://nautilus.cloud/) to access API KEY for Cons
 
   
 
-To deploy your contracts in the local tezos blockchain you first need to Setup [Tezster-CLI](https://github.com/Tezsure/Tezster-CLI/) / [Tezster-GUI](https://github.com/Tezsure/Tezster-GUI)
-
   
 
-  
+To deploy your contracts in the local tezos blockchain you first need to Setup [Tezster-CLI](https://docs.tezster.tech/tezster-cli) / [Tezster-GUI](https://docs.tezster.tech/)
 
+ 
 Once done just change the deploy_config.node : "http://localhost:18731"
 
+  Now when you deploy your contract, your contract will be deployed in the local-network and you can play with tezster tools to interact with the contract. To have a better experience give an alias to your contract with :
+  ```sh
+  tezster add-contract <contract_alias> <contract_address>
+  ```
+  And you can use all the funtionalities of Tezster-CLI tool.
   
-
+  
   
 
 ***Note** : *By Default the tezos-node runs in 18731 for Tezster.**
 
   
 
+  
+
 **Remaining keys are the contract deployment prams which inchudes :**
+
+  
 
 -  **amount** you want to send to the contract ( in micro Tez ).
 
+  
+
 -  **delegate_address** to whom you want to delegate your contract balance. ( tz1 address )
+
+  
 
 -  **fee** to the baker ( in micro Tez )
 
+  
+
 -  **storage_limit** for the contract ( limits the storage used by the contract )
+
+  
 
 -  **gas_limit** to restrict the actions / operactions to be carried out while deployment.
 
   
 
-**And then Run the above command ! Your contract will be Deployed**
+  
+
+**And then Run the command `npm run deploy `! Your contract will be Deployed**
+
+  
 
   
 
@@ -297,32 +416,48 @@ Once done just change the deploy_config.node : "http://localhost:18731"
 6.  `npm run dapp ` It will spin-up the Dapp front-end and you are ready to use it. This Bundle is packed up with simple create-react-app. Once you run the command the front-end dev server will start up and you will be redirected to your home page in your default browser.
 
   
+
 7.  `npm run test` It will run the whole template of SmartPy code with their scenario based testing. And the test results will be visualised in the teminal.
+
+  
 
 **This command will also generate a test_build where your test results will be stored.**
 
+  
+
 All you need is to change the **config.json** file and add up the contract name.
+
+  
 
 ```json
 "test_config": {
 	"contract_name": "demo_test.py"
 }
 ```
- **`npm run sync` is mandatory whenever your config.json file is changed !**
- 
-  *PS: You have to create another file in ***contract*** folder with the Smart-Contract and the tests written in it.*
+
+**`npm run sync` is mandatory whenever your config.json file is changed !**
+
+*PS: You have to create another file in ***contract*** folder with the Smart-Contract and the tests written in it.*
+
+  
 
 8.  `npm run get-entry-points` It will extract the entry-points from you recently compiled code and display in the terminal with a sample invocation which you can reference while invoking an entry-point from your dapp.
 
+  
+
 ```
-{ name: undefined, type: 'unit' }
- Name : double 
- Parameters :  
- Structure : (Left (Right $PARAM)) 
- Sample Invocation : (Left (Right Unit))
+Type: 'unit'
+Name : double
+Parameters :
+Structure : (Left (Right $PARAM))
+Sample  Invocation  : (Left (Right  Unit))
 ```
 
+  
+
 Package comes with React Ready front-end , and you are ready to use. Use ConseilJs library to interct with the contract.
+
+  
 
   
 
@@ -332,13 +467,21 @@ Build some Awesome Dapps !
 
   
 
+  
+
 ## Future Development
+
+  
 
 We'll be adding some new set of features like **local testing environment** to provide more flexibitity and usability to this Bundle & More bundles are coming soon , stay tuned!
 
   
 
+  
+
 ## License
+
+  
 
   
 
