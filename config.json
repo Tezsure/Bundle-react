@@ -1,6 +1,6 @@
 {
     "deploy_config" : {
-        "node" : "http://testnet.tezster.tech",
+        "node" : "https://testnet.tezster.tech",
         "contract_code" : "ContractCode.tz",
         "contract_storage" : "ContractStorage.tz",
         "key" : "test_key1",
@@ -13,7 +13,7 @@
     },
 
     "contract_interaction_config": {
-        "node" : "http://testnet.tezster.tech",
+        "node" : "https://testnet.tezster.tech",
         "api-key": ""
     },
 
