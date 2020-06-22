@@ -36,8 +36,8 @@
   "homepage": "https://github.com/Tezsure/Bundle-react#readme",
   "dependencies": {
     "bs58check": "^2.1.2",
-    "chalk": "^4.0.0",
-    "conseiljs": "^0.4.2-beta.2",
+    "chalk": "^4.1.0",
+    "conseiljs": "0.4.2",
     "libsodium-wrappers-sumo": "^0.7.6"
   }
 }
