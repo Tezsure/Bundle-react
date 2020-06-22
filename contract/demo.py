@@ -1,5 +1,3 @@
-# Your Contract goes here 
-
 import smartpy as sp
 
 class StoreValue(sp.Contract):
@@ -18,12 +16,19 @@ class StoreValue(sp.Contract):
     def divide(self, params):
         sp.verify(params.divisor > 5)
         self.data.storedValue /= params.divisor
-# We evaluate a contract with parameters.
-contract = StoreValue(12)
 
-
-# We need to export the compile the contract.
-# It can be done with the following.
-import smartpybasic as spb
-spb.compileContract(contract,targetBaseFilename = "./contract_build/Contract")
-print("Contract compiled in ./contract_build/ContractCode.tz")
+if "templates" not in __name__:
+    @sp.add_test(name = "StoreValue")
+    def test():
+        c1 = StoreValue(12)
+        scenario = sp.test_scenario()
+        scenario.h1("Store value test")
+        scenario += c1
+        scenario += c1.replace(value = 15)
+        scenario.p("Some computation").show(c1.data.storedValue * 12)
+        scenario += c1.replace(value = 25)
+        scenario += c1.double()
+        scenario += c1.divide(divisor = 2).run(valid = False)
+        scenario.verify(c1.data.storedValue == 50)
+        scenario += c1.divide(divisor = 6)
+        scenario.verify(c1.data.storedValue == 8)

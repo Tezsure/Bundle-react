@@ -6,7 +6,7 @@
     "sync": "node ./utils/scripts/compileSync.js",
     "test": "bash ./utils/scripts/checkScenario.sh",
     "compile": "npm run run-code",
-    "run-code": "bash ./utils/scripts/runCode.sh",
+    "run-code": "bash ./utils/scripts/compileCode.sh",
     "deploy": "node ./utils/ConseilJsUtils/deployContract.js",
     "get-entry-points": "bash ./utils/scripts/getEntryPoints.sh",
     "client-install": "npm install --prefix client",

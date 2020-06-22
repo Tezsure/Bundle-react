@@ -1,8 +1,16 @@
 {
+    "compile_config" : {
+        "contract_name": "demo.py",
+        "class_name": "StoreValue(12)"
+    },
+    "test_config": {
+        "contract_name": "demo.py"
+    },
+
     "deploy_config" : {
         "node" : "https://testnet.tezster.tech",
-        "contract_code" : "ContractCode.tz",
-        "contract_storage" : "ContractStorage.tz",
+        "contract_code" : "demo_compiled.tz",
+        "contract_storage" : "demo_storage_init.tz",
         "key" : "test_key1",
         "amount" : 10,
         "delegate_address" : "",
@@ -15,13 +23,5 @@
     "contract_interaction_config": {
         "node" : "https://testnet.tezster.tech",
         "api-key": ""
-    },
-
-    "compile_config" : {
-        "contract_name": "demo.py",
-        "michelson_code": "ContractCode.tz"
-    },
-    "test_config": {
-        "contract_name": "demo_test.py"
     }
 }
