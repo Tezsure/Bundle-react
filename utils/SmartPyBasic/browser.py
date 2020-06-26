@@ -24,6 +24,10 @@ class Window:
     lambdaNextId = 0
     activeTrace = None
 
+    class console: pass
+    console.log = print
+
+
     def nextId(self):
         result = self.contractNextId
         self.contractNextId += 1
@@ -37,7 +41,6 @@ class Window:
 
     def addOutput(self, s):
         pass
-
 
 class Document:
     pass

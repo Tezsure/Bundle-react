@@ -7,11 +7,12 @@ window.contracts = {}
 
 
 class Test:
-    def __init__(self, name, shortname, f, profile):
+    def __init__(self, name, shortname, f, profile, is_default):
         self.name = name
         self.shortname = shortname
         self.profile = profile
         self.f = f
+        self.is_default = is_default
 
     def eval(self):
         import smartpy
@@ -52,7 +53,7 @@ class Test:
 window.pythonTests = []
 
 
-def add_test(name, shortname=None, profile=False):
+def add_test(name, shortname=None, profile=False, is_default=True):
     if shortname is None:
         shortname = name.replace(" ", "_")
     if any(x.shortname == shortname for x in window.pythonTests):
@@ -70,7 +71,7 @@ def add_test(name, shortname=None, profile=False):
             )
 
     def r(f):
-        window.pythonTests.append(Test(name, shortname, f, profile))
+        window.pythonTests.append(Test(name, shortname, f, profile, is_default))
 
     return r
 
@@ -306,7 +307,7 @@ def run(withTests):
     window.cleanAll()
     for test in window.pythonTests:
         window.addButton(test.name, test.f)
-        if withTests:
+        if withTests and test.is_default:
             test.eval()
     if withTests and len(window.pythonTests) == 0:
         html = ""

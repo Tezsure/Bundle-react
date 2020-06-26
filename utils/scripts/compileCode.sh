@@ -1,1 +1,1 @@
-./utils/SmartPyBasic/SmartPy.sh compile ./contract/demo.py "StoreValue(12)" ./contract_build
+./utils/SmartPyBasic/SmartPy.sh compile ./contract/demo.py "FA12(sp.address('tz1dmXSsbCPtv2JeFdRkPx1b3stkoq77YaMw'))" ./contract_build

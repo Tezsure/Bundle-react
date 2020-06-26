@@ -6,6 +6,7 @@ import traceback
 import inspect
 import sys
 import datetime
+from types import FunctionType
 
 pyRange = range
 pyBool = bool
@@ -143,9 +144,11 @@ class Expr:
     def on_update(self, f):
         self.onUpdateHandlers.append(f)
 
-    def get(self, item, defaultValue=None):
-        if defaultValue is not None:
-            return Expr("getItemDefault", [self, spExpr(item), spExpr(defaultValue)])
+    def get(self, item, default_value = None, message = None):
+        if default_value is not None:
+            return Expr("getItemDefault", [self, spExpr(item), spExpr(default_value)])
+        if message is not None:
+            return Expr("getItemMessage", [self, spExpr(item), spExpr(message)])
         return self.__getitem__(item)
 
     def __enter__(self):
@@ -297,7 +300,8 @@ class Expr:
             if isinstance(e, str):
                 return '"%s"' % e
             return str(e)
-
+        if self._f == "invalid":
+            raise Exception(" ".join(str(x) for x in self._l))
         if self._l:
             return "(%s %s)" % (self._f, " ".join(ppe(x) for x in self._l))
         return "(%s)" % (self._f)
@@ -442,8 +446,10 @@ def tez(x):
     )
 
 
-def spExpr(x):
+def spExpr(x, context = "expression"):
     debug = False  # isinstance(x, dict)
+    if x is None:
+        raise Exception("Unexpected value (None) for %s in line %i." % (context, get_line_no()))
     if isinstance(x, Local):
         raise Exception(
             "Local value of variable %s can be accessed by doing %s.value"
@@ -481,14 +487,6 @@ def spExpr(x):
         if debug:
             alert("bytes")
         return literal("bytes", x.decode())
-    if isinstance(x, TRecord):
-        if debug:
-            alert("TRecord")
-        return literal("record", x)
-    if isinstance(x, TList):
-        if debug:
-            alert("TList")
-        return literal("list", x)
     if isinstance(x, WouldBeValue):
         if debug:
             alert("WouldBeValue")
@@ -521,6 +519,11 @@ def spExpr(x):
             alert(x)
             alert("Lambda")
         return x.f
+    if isinstance(x, FunctionType):
+        if debug:
+            alert(x)
+            alert("FunctionType")
+        return build_lambda(x).f
     if isinstance(x, TestAccount):
         if debug:
             alert(x)
@@ -541,15 +544,35 @@ class TType:
 
 class TRecord(TType):
     def __init__(self, **kargs):
-        args = sorted(kargs.items())
-        self.kargs = kargs
+        args = {}
+        for (k, v) in kargs.items():
+            v = sp.types.conv(v)
+            args[k] = v
+            setattr(self, k, v)
+        self.kargs = args
         self.layout_ = None
-        for (k, v) in args:
-            setattr(self, k, sp.types.conv(v))
 
     def layout(self, layout):
-        self.layout_ = parse_layout(layout)
-        return self
+        result = TRecord(**dict(self.kargs))
+        result.layout_ = parse_layout(layout)
+        return result
+
+    def right_comb(self):
+        result = TRecord(**dict(self.kargs))
+        result.layout_ = "Right"
+        return result
+
+    def with_fields(self, **kargs):
+        result = dict(self.kargs)
+        for (k, v) in kargs.items():
+            result[k] = v
+        return TRecord(**result)
+
+    def without_fields(self, l):
+        result = dict(self.kargs)
+        for k in l:
+            del result[k]
+        return TRecord(**result)
 
     def export(self):
         fields = " ".join(
@@ -610,6 +633,10 @@ class TVariant(TType):
 
     def layout(self, layout):
         self.layout_ = parse_layout(layout)
+        return self
+
+    def right_comb(self):
+        self.layout_ = "Right"
         return self
 
     def export(self):
@@ -739,8 +766,8 @@ class TContract(TType):
 
 class TLambda(TType):
     def __init__(self, t1, t2):
-        self.t1 = t1
-        self.t2 = t2
+        self.t1 = sp.types.conv(t1)
+        self.t2 = sp.types.conv(t2)
 
     def export(self):
         return "(lambda %s %s)" % (self.t1.export(), self.t2.export())
@@ -753,11 +780,11 @@ class SpTypes:
     def conv(self, t):
         if isinstance(t, WouldBeValue):
             raise Exception("Bad type expression " + str(t))
-        # This line needs to come before lines with ==.
-        if isinstance(t, TType) or isinstance(t, Expr):
-            return t
         if t is None:
             t = self.unknown()
+        # This line needs to come before lines with ==.
+        if isinstance(t, TType) or isinstance(t, Expr) or isinstance(t, TUnknown):
+            return t
         if t == pyInt:
             raise Exception("Type int in this context is referred to as sp.TInt.")
         if t == pyBool:
@@ -768,16 +795,16 @@ class SpTypes:
             raise Exception("Type bytes in this context is referred to as sp.TBytes.")
         if isinstance(t, pyList) and pyLen(t) == 1:
             return TList(self.conv(t[0]))
-        raise Exception("Bad type expression " + str(t))
+        raise Exception("Bad type expression " + str(t) + " of type " + str(type(t)))
 
     def trecord(self, **kargs):
         for x in kargs:
             kargs[x] = self.conv(kargs[x])
         return TRecord(kargs)
 
-    def unknown(self, name=""):
+    def unknown(self):
         self.unknownIds += 1
-        return TUnknown("%s %i" % (name, self.unknownIds))
+        return TUnknown(str(self.unknownIds))
 
     def taddress(self):
         return TAddress
@@ -807,11 +834,6 @@ class TreeBlock:
     def addLocal(self, var):
         self.locals.append(var)
 
-    def dropLocals(self):
-        for x in reversed(self.locals):
-            if not x.dropped:
-                x.drop()
-
     def export(self):
         return "(%s)" % (" ".join(x.export() for x in self.commands))
 
@@ -828,7 +850,6 @@ class CommandBlock:
         return self.value
 
     def __exit__(self, type, value, traceback):
-        self.commands.dropLocals()
         self.sp.mb.currentBlock = self.currentBlock
 
     def export(self):
@@ -860,14 +881,13 @@ class Sp:
     def newCommand(self, command):
         if hasattr(self, "mb") and self.mb is not None:
             self.mb.append(command)
+        else:
+            raise Exception("New command outside of contract (line %i):\n%s" % (get_line_no(), str(command)))
 
     def set(self, var, value):
         if value is None:
             raise Exception("None value for ", var)
         self.newCommand(Expr("set", [var, spExpr(value), get_line_no()]))
-
-    def dropLocal(self, var):
-        self.newCommand(Expr("dropLocal", [var.name, get_line_no()]))
 
     def updateSet(self, set, item, add):
         self.newCommand(
@@ -1064,13 +1084,6 @@ class ExecMessage:
         return result
 
 
-def unknownTypeParam(t, s):
-    if t == "UNKNOWN":
-        t = sp.types.unknown(s)
-    t = sp.types.conv(t)
-    return t
-
-
 class WouldBeValue:
     def __repr__(self):
         try:
@@ -1099,7 +1112,9 @@ class record(WouldBeValue):
 
 
 class tuple(WouldBeValue):
-    def __init__(self, l=[]):
+    def __init__(self, l = None):
+        if l is None:
+            l = []
         self.l = l
         self.lineNo = get_line_no()
 
@@ -1115,8 +1130,10 @@ def pair(e1, e2):
 
 
 class list(WouldBeValue):
-    def __init__(self, l=[], t="UNKNOWN"):
-        self.t = unknownTypeParam(t, "list t")
+    def __init__(self, l = None, t = None):
+        if l is None:
+            l = []
+        self.t = sp.types.conv(t)
         self.l = l
         self.lineNo = get_line_no()
 
@@ -1138,10 +1155,10 @@ class list(WouldBeValue):
 
 
 class set(WouldBeValue):
-    def __init__(self, l=None, t="UNKNOWN"):
+    def __init__(self, l = None, t = None):
         if l is None:
             l = []
-        self.t = unknownTypeParam(t, "set t")
+        self.t = sp.types.conv(t)
         self.l = l
         self.lineNo = get_line_no()
 
@@ -1171,14 +1188,19 @@ class set(WouldBeValue):
 
 
 class mapOrBigMap(WouldBeValue):
-    def __init__(self, l={}, tkey="UNKNOWN", tvalue="UNKNOWN"):
-        self.tkey = unknownTypeParam(tkey, "%s tkey" % self.name())
-        self.tvalue = unknownTypeParam(tvalue, "%s tvalue" % self.name())
+    def __init__(self, l = None, tkey = None, tvalue = None):
+        self.tkey = sp.types.conv(tkey)
+        self.tvalue = sp.types.conv(tvalue)
+        if l is None:
+            l = {}
         self.l = l
         self.lineNo = get_line_no()
 
     def contains(self, value):
         return Expr("contains", [self, spExpr(value), get_line_no()])
+
+    def __getitem__(self, item):
+        return Expr("getItem", [self, spExpr(item), get_line_no()])
 
     def export(self):
         return "(%s %s %s %s %s)" % (
@@ -1214,10 +1236,6 @@ class map(mapOrBigMap):
 
     def rev_values(self):
         return Expr("rev_values", [self, get_line_no()])
-
-    def __getitem__(self, item):
-        return Expr("getItem", [self, spExpr(item), get_line_no()])
-
 
 class big_map(mapOrBigMap):
     def name(self):
@@ -1337,7 +1355,6 @@ class Contract:
                 "Entry point failure for %s (line %i): entry points cannot have return statements."
                 % (addedMessage.name, addedMessage.lineNo)
             )
-        mb.commands.dropLocals()
         self.mb = None
         sp.setMB(None)
         self.messages[addedMessage.name] = mb
@@ -1373,6 +1390,7 @@ class Contract:
         self.smartml = Smartml(self)
         sp.profile("CollectMessages smartml " + self.__class__.__name__)
         self.data = Expr("contractData", [self.smartml.contractId, get_line_no()])
+        self.balance = Expr("contractBalance", [self.smartml.contractId, get_line_no()])
         sp.profile("CollectMessages end " + self.__class__.__name__)
         self.address = contract_address(self)
 
@@ -1479,11 +1497,13 @@ def implicit_account(key_hash):
 
 
 default_verify_message = None
-
+wrap_verify_messages = None
 
 def verify(cond, ghost=False, message=None):
     if message is None:
         message = default_verify_message
+    if wrap_verify_messages is not None and message is not None:
+        message = wrap_verify_messages(message)
     if message is None:
         sp.newCommand(Expr("verify", [spExpr(cond), ghost, get_line_no()]))
     else:
@@ -1493,7 +1513,7 @@ def verify(cond, ghost=False, message=None):
 
 
 def verify_equal(v1, v2, ghost=False, message=None):
-    verify(poly_equal(v1, v2), ghost, message)
+    verify(poly_equal_expr(v1, v2), ghost, message)
 
 
 def ghostVerify(cond, message=None):
@@ -1501,8 +1521,7 @@ def ghostVerify(cond, message=None):
 
 
 def failwith(message):
-    return sp.newCommand(Expr("failwith", [spExpr(message), get_line_no()]))
-
+    sp.newCommand(Expr("failwith", [spExpr(message), get_line_no()]))
 
 ## Control
 def else_():
@@ -1544,7 +1563,7 @@ def if_(condition):
 def for_(name, value):
     value = spExpr(value)
     b = CommandBlock(sp)
-    t = sp.types.unknown("for %s" % name)
+    t = sp.types.unknown()
     sp.newCommand(Expr("forGroup", [name, t, value, b, get_line_no()]))
     value = Expr("iter", [name, t, get_line_no()])
     value.__asBlock = b
@@ -1564,9 +1583,8 @@ def pack(value):
     return Expr("pack", [spExpr(value), get_line_no()])
 
 
-def unpack(value, t="UNKNOWN"):
-    t = unknownTypeParam(t, "unpack.t")
-    return Expr("unpack", [spExpr(value), t, get_line_no()])
+def unpack(value, t = None):
+    return Expr("unpack", [spExpr(value), sp.types.conv(t), get_line_no()])
 
 
 def blake2b(value):
@@ -1645,13 +1663,16 @@ def is_nat(v):
 def as_nat(v):
     return is_nat(v).open_some()
 
+def result(r):
+    sp.newCommand(Expr("result", [spExpr(r), get_line_no()]))
 
 class Lambda:
-    def __init__(self, f, params, tParams, global_name):
+    def __init__(self, f, params, tParams, global_name, auto_result):
         self.id = window.lambdaNextId
         self.params = params
         self.tParams = tParams
         self.global_name = global_name
+        self.auto_result = auto_result
         window.lambdaNextId += 1
         self.f = self.collectLambda(f)
 
@@ -1663,19 +1684,19 @@ class Lambda:
         currentBlock = sp.mb.currentBlock
         commands = TreeBlock()
         sp.mb.currentBlock = commands
-        result = f(
+        r = f(
             Expr("lambdaParams", [self.id, self.params, get_line_no(), self.tParams])
         )
-        if result is None:
-            result = unit
-        sp.newCommand(Expr("lambdaResult", [spExpr(result), get_line_no()]))
-        result = Expr("lambda", [self.id, self.params, get_line_no(), commands])
-        commands.dropLocals()
+        if self.auto_result:
+            result(r)
+        elif r is not None:
+            raise Exception("Please use 'sp.result' instead of 'return' in SmartPy functions.")
+        r = Expr("lambda", [self.id, self.params, get_line_no(), commands])
         sp.mb.currentBlock = currentBlock
         self.mb = prev
         if newMB:
             sp.setMB(None)
-        return result
+        return r
 
     def __call__(self, arg):
         return Expr("call_lambda", [self.f, spExpr(arg), get_line_no()])
@@ -1687,24 +1708,20 @@ class Lambda:
         return self.f.export()
 
 
-def build_lambda(f, params="", tParams="UNKNOWN", global_name=None):
-    if tParams == "UNKNOWN":
-        tParams = sp.types.unknown("lambda %s" % params)
+def build_lambda(f, params="", tParams = None, global_name=None):
     tParams = sp.types.conv(tParams)
-    return Lambda(f, params, tParams, global_name)
+    auto_result = f.__name__ == "<lambda>"
+    return Lambda(f, params, tParams, global_name, auto_result)
 
 
 class Local:
-    def __init__(self, name, value, t="UNKNOWN"):
-        if t == "UNKNOWN":
-            t = sp.types.unknown("local %s" % name)
+    def __init__(self, name, value, t = None):
         t = sp.types.conv(t)
         sp.defineLocal(self, name, spExpr(value), t)
         self.init = False
         self.name = name
         self.val = value
         self.t = t
-        self.dropped = False
         self.init = True
 
     def __getattr__(self, attr):
@@ -1729,17 +1746,11 @@ class Local:
         else:
             object.__setattr__(self, attr, value)
 
-    def drop(self):
-        if self.dropped:
-            raise Exception("Local variable %s is already dropped." % self.name)
-        self.dropped = True
-        sp.dropLocal(self)
-
     def export(self):
         return self.value.export()
 
 
-def local(name, value, t="UNKNOWN"):
+def local(name, value, t = None):
     return Local(name, value, t)
 
 
@@ -1747,7 +1758,7 @@ def transfer(arg, amount, destination):
     sp.newCommand(
         Expr(
             "transfer",
-            [spExpr(arg), spExpr(amount), spExpr(destination), get_line_no()],
+            [spExpr(arg, "transfer arguments"), spExpr(amount, "transfer amount"), spExpr(destination, "transfer destination"), get_line_no()],
         )
     )
 
@@ -1763,11 +1774,15 @@ def contract(t, address, entry_point=""):
     )
 
 
-def set_type(expression, t):
+def set_type_expr(expression, t):
     result = Expr("set_type", [spExpr(expression), sp.types.conv(t), get_line_no()])
-    sp.newCommand(result)
     return result
 
+
+def set_type(expression, t):
+    result = set_type_expr(expression, t)
+    sp.newCommand(result)
+    return Expr("invalid", ["Invalid expression, sp.set_type should no longer be used as an expression, please use sp.set_type_expr instead (line: %i)" % get_line_no()])
 
 def type_of(e):
     return Expr("type_of", [spExpr(e), get_line_no()])
@@ -1804,8 +1819,8 @@ max = spmax
 min = spmin
 
 
-def poly_equal(a, b):
-    return pack(a) == pack(set_type(b, type_of(a)))
+def poly_equal_expr(a, b):
+    return pack(a) == pack(set_type_expr(b, type_of(a)))
 
 
 class Scenario:
@@ -1871,7 +1886,7 @@ class Scenario:
     def verify_equal(self, v1, v2):
         data = {}
         data["action"] = "verify"
-        data["condition"] = poly_equal(v1, v2).export()
+        data["condition"] = poly_equal_expr(v1, v2).export()
         data["line_no"] = get_line_no()
         self.messages += [data]
         return self
@@ -1965,15 +1980,15 @@ def Set(**args):
 # Library
 
 
-def vector(xs, tkey=TIntOrNat, tvalue="UNKNOWN"):
+def vector(xs, tkey=TIntOrNat, tvalue = None):
     return map(l={k: v for (k, v) in enumerate(xs)}, tkey=tkey, tvalue=tvalue)
 
 
-def matrix(xs, tkey=TIntOrNat, tvalue="UNKNOWN"):
+def matrix(xs, tkey=TIntOrNat, tvalue = None):
     return vector([vector(x, tkey=tkey, tvalue=tvalue) for x in xs], tkey=tkey)
 
 
-def cube(xs, tkey=TIntOrNat, tvalue="UNKNOWN"):
+def cube(xs, tkey=TIntOrNat, tvalue = None):
     return vector([matrix(x, tkey=tkey, tvalue=tvalue) for x in xs], tkey=tkey)
 
 
@@ -1983,6 +1998,12 @@ inBrowser = window.inBrowser
 def add_test(*args, **kargs):
     return smartpyio.add_test(*args, **kargs)
 
+def show(name, contract, shortname=None, profile=False):
+    def test():
+        scenario = test_scenario()
+        scenario += contract
+        scenario.simulation(contract)
+    return smartpyio.add_test(name = name, shortname = shortname, profile = profile)(test)
 
 def import_template(name):
     if inBrowser:
@@ -1998,3 +2019,50 @@ def import_template(name):
     module.__dict__['__name__'] = "templates/" + name
     exec (template, module.__dict__)
     return module
+
+def compile_contract(
+        contract,
+        target_directory,
+        name = "contract"
+):
+    """Exports contract to smlse, code and storage files."""
+    import subprocess
+    import os
+    os.makedirs(target_directory, exist_ok=True)
+    targetSmlse = target_directory + "/" + name + ".smlse"
+    open(targetSmlse, "w").write(contract.export())
+    command = [
+        "node",
+        os.path.dirname(os.path.realpath(__file__)) + "/smartml-cli.js",
+        "compile-smartml-contract",
+        targetSmlse,
+        target_directory
+    ]
+    subprocess.run(command)
+
+class Lazy_strings(big_map):
+    def __init__(self, contract, path):
+        super().__init__(tkey = TNat, tvalue = TString)
+        self.next_id = 0
+        self.contract = contract
+        self.path = path
+        self.app = None
+        self.d = {}
+    def get(self, x):
+        result(self.path(fst(x)).get(snd(x), ""))
+    def __call__(self, x):
+        if not(isinstance(x, str)):
+            return x
+        try:
+            return self.d[x]
+        except KeyError:
+            self.l[self.next_id] = x
+            if False:
+                result = self.path(self.contract.data).get(self.next_id, "")
+            else:
+                if self.app is None:
+                    self.app = self.contract.global_lambda("get_error", self.get)
+                result = self.app((self.contract.data, self.next_id))
+                self.d[x] = result
+            self.next_id += 1
+            return result

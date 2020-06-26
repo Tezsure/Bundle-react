@@ -67,6 +67,7 @@ if __name__ == "__main__":
             raise Exception("Cannot export sexprfile without a --class_call.")
         open(args.sexprfile, "w").write(contract.export())
     if args.scenario:
+        scenarios = []
         for test in browser.window.pythonTests:
             try:
                 test.eval()
@@ -86,7 +87,8 @@ if __name__ == "__main__":
                 scenario = browser.scenario
             else:
                 scenario = browser.scenario.messages  # trace
-            open(args.scenario, "w").write(json.dumps(scenario))
+            scenarios.append({'shortname': test.shortname, 'longname': test.name, 'scenario' : scenario})
+        open(args.scenario, "w").write(json.dumps(scenarios))
             # print ("Exporting %s" % args.scenario)
     if args.pyadaptedfile is not None:
         open(args.pyadaptedfile, "w").write(adaptedCode)

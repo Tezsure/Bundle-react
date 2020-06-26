@@ -33,8 +33,10 @@ Install directory: $install_path
 
 Usage: $(basename $0) <command> <arguments>
 
-- local-install PATH         : Install the default version of SmartPy at PATH.
-- local-install-dev PATH     : Like local-install but get the 'dev' version.
+- local-install PATH                   : Install the default version of SmartPy at PATH.
+- local-install-dev PATH               : Like local-install but get the 'dev' version.
+- local-install-test PATH              : Like local-install but get the 'test' version.
+- local-install-custom DISTRIB PATH    : Like local-install but get the 'DISTRIB' version.
 - local-install-from SRC-PATH DST-PATH :
   Install from another installation, or from the git repository's python/
   directory.
@@ -62,7 +64,7 @@ download () {
 files_to_install="
 smartpy.py
 smartpyio.py
-smartpybasic.py
+smartpy_cli.py
 browser.py
 version.py
 SmartPy.sh
@@ -70,6 +72,8 @@ smartml-cli.js
 reference.html
 asciidoctor.css
 coderay-asciidoctor.css
+scripts/demo.py
+templates/welcome.py
 "
 
 install_from () {
@@ -114,10 +118,14 @@ case "$1" in
     "" | "help" | "--help" | "-h")
         usage ;;
     "local-install" )
-        install_from download https://SmartPy.io/SmartPyBasic "$2" ;;
+        install_from download https://SmartPy.io/smartpy-cli "$2" ;;
     "local-install-dev" )
-        install_from download https://SmartPy.io/SmartPyBasicDev "$2" ;;
-    "local-install-from-path" )
+        install_from download https://SmartPy.io/smartpy-cli-dev "$2" ;;
+    "local-install-test" )
+        install_from download https://SmartPy.io/smartpy-cli-test "$2" ;;
+    "local-install-custom" )
+        install_from download "$2" "$3" ;;
+    "local-install-from" )
         shift
         install_from cp "$1" "$2" ;;
     # Aliases to cli-js commands:
@@ -129,6 +137,10 @@ case "$1" in
     "test" )
         shift
         call_app run-smartpy-test-in-interpreter "$@" ;;
+    "run" )
+        shift
+        export NODE_PATH=$smartpy_install_path/node_modules:$NODE_PATH
+        python3 $install_path/smartpybasic.py "$@" ;;
     "test-sandbox" )
         shift
         call_app run-smartpy-test-in-interpreter "$@"

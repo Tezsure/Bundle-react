@@ -1,7 +1,7 @@
 {
     "compile_config" : {
         "contract_name": "demo.py",
-        "class_name": "StoreValue(12)"
+        "class_name": "FA12(sp.address('tz1dmXSsbCPtv2JeFdRkPx1b3stkoq77YaMw'))"
     },
     "test_config": {
         "contract_name": "demo.py"
@@ -17,7 +17,7 @@
         "fee" : 10000,
         "derivation_path" : "",
         "storage_limit" : 10000,
-        "gas_limit" : 100000
+        "gas_limit" : 500000
     },
 
     "contract_interaction_config": {

@@ -415,22 +415,103 @@ Please see <a href="#_variants">Variants</a>.</p>
 <div class="sect2">
 <h3 id="_setting_a_type_constraint_in_smartpy">Setting a type constraint in SmartPy</h3>
 <div class="paragraph">
-<p>This is usually not needed.</p>
+<p>This is usually not needed for small contracts or prototypes but gets useful typically when interacting with the outside world, implementing a given interface, etc.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>self.init_type(t)</code></dt>
+<dd>
+<p>Constrain the contract storage to be of type <code>t</code>  (called in the <code>__init__</code> constructor).<br>
+This is useful because it allows to precise the storage type or even to define storage-less contracts.<br>
+In a test, if not determined in the <code>__init__</code> method, the storage can be initialized by calling <code>c.set_storage(expression)</code>.<br>
+See reference <a href="index.html?template=init_type_only.py" target="_blank" rel="noopener">Init Type Only</a> template.<br>
+This is not mandatory but is appreciated by many in practice.</p>
+</dd>
+</dl>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="python">    <span class="keyword">class</span> <span class="class">MyContract</span>(sp.Contract):
+    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="predefined-constant">self</span>):
+        <span class="comment">## Possibly set the storage type</span>
+        <span class="predefined-constant">self</span>.init_type(sp.TRecord(a = sp.TInt, b = sp.TString))
+        <span class="comment">## Possibly set the storage</span>
+        <span class="predefined-constant">self</span>.init(...)</code></pre>
+</div>
 </div>
 <div class="dlist">
 <dl>
 <dt class="hdlist1"><code>sp.set_type(expression, t)</code></dt>
 <dd>
-<p>Constrain <code>expression</code> to be of type <code>t</code>. This can be used as an expression or a command.<br>
+<p>Constrain <code>expression</code> to be of type <code>t</code>. This can only be used as a command inside a contract.<br>
+There is no equivalent instruction in Michelson.<br>
+A usual pattern for big contracts is to explicitely setting types in the first lines of entry points.<br>
+This is usually not needed but is appreciated by many in practice.</p>
+</dd>
+</dl>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="python">    <span class="decorator">@sp.entry_point</span>
+    <span class="keyword">def</span> <span class="function">my_entry_point</span>(<span class="predefined-constant">self</span>, x, y, z):
+        <span class="comment">## First set types</span>
+        sp.set_type(x, sp.TInt)
+        sp.set_type(y, sp.TString)
+        sp.set_type(z, sp.TList(sp.TInt))
+        <span class="comment">## Then do the computations</span>
+        ...</code></pre>
+</div>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>sp.set_type_expr(expression, t)</code></dt>
+<dd>
+<p>Constrain <code>expression</code> to be of type <code>t</code>. This can only be used as an expression.<br>
 There is no equivalent instruction in Michelson.</p>
 </dd>
-<dt class="hdlist1"><code>self.init_type(t)</code></dt>
-<dd>
-<p>Constrain the contract storage to be of type <code>t</code>  (called in the <code>__init__</code>).<br>
-This is useful because it allows to precise the storage type or even to define storage-less contracts.<br>
-In a test, if not determined in the <code>__init__</code> method, the storage can be initialized by calling <code>c.set_storage(expression)</code>.<br>
-See reference <a href="index.html?template=init_type_only.py" target="_blank" rel="noopener">Init Type Only</a> template.<br></p>
-</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>A few words of caution about the differences between <code>sp.set_type</code> and <code>sp.set_type_expr</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="python"><span class="comment"># Inside a contract:</span>
+
+    <span class="decorator">@sp.entry_point</span>
+    <span class="keyword">def</span> <span class="function">my_entry_point</span>(<span class="predefined-constant">self</span>, params):
+        ...
+        <span class="comment">## Warning: this is not taken into account (the expression is simply dropped).</span>
+        sp.set_type_expr(params, sp.TInt)
+        ...
+
+    <span class="decorator">@sp.entry_point</span>
+    <span class="keyword">def</span> <span class="function">my_entry_point</span>(<span class="predefined-constant">self</span>, params):
+        ...
+        <span class="comment">## This is taken into account (when we call params afterward).</span>
+        params = sp.set_type_expr(params, sp.TInt)
+        ... params ...
+
+    <span class="decorator">@sp.entry_point</span>
+    <span class="keyword">def</span> <span class="function">my_entry_point</span>(<span class="predefined-constant">self</span>, params):
+        ...
+        <span class="comment">## This is taken into account (sp.set_type is a command).</span>
+        sp.set_type(params, sp.TInt) <span class="comment">## This is taken into account.</span>
+        ...
+
+<span class="comment"># Inside a test scenario:</span>
+
+    scenario += ...
+    <span class="comment">## This is illegal (command outside of a contract).</span>
+    sp.set_type(..., ...)
+
+    <span class="comment">## This is OK (usually useless nonetheless)</span>
+    x = sp.set_type_expr(..., ...)
+    scenario += c.f(x)</code></pre>
+</div>
+</div>
+<div class="dlist">
+<dl>
 <dt class="hdlist1"><code>sp.set_record_layout(expression, layout)</code></dt>
 <dt class="hdlist1"><code>sp.set_variant_layout(expression, layout)</code></dt>
 <dd>
@@ -1788,7 +1869,9 @@ See Michelson <a href="https://michelson.nomadic-labs.com/#instr-FAILWITH" targe
       scenario += c1.myEntryPoint(<span class="integer">50</span>)
       scenario += c1.myEntryPoint(<span class="integer">50</span>).run(valid = <span class="predefined-constant">False</span>) <span class="comment"># this is expected to fail</span>
       <span class="comment"># Finally, we check the final storage of c1</span>
-      scenario.verify(c1.data.myParameter1 == <span class="integer">151</span>)</code></pre>
+      scenario.verify(c1.data.myParameter1 == <span class="integer">151</span>)
+      <span class="comment"># and its balance</span>
+      scenario.verify(c1.balance == sp.tez(<span class="integer">0</span>))</code></pre>
 </div>
 </div>
 </div>
@@ -1987,7 +2070,7 @@ Michelson (a smart contract cannot manipulate secret keys).</p>
 <h2 id="_command_line_interface">Command Line Interface</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The command line interface is called <strong>SmartPyBasic</strong> and has been introduced by the following <a href="https://medium.com/@SmartPy_io/introducing-smartpybasic-a-simple-cli-to-build-tezos-smart-contract-in-python-f5bd8772b74a" target="_blank" rel="noopener">Medium Post</a>.</p>
+<p>The command line interface is called <strong>smartpy-cli</strong> and has been introduced by the following <a href="https://medium.com/@SmartPy_io/introducing-smartpybasic-a-simple-cli-to-build-tezos-smart-contract-in-python-f5bd8772b74a" target="_blank" rel="noopener">Medium Post</a>.</p>
 </div>
 <div class="sect2">
 <h3 id="_installation">Installation</h3>
@@ -1997,26 +2080,26 @@ Michelson (a smart contract cannot manipulate secret keys).</p>
 <div class="literalblock">
 <div class="content">
 <pre># for the official stable version
-sh &lt;(curl -s https://SmartPy.io/SmartPyBasic/SmartPy.sh) local-install ~</pre>
+sh &lt;(curl -s https://SmartPy.io/smartpy-cli/SmartPy.sh) local-install ~/smartpy-cli</pre>
 </div>
 </div>
 <div class="literalblock">
 <div class="content">
 <pre># for the dev version (not as stable as the stable version but reasonably stable, new incremental features are here)
-sh &lt;(curl -s https://SmartPy.io/SmartPyBasicDev/SmartPy.sh) local-install-dev ~</pre>
+sh &lt;(curl -s https://SmartPy.io/smartpy-cli-dev/SmartPy.sh) local-install-dev ~/smartpy-cli</pre>
 </div>
 </div>
 <div class="literalblock">
 <div class="content">
 <pre># for the test version (quite experimental)
-sh &lt;(curl -s https://SmartPy.io/SmartPyBasicTest/SmartPy.sh) local-install-test ~</pre>
+sh &lt;(curl -s https://SmartPy.io/smartpy-cli-test/SmartPy.sh) local-install-test ~/smartpy-cli</pre>
 </div>
 </div>
 </div>
 <div class="sect2">
 <h3 id="_dependencies">Dependencies</h3>
 <div class="paragraph">
-<p>SmartPyBasic depends on <code>python3</code> and <code>node.js</code>.</p>
+<p>smartpy-cli depends on <code>python3</code> and <code>node.js</code>.</p>
 </div>
 </div>
 <div class="sect2">
@@ -2025,7 +2108,7 @@ sh &lt;(curl -s https://SmartPy.io/SmartPyBasicTest/SmartPy.sh) local-install-te
 <h4 id="_executing_a_smartpy_script">Executing a SmartPy Script</h4>
 <div class="literalblock">
 <div class="content">
-<pre>~/SmartPyBasic/SmartPy.sh run &lt;myscript.py&gt;</pre>
+<pre>~/smartpy-cli/SmartPy.sh run &lt;myscript.py&gt;</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -2036,7 +2119,7 @@ sh &lt;(curl -s https://SmartPy.io/SmartPyBasicTest/SmartPy.sh) local-install-te
 <h4 id="_executing_a_smartpy_script_with_its_tests">Executing a SmartPy Script with its tests</h4>
 <div class="literalblock">
 <div class="content">
-<pre>~/SmartPyBasic/SmartPy.sh test &lt;myscript.py&gt; &lt;output-directory&gt;</pre>
+<pre>~/smartpy-cli/SmartPy.sh test &lt;myscript.py&gt; &lt;output-directory&gt;</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -2047,7 +2130,7 @@ sh &lt;(curl -s https://SmartPy.io/SmartPyBasicTest/SmartPy.sh) local-install-te
 <h4 id="_compiling_a_smartpy_script">Compiling a SmartPy Script</h4>
 <div class="literalblock">
 <div class="content">
-<pre>~/SmartPyBasic/SmartPy.sh compile &lt;contractBuilder.py&gt; &lt;class-call&gt; &lt;output-directory&gt;</pre>
+<pre>~/smartpy-cli/SmartPy.sh compile &lt;contractBuilder.py&gt; &lt;class-call&gt; &lt;output-directory&gt;</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -2055,7 +2138,7 @@ sh &lt;(curl -s https://SmartPy.io/SmartPyBasicTest/SmartPy.sh) local-install-te
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="shell">~/SmartPyBasic/SmartPy.sh compile welcome.py &quot;Welcome(12,123)&quot; /tmp/welcome</code></pre>
+<pre class="CodeRay highlight"><code data-lang="shell">~/smartpy-cli/SmartPy.sh compile welcome.py &quot;Welcome(12,123)&quot; /tmp/welcome</code></pre>
 </div>
 </div>
 </div>
