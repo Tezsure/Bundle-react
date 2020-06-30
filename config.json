@@ -1,7 +1,7 @@
 {
     "compile_config" : {
         "contract_name": "demo.py",
-        "class_name": "FA12(sp.address('tz1dmXSsbCPtv2JeFdRkPx1b3stkoq77YaMw'))"
+        "class_name": "MyContract(12, 123)"
     },
     "test_config": {
         "contract_name": "demo.py"
