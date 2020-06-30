@@ -18,9 +18,9 @@ echo " ------------------";
 ./utils/SmartPyBasic/SmartPy.sh test ./contract/${test_contract} ./test-build;
 printf "\n Test Scenarios :\n";
 echo " -------------------"
-cat ./test-build/interpreted-scenario/scenario-interpreter-log.txt;
+cat ./test-build/Welcome_interpreted/scenario-interpreter-log.txt;
 printf "\n\n"
 `)
-console.log("Contract Synced !");
+console.log("Contract Synced !\n");
 
 console.log("To compile your SmartPy code : npm run compile\n");
