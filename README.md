@@ -14,7 +14,6 @@
 
 - Support of SmartPy Dev mode.
 
-- 
 
 ## Setup & Run Steps :
 
@@ -29,10 +28,6 @@ This is how a Smart Contract in SmartPy looks like :
 ```python
 import smartpy as sp
 
-# This is the SmartPy editor.
-# You can experiment with SmartPy by loading a template.
-# (in the Commands menu above this editor)
-#
 # A typical SmartPy program has the following form:
 
 # A class of contracts
