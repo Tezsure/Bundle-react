@@ -2,15 +2,19 @@
 
 <img  src="bundle.png"  width="100%">
 
-Compile SmartPy code locally , Deploy in the Testnet / Local tezos node & interact with your Dapps
+<div align="center"><strong>Compile SmartPy code locally , Deploy in the Testnet / Local tezos node & interact with your Dapps with a front-end ready environment.</strong></div>
 
 ## Improvements :
 
 - Included local testing environment.
 
-- Entry-Points visualizer.
+- Entry-Points visualizer with Sample invocation.
 
 - Added scripts for invocations and get-storage operation.
+
+- Support of SmartPy Dev mode.
+
+- 
 
 ## Setup & Run Steps :
 
@@ -96,7 +100,7 @@ Note : You have to be specific about file name, otherwise it will throw an error
     },
 ```
 
-Your code will get compiled and stored in ./contract_build folder and the two files you need to focus on is the *Code.tz & *Storage.tz
+Your code will get compiled and stored in ./contract_build folder and the two files you need to focus on is the *_compiled.tz & *_storage_init.tz
 
 #### contract_build folder will contain the following files :
 
@@ -118,7 +122,7 @@ Inside the deploy_config section
 
 - First is the Tezos node you want to use , It can be local or any remote node
 
-* Next You can change the contractCode and ContractStorage with the ones you want to deploy
+* Next You can change the contract_code and contract_storage with the ones you want to deploy
 
 - Set the parameters like amount, gas_limit, derivation_path etc
 
