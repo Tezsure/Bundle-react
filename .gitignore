@@ -11,6 +11,8 @@
 
 # production
 /client/build
+/contract_build
+/test-build
 
 # misc
 /client/.DS_Store

@@ -1,29 +1,42 @@
-# Your Contract goes here 
-
 import smartpy as sp
 
-class StoreValue(sp.Contract):
-    def __init__(self, value):
-        self.init(storedValue = value)
+# A typical SmartPy program has the following form:
 
+# A class of contracts
+class MyContract(sp.Contract):
+    def __init__(self, myParameter1, myParameter2):
+        self.init(myParameter1 = myParameter1,
+                  myParameter2 = myParameter2)
+
+    # An entry point, i.e., a message receiver
+    # (contracts react to messages)
     @sp.entry_point
-    def replace(self, params):
-        self.data.storedValue = params.value
+    def myEntryPoint(self, params):
+        sp.verify(self.data.myParameter1 <= 123)
+        self.data.myParameter1 += params
 
-    @sp.entry_point
-    def double(self, params):
-        self.data.storedValue *= 2
+# Tests
+@sp.add_test(name = "Welcome")
+def test():
+    # We define a test scenario, together with some outputs and checks
+    scenario = sp.test_scenario()
 
-    @sp.entry_point
-    def divide(self, params):
-        sp.verify(params.divisor > 5)
-        self.data.storedValue /= params.divisor
-# We evaluate a contract with parameters.
-contract = StoreValue(12)
+    # We first define a contract and add it to the scenario
+    c1 = MyContract(12, 123)
+    scenario += c1
 
+    # And call some of its entry points
+    scenario += c1.myEntryPoint(12)
+    scenario += c1.myEntryPoint(13)
+    scenario += c1.myEntryPoint(14)
+    scenario += c1.myEntryPoint(50)
+    scenario += c1.myEntryPoint(50)
+    scenario += c1.myEntryPoint(50).run(valid = False) # this is expected to fail
 
-# We need to export the compile the contract.
-# It can be done with the following.
-import smartpybasic as spb
-spb.compileContract(contract,targetBaseFilename = "./contract_build/Contract")
-print("Contract compiled in ./contract_build/ContractCode.tz")
+    # Finally, we check its final storage
+    scenario.verify(c1.data.myParameter1 == 151)
+
+    # We can define another contract using the current state of c1
+    c2 = MyContract(1, c1.data.myParameter1)
+    scenario += c2
+    scenario.verify(c2.data.myParameter2 == 151)
