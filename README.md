@@ -14,6 +14,12 @@
 
 - Support of SmartPy Dev mode.
 
+## Prerequisites :
+
+- Python 3.x +
+- Node v12.x +
+
+> As soon as you clone the repo you are good to go BUILDing your first Dapp in Tezos
 
 ## Setup & Run Steps :
 
@@ -72,8 +78,6 @@ def test():
 
 **Note:** _You don't need to explicitly add the initial storage somewhere just initialize the contract class like a normal python class. We have provided you with a demo.py SmartPy contract._
 
-
-
 Once done writing your Smart Contract inside ./contract, You have to configure the compile the config.
 
 ## Its time to compile & Deploy
@@ -95,19 +99,19 @@ Note : You have to be specific about file name, otherwise it will throw an error
     },
 ```
 
-Your code will get compiled and stored in ./contract_build folder and the two files you need to focus on is the *_compiled.tz & *_storage_init.tz
+Your code will get compiled and stored in ./contract*build folder and the two files you need to focus on is the *\_compiled.tz & \_\_storage_init.tz
 
 #### contract_build folder will contain the following files :
 
-* demo_compiled.tz : Michelson Code of your Smart Contract.
+- demo_compiled.tz : Michelson Code of your Smart Contract.
 
-* demo_compiled.json : Micheline Code of your Smart Contract.
+- demo_compiled.json : Micheline Code of your Smart Contract.
 
-* demo.smlse : an internal expression between SmartPy and SmartML, kept for the record but not directly useful.
+- demo.smlse : an internal expression between SmartPy and SmartML, kept for the record but not directly useful.
 
-* demo_storage_init.tz : Micheline representation of the Storage.
+- demo_storage_init.tz : Micheline representation of the Storage.
 
-* demo_types.sp : It specifies the types of the params used in the contract.
+- demo_types.sp : It specifies the types of the params used in the contract.
 
 5.  `npm run deploy` will deploy your contract with the params respect to your config.json
 
@@ -157,15 +161,15 @@ Use [https://nautilus.cloud](https://nautilus.cloud/) to access API KEY for Cons
 
 **Contract Specifications:**
 
-* **contract_code** : It should refer to the Michelson Contract code you want to deploy.
+- **contract_code** : It should refer to the Michelson Contract code you want to deploy.
 
-* **contract_storage** : refers to the Michelson representation of the initial storage used for deployment
+- **contract_storage** : refers to the Michelson representation of the initial storage used for deployment
 
 **Bundle is provided with 6 Keys in the Keystore :**
 
-* Both test_key1.js & test_key2.js are activated in the Alphanet . One can use that or import your own from the faucet and Activate & Reveal using the ConseilJsUtils.
+- Both test_key1.js & test_key2.js are activated in the Alphanet . One can use that or import your own from the faucet and Activate & Reveal using the ConseilJsUtils.
 
-* 4 bootstrap acoounts are provided which can be directly used with our Tezster Suite which provides a local development Blockchain with unique ease of interaction with the Tezos node !
+- 4 bootstrap acoounts are provided which can be directly used with our Tezster Suite which provides a local development Blockchain with unique ease of interaction with the Tezos node !
 
 To deploy your contracts in the local tezos blockchain you first need to Setup [Tezster-CLI](https://docs.tezster.tech/tezster-cli) / [Tezster-GUI](https://docs.tezster.tech/)
 
@@ -205,9 +209,13 @@ All you need is to change the **config.json** file and add up the contract name.
 
 ```json
     "test_config": {
-        "contract_name": "demo.py"
+        "contract_name": "demo.py",
+        "test_name": "MyContract"
     }
 ```
+
+- `contract_name` : This is the file name of Smart Contract you want to test
+- `test_name` : This is the test name that is specified in the SmartPy Code `@sp.add_test(name = "Welcome")`
 
 **`npm run sync` is mandatory whenever your config.json file is changed !**
 
