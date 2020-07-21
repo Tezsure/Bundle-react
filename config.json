@@ -5,7 +5,7 @@
     },
     "test_config": {
         "contract_name": "demo.py",
-        "test_name": "MyContract"
+        "test_name": "Welcome"
     },
     "deploy_config": {
         "node": "https://testnet.tezster.tech",
