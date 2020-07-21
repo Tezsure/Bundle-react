@@ -10,7 +10,7 @@ const test_name = config.test_config.test_name;
 
 fs.writeFileSync(
   "./utils/scripts/compileCode.sh",
-  `./utils/SmartPyBasic/SmartPy.sh compile ./contract/${contract_name} "${class_name}" ./contract_build`
+  `./utils/smartpy-cli/SmartPy.sh compile ./contract/${contract_name} "${class_name}" ./contract_build`
 );
 fs.writeFileSync(
   "./utils/scripts/checkScenario.sh",
@@ -20,7 +20,7 @@ echo " Testing your SmartContract .... ";
 echo " --------------------------------";
 printf "\n Test Summary : \n"
 echo " ------------------";
-./utils/SmartPyBasic/SmartPy.sh test ./contract/${test_contract} ./test-build;
+./utils/smartpy-cli/SmartPy.sh test ./contract/${test_contract} ./test-build;
 printf "\n Test Scenarios :\n";
 echo " -------------------"
 cat ./test-build/${test_name}_interpreted/scenario-interpreter-log.txt;

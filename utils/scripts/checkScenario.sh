@@ -6,7 +6,7 @@ printf "
  Test Summary : 
 "
 echo " ------------------";
-./utils/SmartPyBasic/SmartPy.sh test ./contract/demo.py ./test-build;
+./utils/smartpy-cli/SmartPy.sh test ./contract/demo.py ./test-build;
 printf "
  Test Scenarios :
 ";
