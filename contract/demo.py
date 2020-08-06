@@ -16,7 +16,7 @@ class MyContract(sp.Contract):
         self.data.myParameter1 += params
 
 # Tests
-@sp.add_test(name = "Welcome")
+@sp.add_test(name = "Welcome Test")
 def test():
     # We define a test scenario, together with some outputs and checks
     scenario = sp.test_scenario()
