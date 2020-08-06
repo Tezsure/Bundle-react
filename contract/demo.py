@@ -4,9 +4,9 @@ import smartpy as sp
 
 # A class of contracts
 class MyContract(sp.Contract):
-    def __init__(self, myParameter1, myParameter2):
+    def __init__(self, myParameter1, myParameter3):
         self.init(myParameter1 = myParameter1,
-                  myParameter2 = myParameter2)
+                  myParameter3 = myParameter3)
 
     # An entry point, i.e., a message receiver
     # (contracts react to messages)
@@ -16,7 +16,7 @@ class MyContract(sp.Contract):
         self.data.myParameter1 += params
 
 # Tests
-@sp.add_test(name = "Welcome Test")
+@sp.add_test(name = "Welcome Test 1")
 def test():
     # We define a test scenario, together with some outputs and checks
     scenario = sp.test_scenario()
