@@ -83,18 +83,27 @@ class DAOContract(sp.contract):
         self init (
             admin = _Admin,
             totalmembers = members,
-            projectdetails = sp.big_map(tkey = sp.TNat, 
+            allocprop = sp.big_map(tkey = sp.TNat, 
                                             tvalue = 
                                                 sp.TRecord(
                                                     creator = sp.TAddress,
                                                     amount  = sp.TNat,
                                                     votes   = sp.TInt,
                                                     voteCount = sp.TInt,
-                                                    voteToShareholder=sp.TMap(sp.TAddress, sp.TBool),
                                                     expiry  = sp.TTimestamp,
                                                     accepted = sp.TBool
+                                                    
                                                 )
-                                            )
+                                    ),
+            membermap = sp.map(tkey = sp.TAddress,
+                               tvalue = sp.TBool)                                
+            addmemberdata = sp.map(tkey = sp.TNat,
+                                   tvalue = sp.record(
+                                       address = sp.TAddress,
+                                       status = sp.TBool
+                                       )
+                                    )
+                                    
         )
     def intialize (self):
         
@@ -109,9 +118,12 @@ class DAOContract(sp.contract):
         sp.verify(self.data.members >= params.members)
         sp.for member in params._members:
             sp.transfer(sp.record(address = member, value = 100), sp.tez(0), tokenDAO)
+            membermap[]
+            
+            
+    def addrequest()        
 
-    def projectselect(self,params):
-        
+    def allocationrequest(self,params):
 
 class Viewer(sp.Contract):
     def __init__(self, t):
