@@ -103,7 +103,8 @@ class DAOContract(sp.contract):
                                        status = sp.TBool
                                        )
                                     )
-                                    
+            addmemberdataid = sp.nat(0)
+            membermapid = sp.nat(0)
         )
     def intialize (self):
         
@@ -115,16 +116,20 @@ class DAOContract(sp.contract):
         sp.transfer(sp.record(address = admin, value = 100), sp.tez(0), tokenDAO)                    
     
     def addMembers(self,params):
-        sp.verify(self.data.members >= params.members)
-        sp.for member in params._members:
-            sp.transfer(sp.record(address = member, value = 100), sp.tez(0), tokenDAO)
-            membermap[]
+        sp.verify(sp.sender == sp.data.admin)
+           memberaddress = seld.data.addmemberdata[params.id].address
+            sp.transfer(sp.record(address = memberaddress, value = 100), sp.tez(0), tokenDAO)
             
             
-    def addrequest()        
+            
+            
+    def addrequest(self, params):
+        sp.set_type(params, sp.TAddress)
+        addmemberdata[self.data.addmemberdataid] = params.address
+        self.data.addmemberdataid += 1
+        
 
     def allocationrequest(self,params):
-
 class Viewer(sp.Contract):
     def __init__(self, t):
         self.init(last = sp.none)
