@@ -80,7 +80,7 @@ class FA12(sp.Contract):
         
 class DAOContract(sp.contract):
     def __init__(self, _Admin, members):
-        self init (
+        self.init (
             admin = _Admin,
             totalmembers = members,
             allocprop = sp.big_map(tkey = sp.TNat, 
@@ -88,23 +88,24 @@ class DAOContract(sp.contract):
                                                 sp.TRecord(
                                                     creator = sp.TAddress,
                                                     amount  = sp.TNat,
-                                                    votes   = sp.TInt,
-                                                    voteCount = sp.TInt,
+                                                    votesfor   = sp.TNat,
+                                                    votesagainst = sp.TNat
+                                                    voteCount = sp.TNat,
                                                     expiry  = sp.TTimestamp,
                                                     accepted = sp.TBool
                                                     
                                                 )
                                     ),
-            membermap = sp.map(tkey = sp.TAddress,
-                               tvalue = sp.TBool)                                
-            addmemberdata = sp.map(tkey = sp.TNat,
+            membermap = sp.big_map(tkey = sp.TAddress,
+                            tvalue = sp.TBool),                                
+            addmemberdata = sp.big_map(tkey = sp.TNat,
                                    tvalue = sp.record(
                                        address = sp.TAddress,
                                        status = sp.TBool
                                        )
                                     )
-            addmemberdataid = sp.nat(0)
-            membermapid = sp.nat(0)
+            addmemberdataid = sp.nat(0),
+            membermapid = sp.nat(0),
             allocpropid = sp.nat(0)
         )
     def intialize (self):
@@ -132,6 +133,18 @@ class DAOContract(sp.contract):
 
     def allocationrequest(self,params):
         sp.verify(self.data.membermap[sp.sender] == True)
+        self.data.allocprop[self.data.allocpropid] = sp.record(
+            
+                                                    creator = params.address,
+                                                    amount  = params.amt,
+                                                    votesfor   = sp.nat(0),
+                                                    voteagainst = sp.nat(0),
+                                                    votecount = sp.nat(0),
+                                                    expiry  = sp.TTimestamp,
+                                                    accepted = sp.TBool
+                                                    )
+                                                    
+        self.data.allocpropid += 1                                            
         
 
 class Viewer(sp.Contract):
