@@ -145,7 +145,8 @@ class DAOContract(sp.contract):
                                                     )
                                                     
         self.data.allocpropid += 1
-
+        
+""" need to implement Qv through cost algo"""
 
     def vote (self, params):
         sp.verify(self.data.membermap[sp.sender] == True)
