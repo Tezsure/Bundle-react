@@ -158,7 +158,7 @@ class DAOContract(sp.contract):
         propvote.voteagainst += 1
         propvote.voteCount +=1
 
-    def fund    
+       
 
 
 
