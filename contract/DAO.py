@@ -139,13 +139,28 @@ class DAOContract(sp.contract):
                                                     amount  = params.amt,
                                                     votesfor   = sp.nat(0),
                                                     voteagainst = sp.nat(0),
-                                                    votecount = sp.nat(0),
+                                                    voteCount = sp.nat(0),
                                                     expiry  = sp.TTimestamp,
                                                     accepted = sp.TBool
                                                     )
                                                     
-        self.data.allocpropid += 1                                            
-        
+        self.data.allocpropid += 1
+
+
+    def vote (self, params):
+        sp.verify(self.data.membermap[sp.sender] == True)
+        propvote = self.data.allocprop[params.id]
+        sp.if params.infavor == True:
+        propvote.votesfor += 1
+        propvote.voteCount +=1
+        sp.elif params.infavor == False:
+        propvote.voteagainst += 1
+        propvote.voteCount +=1
+
+    def fund    
+
+
+
 
 class Viewer(sp.Contract):
     def __init__(self, t):
