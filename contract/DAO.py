@@ -89,7 +89,7 @@ class DAOContract(sp.contract):
                                                     creator = sp.TAddress,
                                                     amount  = sp.TNat,
                                                     votesfor   = sp.TNat,
-                                                    votesagainst = sp.TNat
+                                                    votesagainst = sp.TNat,
                                                     voteCount = sp.TNat,
                                                     expiry  = sp.TTimestamp,
                                                     accepted = sp.TBool
@@ -103,10 +103,11 @@ class DAOContract(sp.contract):
                                        address = sp.TAddress,
                                        status = sp.TBool
                                        )
-                                    )
+                                    ),
             addmemberdataid = sp.nat(0),
             membermapid = sp.nat(0),
-            allocpropid = sp.nat(0)
+            allocpropid = sp.nat(0),
+            propactive = sp.TBool
         )
     def intialize (self):
         
@@ -158,7 +159,7 @@ class DAOContract(sp.contract):
         propvote.voteagainst += 1
         propvote.voteCount +=1
 
-    def fund    
+        
 
 
 
