@@ -149,21 +149,16 @@ class DAOContract(sp.contract):
         
 """ need to implement Qv through cost algo"""
 
-    def vote (self, params):
+    def vote(self, params):
         sp.verify(self.data.membermap[sp.sender] == True)
         propvote = self.data.allocprop[params.id]
         sp.if params.infavor == True:
-        propvote.votesfor += 1
-        propvote.voteCount +=1
-        sp.elif params.infavor == False:
-        propvote.voteagainst += 1
-        propvote.voteCount +=1
+            propvote.votesfor += 1
+            propvote.voteCount +=1
+        sp.if params.infavor == False:
+            propvote.voteagainst += 1
+            propvote.voteCount +=1
 
-<<<<<<< HEAD
-        
-=======
-       
->>>>>>> ec56e23e6e35e4c286d740dacd0d6d3fd1651d9e
 
 
 
