@@ -159,7 +159,11 @@ class DAOContract(sp.contract):
         propvote.voteagainst += 1
         propvote.voteCount +=1
 
+<<<<<<< HEAD
         
+=======
+       
+>>>>>>> ec56e23e6e35e4c286d740dacd0d6d3fd1651d9e
 
 
 
