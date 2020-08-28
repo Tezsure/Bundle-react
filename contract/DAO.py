@@ -78,10 +78,11 @@ class FA12(sp.Contract):
         sp.transfer(self.data.administrator, sp.tez(0), sp.contract(sp.TAddress, params.target).open_some())
         
         
-class DAOContract(sp.contract):
+class DAOContract(sp.Contract):
     def __init__(self, _Admin, members):
         self.init (
             admin = _Admin,
+            tokencontract = sp.none,
             totalmembers = members,
             allocprop = sp.big_map(tkey = sp.TNat, 
                                             tvalue = 
@@ -92,7 +93,8 @@ class DAOContract(sp.contract):
                                                     votesagainst = sp.TNat,
                                                     voteCount = sp.TNat,
                                                     expiry  = sp.TTimestamp,
-                                                    accepted = sp.TBool
+                                                    accepted = sp.TBool,
+                                                    diff = sp.TInt
                                                     
                                                 )
                                     ),
@@ -101,28 +103,36 @@ class DAOContract(sp.contract):
             addmemberdata = sp.big_map(tkey = sp.TNat,
                                    tvalue = sp.record(
                                        address = sp.TAddress,
+                                       balance = sp.TNat,
                                        status = sp.TBool
                                        )
                                     ),
             addmemberdataid = sp.nat(0),
             membermapid = sp.nat(0),
-            allocpropid = sp.nat(0),
-            propactive = sp.TBool
+            membercount = sp.nat(0),
+            allocpropid = sp.nat(0)
+            
         )
-    def intialize (self):
+    def intialize (self, params):
         
-        sp.verify(sp.sender == sp.data.admin)
+        sp.verify(sp.sender == self.data.admin)
+        sp.verify(~self.data.tokencontract.is_some())
+        self.data.tokencontract = params.token
         
         tokenDAO = sp.contract(sp.TRecord(address = sp.TAddress, value = sp.TNat),
-                            self.data.token.open_some(), entry_point = "mint").open_some()
+                            self.data.tokencontract, entry_point = "mint").open_some()
         
-        sp.transfer(sp.record(address = admin, value = 100), sp.tez(0), tokenDAO)                    
+        sp.transfer(sp.record(address = tokencontract, value = 100), sp.tez(0), tokenDAO)                    
     
     def addMembers(self,params):
-        sp.verify(sp.sender == sp.data.admin)
-           memberaddress = self.data.addmemberdata[params.id].address
-            sp.transfer(sp.record(address = memberaddress, value = 100), sp.tez(0), tokenDAO)
-            self.data.membermap[params.id] = True
+        sp.verify(sp.sender == self.data.admin)
+        sp.verify(self.data.membercount <= totalmembers)
+        memberaddress = self.data.addmemberdata[params.id].address
+        fa = sp.contract(sp.TRecord(address = sp.TAddress, value = sp.TNat),
+                            self.data.tokencontract, entry_point = "mint").open_some()
+        sp.transfer(sp.record(address = memberaddress, value = 100), sp.tez(0), fa)
+        self.data.membermap[params.id] = True
+        self.data.membercount+=1
             
             
             
@@ -142,27 +152,31 @@ class DAOContract(sp.contract):
                                                     voteagainst = sp.nat(0),
                                                     voteCount = sp.nat(0),
                                                     expiry  = sp.TTimestamp,
-                                                    accepted = sp.TBool
+                                                    accepted = sp.TBool,
+                                                    diff = sp.nat(0)
                                                     )
                                                     
         self.data.allocpropid += 1
-        
-""" need to implement Qv through cost algo and also use burn func to adjust dynamic voting"""
-
+    
+    
     def vote(self, params):
         sp.verify(self.data.membermap[sp.sender] == True)
         propvote = self.data.allocprop[params.id]
+        sp.verify(propvote.expiry > sp.now)
         sp.if params.infavor == True:
-            propvote.votesfor += 1
-            propvote.voteCount +=1
+            propvote.votesfor += params.value
+            
+            propvote.voteCount +=params.value
         sp.if params.infavor == False:
-            propvote.voteagainst += 1
-            propvote.voteCount +=1
-
-
-
-
-
+            propvote.voteagainst += params.value
+            propvote.voteCount +=params.value
+        
+        propvote.diff = propvote.votesfor - prop.voteagainst
+        
+    def finaliseround(self,params):
+        sp.verify(self.data.membermap[sp.sender] == True)
+        sp.for x in self.data.allocpropid:
+            k = sp.local()
 class Viewer(sp.Contract):
     def __init__(self, t):
         self.init(last = sp.none)
