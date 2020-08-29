@@ -92,8 +92,9 @@ class DAOContract(sp.Contract):
                                                     votesfor   = sp.TNat,
                                                     votesagainst = sp.TNat,
                                                     voteCount = sp.TNat,
-                                                    expiry  = sp.TTimestamp,
+                                                    allocexpiry  = sp.TTimestamp,
                                                     accepted = sp.TBool,
+                                                    voteexpiry = sp.TTimestamp,
                                                     diff = sp.TInt
                                                     
                                                 )
@@ -152,7 +153,7 @@ class DAOContract(sp.Contract):
     
     
     """utility function to calculate cost of voting"""
-    def squareRoot(self, x):
+    def square(self, x):
        sp.verify(x >= 0)
        y = sp.local('y', x)
        sp.while y.value * y.value > x:
@@ -170,18 +171,23 @@ class DAOContract(sp.Contract):
                                                     votesfor   = sp.nat(0),
                                                     voteagainst = sp.nat(0),
                                                     voteCount = sp.nat(0),
-                                                    expiry  = sp.TTimestamp,
-                                                    accepted = sp.TBool,
+                                                    allocexpiry  = sp.TTimestamp,
+                                                    accepted = False,
+                                                    voteexpiry = sp.TTimestamp,
                                                     diff = sp.nat(0)
                                                     )
                                                     
         self.data.allocpropid += 1
     
     
+    def addproject(self,params):
+        
+    
     def vote(self, params):
         sp.verify(self.data.membermap[sp.sender] == True)
         propvote = self.data.allocprop[params.id]
-        sp.verify(propvote.expiry > sp.now)
+        sp.verify(propvote.allocexpiry > sp.now)
+        sp.verify(propvote.voteexpiry > sp.now)
         sp.if params.infavor == True:
             propvote.votesfor += params.value
             
@@ -192,10 +198,19 @@ class DAOContract(sp.Contract):
         
         propvote.diff = propvote.votesfor - prop.voteagainst
         
-    """def finaliseround(self,params):
+        
+    def finaliseallocation(self,params):
         sp.verify(self.data.membermap[sp.sender] == True)
         sp.for x in self.data.allocpropid:
-            k = sp.local()"""
+            k = sp.nat(0)
+            sp.verify(self.data.allocprop[x].accepted == False)
+            sp.verify(self.data.allocprop[x].ac == False)
+            aldiff = self.data.allocprop[x].diff
+            sp.if aldiff > k:
+                k = aldiff
+            
+        self.data.allocprop[k].accepted = True
+        
             
 class Viewer(sp.Contract):
     def __init__(self, t):
