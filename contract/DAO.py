@@ -110,7 +110,16 @@ class DAOContract(sp.Contract):
             addmemberdataid = sp.nat(0),
             membermapid = sp.nat(0),
             membercount = sp.nat(0),
-            allocpropid = sp.nat(0)
+            allocpropid = sp.nat(0),
+            projectdata = sp.big_map(tkey = sp.TAddress,
+                                    tvalue = sp.TRecord(
+                                funded = sp.TBool,
+                                votesfor   = sp.TNat,
+                                votesagainst = sp.TNat,
+                                voteCount = sp.TNat,
+                                expiry  = sp.TTimestamp,
+                                diff = sp.TInt)
+                                )
             
         )
     def intialize (self, params):
@@ -140,7 +149,17 @@ class DAOContract(sp.Contract):
         sp.set_type(params, sp.TAddress)
         addmemberdata[self.data.addmemberdataid] = params.address
         self.data.addmemberdataid += 1
-        
+    
+    
+    """utility function to calculate cost of voting"""
+    def squareRoot(self, x):
+       sp.verify(x >= 0)
+       y = sp.local('y', x)
+       sp.while y.value * y.value > x:
+           y.value = (x // y.value + y.value) // 2
+       sp.verify((y.value * y.value <= x) & (x < (y.value + 1) * (y.value + 1)))
+       self.data.value = y.value
+       
 
     def allocationrequest(self,params):
         sp.verify(self.data.membermap[sp.sender] == True)
@@ -173,10 +192,11 @@ class DAOContract(sp.Contract):
         
         propvote.diff = propvote.votesfor - prop.voteagainst
         
-    def finaliseround(self,params):
+    """def finaliseround(self,params):
         sp.verify(self.data.membermap[sp.sender] == True)
         sp.for x in self.data.allocpropid:
-            k = sp.local()
+            k = sp.local()"""
+            
 class Viewer(sp.Contract):
     def __init__(self, t):
         self.init(last = sp.none)
