@@ -112,6 +112,8 @@ class DAOContract(sp.Contract):
             membermapid = sp.nat(0),
             membercount = sp.nat(0),
             allocpropid = sp.nat(0),
+            indispute = sp.TBool,
+            finalproject = sp.TAddress
             projectdata = sp.big_map(tkey = sp.TAddress,
                                     tvalue = sp.TRecord(
                                 funded = sp.TBool,
@@ -121,6 +123,7 @@ class DAOContract(sp.Contract):
                                 expiry  = sp.TTimestamp,
                                 diff = sp.TInt)
                                 )
+                                
             
         )
     def intialize (self, params):
@@ -154,13 +157,13 @@ class DAOContract(sp.Contract):
     
     """utility function to calculate cost of voting"""
     def square(self, x):
-       sp.verify(x >= 0)
-       y = sp.local('y', x)
+    sp.verify(x >= 0)
+    y = sp.local('y', x)
        sp.while y.value * y.value > x:
            y.value = (x // y.value + y.value) // 2
        sp.verify((y.value * y.value <= x) & (x < (y.value + 1) * (y.value + 1)))
-       self.data.value = y.value
-       
+    self.data.value = y.value
+
 
     def allocationrequest(self,params):
         sp.verify(self.data.membermap[sp.sender] == True)
@@ -180,7 +183,7 @@ class DAOContract(sp.Contract):
         self.data.allocpropid += 1
     
     
-    def addproject(self,params):
+    
         
     
     def vote(self, params):
@@ -204,12 +207,38 @@ class DAOContract(sp.Contract):
         sp.for x in self.data.allocpropid:
             k = sp.nat(0)
             sp.verify(self.data.allocprop[x].accepted == False)
-            sp.verify(self.data.allocprop[x].ac == False)
+            sp.verify(self.data.allocprop[x].allocexpiry > sp.now)
+            sp.verify(self.data.allocprop[x].voteexpiry < sp.now)
             aldiff = self.data.allocprop[x].diff
             sp.if aldiff > k:
                 k = aldiff
             
         self.data.allocprop[k].accepted = True
+        
+        
+    def projectvote(self,params):
+        projectd = projectdata[params.address]
+        sp.verify(projectd.funded == False)
+        #sp.verify(sp.now < projectd.expiry)
+        sp.if params.for == True:
+            projectd.votesfor +=1
+        sp.if params.against == False:
+            projectd.votesagainst += 1
+
+    projectd.diff = projectd.for - projectd.against
+    
+        """use this function to transfer funds to the project contract"""
+    def finaliseproject(self,params):
+        sp.verify(self.data.membermap[sp.sender] == True)
+        self.data.finalproject = projectdata[params.address]
+        #Transfer allocated funds
+        
+    def dispute(self,params):
+        sp.verify(self.data.indispute == False)
+        sp.if projectdata[params.address].diff > self.data.finalproject:
+            self.data.finalproject = projectdata[params.address]
+        
+
         
             
 class Viewer(sp.Contract):
