@@ -237,6 +237,7 @@ class DAOContract(sp.Contract):
         sp.if projectdata[params.address].diff > self.data.finalproject:
             self.data.finalproject = projectdata[params.address]
         
+         
 
 
         
