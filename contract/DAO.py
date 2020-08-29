@@ -3,6 +3,8 @@
 
 import smartpy as sp
 
+import smartpy as sp
+
 class FA12(sp.Contract):
     def __init__(self, admin):
         self.init(paused = False, balances = sp.big_map(tvalue = sp.TRecord(approvals = sp.TMap(sp.TAddress, sp.TNat), balance = sp.TNat)), administrator = admin, totalSupply = 0)
@@ -48,6 +50,21 @@ class FA12(sp.Contract):
         self.addAddressIfNecessary(params.address)
         self.data.balances[params.address].balance += params.value
         self.data.totalSupply += params.value
+        sp.transfer(
+            sp.record(
+                address = params.address, 
+                value = params.value
+            ), 
+            sp.tez(0), 
+            sp.contract(
+                sp.TRecord(
+                    address = sp.TAddress, 
+                    value = sp.TNat
+                ),
+               self.data.administrator, 
+                "addTokens"
+            ).open_some()
+        )
 
     @sp.entry_point
     def burn(self, params):
@@ -122,15 +139,63 @@ class DAOContract(sp.Contract):
                                 voteCount = sp.TNat,
                                 expiry  = sp.TTimestamp,
                                 diff = sp.TInt)
-                                )
+                                ),
+                holders = sp.big_map(  # Holder address to balance, approvals map
+                tkey = sp.TAddress, 
+                tvalue = sp.TRecord(
+                    approvals = sp.TMap(sp.TAddress, sp.TNat),
+                    balance = sp.TNat
+                )
+            ) 
                                 
             
         )
+        
+        
+    @sp.entry_point
+    def addTokens(self, params):
+        """Internal entry point for the token standard to add to the balances TBigMap in the DAO
+        
+        Args:
+            address (sp.TAddress): Address of the account to add tokens to
+            value (sp.TNat): Amount of tokens to add to the specified 'address'
+        """
+        
+        # Setting a type to each parameter
+        sp.set_type(
+            params,
+            sp.TRecord(
+                address = sp.TAddress,
+                value = sp.TNat
+            )
+        ).layout(
+            (
+                "address",
+                "value"
+            )    
+        )
+        
+        # Check if the caller of the entry point is the Token Contract 
+        sp.verify(sp.sender == self.data.token.open_some())
+        
+        # Check whether the address of the receiver of tokens exists in the balances (holders)
+        # TBigMap of the DAO contract, if not initialize it with 0 balance 
+        sp.if ~self.data.holders.contains(params.address):
+            self.data.holders[params.address] = sp.record(approvals = {}, balance = 0)
+        
+        # Add tokens to the receivers balance in order to synchronize balances across tokens
+        self.data.holders[params.address].balance += params.value
+        
+    def settokencontract(self,params):
+        sp.set_type(params.token, sp.TAddress)
+        sp.verify(sp.sender == self.data.admin)
+        sp.verify(~self.data.tokencontract.is_some())
+        self.data.tokencontract = sp.some(params.token)
+        
     def intialize (self, params):
         
         sp.verify(sp.sender == self.data.admin)
-        sp.verify(~self.data.tokencontract.is_some())
-        self.data.tokencontract = params.token
+        
         
         tokenDAO = sp.contract(sp.TRecord(address = sp.TAddress, value = sp.TNat),
                             self.data.tokencontract, entry_point = "mint").open_some()
@@ -185,7 +250,7 @@ class DAOContract(sp.Contract):
     
     
         
-    
+    """QV implementation remaining"""
     def vote(self, params):
         sp.verify(self.data.membermap[sp.sender] == True)
         propvote = self.data.allocprop[params.id]
@@ -238,6 +303,7 @@ class DAOContract(sp.Contract):
             self.data.finalproject = projectdata[params.address]
         
          
+
 
 
         
