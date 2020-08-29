@@ -3,8 +3,6 @@
 
 import smartpy as sp
 
-import smartpy as sp
-
 class FA12(sp.Contract):
     def __init__(self, admin):
         self.init(paused = False, balances = sp.big_map(tvalue = sp.TRecord(approvals = sp.TMap(sp.TAddress, sp.TNat), balance = sp.TNat)), administrator = admin, totalSupply = 0)
@@ -220,14 +218,7 @@ class DAOContract(sp.Contract):
         self.data.addmemberdataid += 1
     
     
-    """utility function to calculate cost of voting"""
-    def square(self, x):
-       sp.verify(x >= 0)
-       y = sp.local('y', x)
-       sp.while y.value * y.value > x:
-           y.value = (x // y.value + y.value) // 2
-       sp.verify((y.value * y.value <= x) & (x < (y.value + 1) * (y.value + 1)))
-       self.data.value = y.value
+    
        
 
     def allocationrequest(self,params):
@@ -250,19 +241,29 @@ class DAOContract(sp.Contract):
     
     
         
-    """QV implementation remaining"""
+    """QV implementation first go"""
     def vote(self, params):
         sp.verify(self.data.membermap[sp.sender] == True)
+        burn = sp.nat(0)
         propvote = self.data.allocprop[params.id]
         sp.verify(propvote.allocexpiry > sp.now)
         sp.verify(propvote.voteexpiry > sp.now)
         sp.if params.infavor == True:
             propvote.votesfor += params.value
-            
             propvote.voteCount +=params.value
+            burn = params.value * params.value
+            burnfunc = sp.contract(sp.TRecord(address = sp.TAddress, value = sp.TNat),
+                            self.data.tokencontract, entry_point = "burn").open_some()
+            sp.transfer(sp.record(address = sp.sender, value = burn), sp.tez(0), burnfunc)
+            self.data.holder[sp.sender].balance-=burn
         sp.if params.infavor == False:
             propvote.voteagainst += params.value
             propvote.voteCount +=params.value
+            burn = params.value * params.value
+            burnfunc = sp.contract(sp.TRecord(address = sp.TAddress, value = sp.TNat),
+                            self.data.tokencontract, entry_point = "burn").open_some()
+            sp.transfer(sp.record(address = sp.sender, value = burn), sp.tez(0), burnfunc)
+            self.data.holder[sp.sender].balance-=burn
         
         propvote.diff = propvote.votesfor - prop.voteagainst
         
@@ -302,7 +303,8 @@ class DAOContract(sp.Contract):
         sp.if projectdata[params.address].diff > self.data.finalproject:
             self.data.finalproject = projectdata[params.address]
         
-         
+        
+
 
 
 
