@@ -1,7 +1,6 @@
 # Fungible Assets - FA12
 # Inspired by https://gitlab.com/tzip/tzip/blob/master/A/FA1.2.md
 
-import smartpy as sp
 
 import smartpy as sp
 
@@ -96,9 +95,10 @@ class FA12(sp.Contract):
         
         
 class DAOContract(sp.Contract):
-    def __init__(self, _Admin, members):
+    def __init__(self, _Admin, members, amt):
         self.init (
             admin = _Admin,
+            mincontribution = amt,
             tokencontract = sp.none,
             totalmembers = members,
             allocprop = sp.big_map(tkey = sp.TNat, 
@@ -286,14 +286,15 @@ class DAOContract(sp.Contract):
     def finaliseproject(self,params):
         sp.verify(self.data.membermap[sp.sender] == True)
         self.data.finalproject = projectdata[params.address]
-        #Transfer allocated funds
+        sp.send(self.data.finalproject,)
         
     def dispute(self,params):
         sp.verify(self.data.indispute == False)
         sp.if projectdata[params.address].diff > self.data.finalproject:
             self.data.finalproject = projectdata[params.address]
         
-         
+    
+
 class Viewer(sp.Contract):
     def __init__(self, t):
         self.init(last = sp.none)
