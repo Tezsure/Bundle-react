@@ -3,6 +3,8 @@
 
 import smartpy as sp
 
+import smartpy as sp
+
 class FA12(sp.Contract):
     def __init__(self, admin):
         self.init(paused = False, balances = sp.big_map(tvalue = sp.TRecord(approvals = sp.TMap(sp.TAddress, sp.TNat), balance = sp.TNat)), administrator = admin, totalSupply = 0)
@@ -152,14 +154,6 @@ class DAOContract(sp.Contract):
         
     @sp.entry_point
     def addTokens(self, params):
-        """Internal entry point for the token standard to add to the balances TBigMap in the DAO
-        
-        Args:
-            address (sp.TAddress): Address of the account to add tokens to
-            value (sp.TNat): Amount of tokens to add to the specified 'address'
-        """
-        
-        # Setting a type to each parameter
         sp.set_type(
             params,
             sp.TRecord(
@@ -172,16 +166,9 @@ class DAOContract(sp.Contract):
                 "value"
             )    
         )
-        
-        # Check if the caller of the entry point is the Token Contract 
         sp.verify(sp.sender == self.data.token.open_some())
-        
-        # Check whether the address of the receiver of tokens exists in the balances (holders)
-        # TBigMap of the DAO contract, if not initialize it with 0 balance 
         sp.if ~self.data.holders.contains(params.address):
             self.data.holders[params.address] = sp.record(approvals = {}, balance = 0)
-        
-        # Add tokens to the receivers balance in order to synchronize balances across tokens
         self.data.holders[params.address].balance += params.value
         
     def settokencontract(self,params):
@@ -303,13 +290,7 @@ class DAOContract(sp.Contract):
         sp.if projectdata[params.address].diff > self.data.finalproject:
             self.data.finalproject = projectdata[params.address]
         
-        
-
-
-
-
-        
-            
+         
 class Viewer(sp.Contract):
     def __init__(self, t):
         self.init(last = sp.none)
