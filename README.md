@@ -4,4 +4,4 @@
 </p>
 
 ## Architectural Diagram
-<!-- <img src="images/Tijori_Tezos.png"> -->
+<img src="images/Tijori_Tezos.png">
