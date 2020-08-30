@@ -196,14 +196,16 @@ class DAOContract(sp.Contract):
         sp.transfer(sp.record(address = memberaddress, value = 100), sp.tez(0), fa)
         self.data.membermap[params.id] = True
         self.data.membercount+=1
+    
             
             
             
     def addrequest(self, params):
-        sp.verify(params.amt == se;f.data.mincontribution)
+        sp.verify(params.amt == self.data.mincontribution)
         sp.send(self.data.admin, params.amt)
         addmemberdata[self.data.addmemberdataid] = params.address
         self.data.addmemberdataid += 1
+        
     
     
     
