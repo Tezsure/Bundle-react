@@ -200,7 +200,8 @@ class DAOContract(sp.Contract):
             
             
     def addrequest(self, params):
-        sp.set_type(params, sp.TAddress)
+        sp.verify(params.amt == se;f.data.mincontribution)
+        sp.send(self.data.admin, params.amt)
         addmemberdata[self.data.addmemberdataid] = params.address
         self.data.addmemberdataid += 1
     
