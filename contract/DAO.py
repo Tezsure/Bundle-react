@@ -91,11 +91,11 @@ class FA12(sp.Contract):
         
         
 class DAOContract(sp.Contract):
-    def _init_(self,_Admin,members,amt,token):
+    def _init_(self,_Admin,members,amt):
         self.init (
             admin = _Admin,
             mincontribution = amt,
-            tokencontract = token,
+            tokencontract = sp.TAddress,
             totalmembers = members,
             allocprop = sp.big_map(tkey = sp.TNat, 
                                             tvalue = 
@@ -171,14 +171,14 @@ class DAOContract(sp.Contract):
     def settokencontract(self,token):
         sp.set_type(token, sp.TAddress)
         sp.verify(sp.sender == self.data.admin)
-        sp.verify(~self.data.tokencontract.is_some())
-        self.data.tokencontract = sp.some(token)
+        #sp.verify(~self.data.tokencontract.is_some())
+        self.data.tokencontract = token
         
     @sp.entry_point    
     def intialize (self,token):
         
         sp.verify(sp.sender == self.data.admin)
-        sp.set_type(token, sp.TAddress)
+        
         self.settokencontract(token)
         
         tokenDAO = sp.contract(sp.TRecord(address = sp.TAddress, value = sp.TNat),
@@ -406,7 +406,7 @@ if "templates" not in __name__:
         fa12 = FA12(daoContract.address)
         scenario.show([daoContract.address])
         scenario.show([fa12.address])
-        
+        scenario +=daoContract
         
         
         
