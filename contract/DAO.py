@@ -1,7 +1,3 @@
-# Fungible Assets - FA12
-# Inspired by https://gitlab.com/tzip/tzip/blob/master/A/FA1.2.md
-
-
 import smartpy as sp
 
 class FA12(sp.Contract):
@@ -95,7 +91,7 @@ class FA12(sp.Contract):
         
         
 class DAOContract(sp.Contract):
-    def __init__(self, _Admin, members, amt):
+    def _init_(self,_Admin,members,amt):
         self.init (
             admin = _Admin,
             mincontribution = amt,
@@ -152,7 +148,7 @@ class DAOContract(sp.Contract):
         )
         
         
-    @sp.entry_point
+    """@sp.entry_point
     def addTokens(self, params):
         sp.set_type(
             params,
@@ -167,9 +163,9 @@ class DAOContract(sp.Contract):
             )    
         )
         sp.verify(sp.sender == self.data.token.open_some())
-        sp.if ~self.data.holders.contains(params.address):
-            self.data.holders[params.address] = sp.record(approvals = {}, balance = 0)
-        self.data.holders[params.address].balance += params.value
+        #sp.if ~self.data.holders.contains(params.address):
+            #self.data.holders[params.address] = sp.record(approvals = {}, balance = 0)
+        self.data.holders[params.address].balance += params.value"""
         
     def settokencontract(self,params):
         sp.set_type(params.token, sp.TAddress)
@@ -177,10 +173,11 @@ class DAOContract(sp.Contract):
         sp.verify(~self.data.tokencontract.is_some())
         self.data.tokencontract = sp.some(params.token)
         
-    def intialize (self, params):
+    @sp.entry_point    
+    def intialize (self,params):
         
         sp.verify(sp.sender == self.data.admin)
-        
+        self.settokencontract(params.token)
         
         tokenDAO = sp.contract(sp.TRecord(address = sp.TAddress, value = sp.TNat),
                             self.data.tokencontract, entry_point = "mint").open_some()
@@ -304,10 +301,11 @@ class Viewer(sp.Contract):
         self.data.last = sp.some(params)
 
 if "templates" not in __name__:
-    @sp.add_test(name = "FA12")
+    """@sp.add_test(name = "FA12")
     def test():
 
         scenario = sp.test_scenario()
+    
         scenario.h1("FA1.2 template - Fungible assets")
 
         scenario.table_of_contents()
@@ -377,10 +375,42 @@ if "templates" not in __name__:
         view_totalSupply = Viewer(sp.TNat)
         scenario += view_totalSupply
         scenario += c1.getTotalSupply(target = view_totalSupply.address)
-        scenario.verify_equal(view_totalSupply.data.last, sp.some(17))
+        scenario.verify_equal(view_totalSuppy.data.last, sp.some(17))
 
         scenario.h2("Allowance")
         view_allowance = Viewer(sp.TNat)
         scenario += view_allowance
         scenario += c1.getAllowance(arg = sp.record(owner = alice.address, spender = bob.address), target = view_allowance.address)
         scenario.verify_equal(view_allowance.data.last, sp.some(1))
+       """ 
+        
+        
+        
+    @sp.add_test(name = "DAOContract")
+    def test():    
+        # DAO Contract testing#
+        
+        scenario = sp.test_scenario()
+        scenario.h1("Accounts")
+        #scenarionew.show([newadmin, newalice, newbob])
+        
+        admin = sp.test_account("Administrator")
+        alice = sp.test_account("Alice")
+        bob   = sp.test_account("Robert")
+        
+        scenario.show([admin, alice, bob])
+        
+        daoContract = DAOContract(_Admin=admin.address, members=5, amt=10)
+        fa12 = FA12(daoContract.address)
+        scenario.show([daoContract.address])
+        scenario.show([fa12.address]
+        
+        scenario += daoContract
+        
+        
+        scenario.h3("Initialize function")
+        scenario += daoContract.intialize ().run(admin)
+        
+        #scenarionew+=daoContract
+        
+        
