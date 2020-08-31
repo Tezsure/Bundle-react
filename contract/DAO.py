@@ -91,11 +91,11 @@ class FA12(sp.Contract):
         
         
 class DAOContract(sp.Contract):
-    def _init_(self,_Admin,members,amt):
+    def _init_(self,_Admin,members,amt,token):
         self.init (
             admin = _Admin,
             mincontribution = amt,
-            tokencontract = sp.none,
+            tokencontract = token,
             totalmembers = members,
             allocprop = sp.big_map(tkey = sp.TNat, 
                                             tvalue = 
@@ -167,22 +167,24 @@ class DAOContract(sp.Contract):
             #self.data.holders[params.address] = sp.record(approvals = {}, balance = 0)
         self.data.holders[params.address].balance += params.value"""
         
-    def settokencontract(self,params):
-        sp.set_type(params.token, sp.TAddress)
+       
+    def settokencontract(self,token):
+        sp.set_type(token, sp.TAddress)
         sp.verify(sp.sender == self.data.admin)
         sp.verify(~self.data.tokencontract.is_some())
-        self.data.tokencontract = sp.some(params.token)
+        self.data.tokencontract = sp.some(token)
         
     @sp.entry_point    
-    def intialize (self,params):
+    def intialize (self,token):
         
         sp.verify(sp.sender == self.data.admin)
-        self.settokencontract(params.token)
+        sp.set_type(token, sp.TAddress)
+        self.settokencontract(token)
         
         tokenDAO = sp.contract(sp.TRecord(address = sp.TAddress, value = sp.TNat),
                             self.data.tokencontract, entry_point = "mint").open_some()
         
-        sp.transfer(sp.record(address = tokencontract, value = 100), sp.tez(0), tokenDAO)                    
+        sp.transfer(sp.record(address = self.data.admin, value = 100), sp.tez(0), tokenDAO)                    
     
     def addMembers(self,params):
         sp.verify(sp.sender == self.data.admin)
@@ -403,14 +405,19 @@ if "templates" not in __name__:
         daoContract = DAOContract(_Admin=admin.address, members=5, amt=10)
         fa12 = FA12(daoContract.address)
         scenario.show([daoContract.address])
-        scenario.show([fa12.address]
-        
-        scenario += daoContract
+        scenario.show([fa12.address])
         
         
-        scenario.h3("Initialize function")
-        scenario += daoContract.intialize ().run(admin)
-        
-        #scenarionew+=daoContract
         
         
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    
