@@ -394,7 +394,7 @@ if "templates" not in __name__:
         
         scenario = sp.test_scenario()
         scenario.h1("Accounts")
-        #scenarionew.show([newadmin, newalice, newbob])
+        
         
         admin = sp.test_account("Administrator")
         alice = sp.test_account("Alice")
