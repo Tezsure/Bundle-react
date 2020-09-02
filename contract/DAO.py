@@ -199,11 +199,11 @@ class DAOContract(sp.Contract):
             
             
             
-    def addrequest(self, params):
-        sp.verify(params.amt == self.data.mincontribution)
-        sp.send(self.data.admin, params.amt)
-        addmemberdata[self.data.addmemberdataid] = params.address
-        self.data.addmemberdataid += 1
+    def addrequest(self, amt):
+        sp.if amt == self.data.mincontribution:
+         sp.send(self.data.admin, amt)
+         addmemberdata[self.data.addmemberdataid] = sp.sender
+         self.data.addmemberdataid += 1
         
     
     
@@ -394,13 +394,14 @@ if "templates" not in __name__:
         
         scenario = sp.test_scenario()
         scenario.h1("Accounts")
-        
+        #scenarionew.show([newadmin, newalice, newbob])
         
         admin = sp.test_account("Administrator")
         alice = sp.test_account("Alice")
         bob   = sp.test_account("Robert")
         
         scenario.show([admin, alice, bob])
+    
         
         daoContract = DAOContract(_Admin=admin.address, members=5, amt=10)
         fa12 = FA12(daoContract.address)
@@ -408,8 +409,12 @@ if "templates" not in __name__:
         scenario.show([fa12.address])
         scenario +=daoContract
         
+        #scenario.h1("Initialize")
+        #scenario += daoContract.intialize(fa12.address).run(sender = admin)
         
         
+        scenario.h2("AddRequest")
+        scenario += daoContract.addrequest(amt=10).run(sender=alice)
         
         
         
