@@ -54,8 +54,8 @@ function App() {
         <div className="col-md-3">
             <Card style={{ width: '18rem' }}>
                 <Card.Body>
-                  <Card.Title>Card Title</Card.Title>
-                  <Card.Subtitle className="mb-2 text-muted">Card Subtitle</Card.Subtitle>
+                  <Card.Title>Project</Card.Title>
+                  <Card.Subtitle className="mb-2 text-muted">Apply for Funding</Card.Subtitle>
                   <Card.Text>
                     Some quick example text to build on the card title and make up the bulk of
                     the card's content.
