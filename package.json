@@ -35,9 +35,11 @@
   },
   "homepage": "https://github.com/Tezsure/Bundle-react#readme",
   "dependencies": {
+    "bootstrap": "^4.5.2",
     "bs58check": "^2.1.2",
     "chalk": "^4.1.0",
     "conseiljs": "0.4.3",
-    "libsodium-wrappers-sumo": "^0.7.6"
+    "libsodium-wrappers-sumo": "^0.7.6",
+    "react-bootstrap": "^1.3.0"
   }
 }
