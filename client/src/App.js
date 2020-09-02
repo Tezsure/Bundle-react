@@ -2,17 +2,16 @@ import React from "react";
 import logo from "./bundle.png";
 import "./App.css";
 import Button from 'react-bootstrap/Button';
-import Navbar from 'react-bootstrap/Navbar'
-import Nav from 'react-bootstrap/Nav'
-import NavDropdown from 'react-bootstrap/NavDropdown'
-import Form from 'react-bootstrap/Form'
-import FormControl from 'react-bootstrap/FormControl'
-import Card from 'react-bootstrap/Card'
+import Navbar from 'react-bootstrap/Navbar';
+import Nav from 'react-bootstrap/Nav';
+import NavDropdown from 'react-bootstrap/NavDropdown';
+import Form from 'react-bootstrap/Form';
+import FormControl from 'react-bootstrap/FormControl';
+import Card from 'react-bootstrap/Card';
 
 function App() {
   return (
     <div className="App">
-      <div className="container"></div>
       <Navbar bg="dark" variant="dark">
     <Navbar.Brand href="#home">Navbar</Navbar.Brand>
     <Nav className="mr-auto">
@@ -25,36 +24,36 @@ function App() {
       <Button variant="outline-info">Search</Button>
     </Form>
   </Navbar>
-  <br />
-  <div class="card-columns">
-  <Card style={{ width: '18rem' }}>
-  <Card.Body>
-    <Card.Title>Investor</Card.Title>
-    <Card.Subtitle className="mb-2 text-muted">Invest in Projects and businesses </Card.Subtitle>
-    <Card.Text>
-      Some quick example text to build on the card title and make up the bulk of
-      the card's content.
-    </Card.Text>
-    <Card.Link href="#">Card Link</Card.Link>
-    <Card.Link href="#">Another Link</Card.Link>
-  </Card.Body>
-</Card>
-<Card style={{ width: '18rem' }}>
-  <Card.Body>
-    <Card.Title>Card Title</Card.Title>
-    <Card.Subtitle className="mb-2 text-muted">Card Subtitle</Card.Subtitle>
-    <Card.Text>
-      Some quick example text to build on the card title and make up the bulk of
-      the card's content.
-    </Card.Text>
-    <Card.Link href="#">Card Link</Card.Link>
-    <Card.Link href="#">Another Link</Card.Link>
-  </Card.Body>
-</Card>
-</div>
-      <h2><Button variant="primary">Primary</Button>{' '}</h2>
+  
+  <div className="container">
+        <div class="row">
+          <div class="col-sm-6">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">Learn React for the Frontend</h5>
+                <a href="https://reactjs.org/tutorial/tutorial.html" class="btn btn-primary">
+                  Explore ReactJs
+                </a>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">Learn ConseilJs for interacting with Smart Contract</h5>
+                <a href="https://cryptonomic.github.io/ConseilJS/#/" class="btn btn-primary">
+                  Explore ConseilJS
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
+
+
+
 
 export default App;
