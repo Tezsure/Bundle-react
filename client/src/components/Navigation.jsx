@@ -7,7 +7,7 @@ function Navigation(props) {
       <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
           <Link class="navbar-brand" to="/">
-            React Multi-Page Website
+            Tijori
           </Link>
           <button
             class="navbar-toggler"
