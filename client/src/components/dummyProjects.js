@@ -2,7 +2,7 @@ export const dummyProjects = [
     {
       id: 1,
       image:
-        "https://image.freepik.com/free-photo/abstract-connected-dots-lines-blue-background_34629-424.jpg",
+        "https://www.flaticon.com/free-icon/online-store_265754",
       title: "Title 1",
       pitch: "Gamechanger Dapp",
       description:
@@ -34,7 +34,7 @@ export const dummyProjects = [
     {
       id: 2,
       image:
-        "https://image.freepik.com/free-photo/abstract-connected-dots-lines-blue-background_34629-424.jpg",
+        "https://www.flaticon.com/free-icon/online-store_265754",
       title: "Title 2",
       pitch: "Gamechanger Dapp",
       description: "Desc 2",
@@ -65,8 +65,8 @@ export const dummyProjects = [
     {
       id: 3,
       image:
-        "https://image.freepik.com/free-photo/abstract-connected-dots-lines-blue-background_34629-424.jpg",
-      title: "Title 3",
+        "https://www.flaticon.com/free-icon/online-store_265754",
+        title:"Title 3",
       pitch: "Gamechanger Dapp",
       description: "Desc 3",
       website: "https://dummy.com",
@@ -79,8 +79,8 @@ export const dummyProjects = [
     {
       id: 4,
       image:
-        "https://image.freepik.com/free-photo/abstract-connected-dots-lines-blue-background_34629-424.jpg",
-      title: "Title 4",
+        "https://www.flaticon.com/free-icon/online-store_265754tle",
+        title :"Title 4",
       pitch: "Gamechanger Dapp",
       description: "Desc 4",
       website: "https://dummy.com",
