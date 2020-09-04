@@ -12,7 +12,7 @@
 
 import React from "react";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
-import { Navigation, Footer, Home, About, Contact, Projects } from "./components";
+import { Navigation, Footer, Home, About, Contact, Projects, ProjectProfile } from "./components";
 
 function App() {
   return (
@@ -20,6 +20,11 @@ function App() {
       <Router>
         <Navigation />
         <Switch>
+        <Route
+            exact
+            path="/rounds/contribute/:id"
+            component={ProjectProfile}
+          />
           <Route path="/" exact component={() => <Home />} />
           <Route path="/Projects" exact component={() => <Projects />} />
           <Route path="/contact" exact component={() => <Contact />} />
