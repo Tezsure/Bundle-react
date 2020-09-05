@@ -1,5 +1,6 @@
 import React from "react";
 import DaoCards from './DaoCards'
+import sampleimage1 from '../molecular.png'
 
 function Home() {
   return (
@@ -16,12 +17,12 @@ function Home() {
             </p>
           </div>
           <div class="col-lg-3">
-            <DaoCards></DaoCards>
-            <DaoCards></DaoCards>
+            <DaoCards cardimage={sampleimage1}></DaoCards >
+            <DaoCards cardimage={sampleimage1}></DaoCards>
             </div>
             <div class="col-lg-4">
-            <DaoCards></DaoCards>
-            <DaoCards></DaoCards>
+            <DaoCards cardimage={sampleimage1}></DaoCards>
+            <DaoCards cardimage={sampleimage1}></DaoCards>
             </div>
         </div>
       </div>

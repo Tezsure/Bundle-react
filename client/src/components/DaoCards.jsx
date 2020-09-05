@@ -1,13 +1,16 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
 import Card from 'react-bootstrap/Card'
 import Button from 'react-bootstrap/Button'
 
-const DaoCards = ({}) => {
+
+const DaoCards = (props) => {
   return (
-    <Card style={{ width: '18rem' }}>
-  <Card.Img variant="top" src="holder.js/100px180" />
+    <div className="pb-4">
+    <Card style={{ width: '15rem' }}>
+      <center>
+  <Card.Img variant="top" src={props.cardimage} style={{width:'100px'}} />
+    </center>
   <Card.Body>
     <Card.Title>Card Title</Card.Title>
     <Card.Text>
@@ -17,6 +20,7 @@ const DaoCards = ({}) => {
     <Button variant="primary">Go somewhere</Button>
   </Card.Body>
 </Card>
+</div>
   );
 }
 
