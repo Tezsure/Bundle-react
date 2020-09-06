@@ -3,6 +3,7 @@ import DaoCards from './DaoCards'
 import sampleimage1 from '../molecular.png'
 import Carousel from 'react-bootstrap/Carousel'
 import img1 from '../assets/img/undraw_Team_page_re_cffb.png'
+import Footer from "./Footer";
 
 function Home() {
   return (
@@ -15,8 +16,8 @@ function Home() {
       alt="First slide"
     />
     <Carousel.Caption>
-      <h3 className='text-dark'>Image</h3>
-      <p>Nulla vitae elit libero, a pharetra augue mollis interdum.</p>
+      <h3 className='text-dark'>Invest in Projects</h3>
+      <p></p>
     </Carousel.Caption>
   </Carousel.Item>
   <Carousel.Item>
@@ -44,6 +45,7 @@ function Home() {
     </Carousel.Caption>
   </Carousel.Item>
 </Carousel>
+<Footer></Footer>
     </div>
   );
 }
