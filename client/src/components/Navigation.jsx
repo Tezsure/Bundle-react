@@ -47,7 +47,7 @@ function Navigation(props) {
                 }`}
               >
                 <Link class="nav-link" to="/contact">
-                  Contact
+                  DAO
                 </Link>
               </li>
             </ul>

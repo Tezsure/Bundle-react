@@ -2,7 +2,7 @@ import React from "react";
 import DaoCards from './DaoCards'
 import sampleimage1 from '../molecular.png'
 
-function Home() {
+function ProjectPage() {
   return (
     <div className="home">
       <div class="container">
@@ -10,13 +10,9 @@ function Home() {
           <div class="col-lg-4">
             <h1 class="font-weight-light"></h1>
             
-          </div>
-          <div class="col-lg-10">
-          <p>
-              Invest in Projects and businesses to earn Returns,
-              Select a DAO and invest by collective decision making through Quadratic Voting and
-              Earn as the business grows
-              </p>
+        </div>
+        <div class="col-lg-10">
+          
             </div>
             
         </div>
@@ -25,4 +21,4 @@ function Home() {
   );
 }
 
-export default Home;
+export default ProjectPage;
