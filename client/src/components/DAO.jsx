@@ -2,7 +2,7 @@ import React from "react";
 import DaoCards from './DaoCards'
 import sampleimage1 from '../molecular.png'
 
-function Contact() {
+function DAO() {
   return (
     <div className="home">
       <div class="container">
@@ -27,4 +27,4 @@ function Contact() {
   );
 }
 
-export default Contact;
+export default DAO;

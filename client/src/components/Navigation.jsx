@@ -4,7 +4,7 @@ import { Link, withRouter } from "react-router-dom";
 function Navigation(props) {
   return (
     <div className="navigation">
-      <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark" style={{ backgroundColor: '#232323' }}>
         <div class="container">
           <Link class="navbar-brand" to="/">
             Tijori
@@ -46,7 +46,7 @@ function Navigation(props) {
                   props.location.pathname === "/contact" ? "active" : ""
                 }`}
               >
-                <Link class="nav-link" to="/contact">
+                <Link class="nav-link" to="/DAO">
                   DAO
                 </Link>
               </li>
