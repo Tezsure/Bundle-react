@@ -11,10 +11,9 @@ function DAO() {
     <div className="home">
       <Jumbotron fluid>
   <Container>
-    <h1>Fluid jumbotron</h1>
+    <h1>Decentralised Autonomous Organisation</h1>
     <p>
-      This is a modified jumbotron that occupies the entire horizontal space of
-      its parent.
+      Become a member of a DAO and start investing to earn returns
     </p>
   </Container>
 </Jumbotron>
@@ -22,9 +21,9 @@ function DAO() {
       <Container fluid>
   <Row>
     <Col> 
-    <h1 class="font-weight-light">Decentralised Autonomous Organisation</h1>
+    <h1 class="font-weight-light">A List of all DAO's Open for Intake</h1>
             <p>
-              A List of all DAO's Open for Intake
+              
             </p>
             </Col>
   </Row>

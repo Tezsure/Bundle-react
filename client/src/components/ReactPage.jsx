@@ -34,9 +34,9 @@ const ReactPage = (props) => {
   </Tab>
 </Tabs>
   </Container>  
-    
-
-  );
+  
+  
+);
 }
 
 export default ReactPage;
