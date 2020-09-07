@@ -5,3 +5,4 @@
 
 ## Architectural Diagram
 <img src="images/Tijori_Tezos.png">
+# Website: https://ap-aryanpandey.github.io/tijoriui/
