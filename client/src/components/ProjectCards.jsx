@@ -1,26 +1,33 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import Card from 'react-bootstrap/Card'
+import Button from 'react-bootstrap/Button'
 
 
-const ProjectCard = ({ details }) => {
+const ProjectCards = ( {details} ) => {
+
+
+
   return (
-    <div className="col-4 mb-4">
-      <div class="card">
-        <img
-          class="card-img-top"
-          src={details.image}
-          alt="Project Background"
-        />
-        <div class="card-body">
-          <h5 class="card-title">{details.title}</h5>
-          <p class="card-text">{details.description}</p>
-          <Link to={`/rounds/contribute/${details.id}`}>
-            <button class="btn btn-primary btn-block">Contribute</button>
-          </Link>
-        </div>
-      </div>
-    </div>
+    <div className="pb-4">
+    <Card style={{ width: '15rem' }}>
+      <center>
+  <Card.Img variant="top" src={details.image} style={{width:'230px'}} />
+    </center>
+  <Card.Body>
+  <Card.Title>{details.title}</Card.Title>
+    <Card.Text>
+      Some quick example text to build on the card title and make up the bulk of
+      the card's content.
+    </Card.Text>
+    
+    <Link to={`/Project/${details.id}`}>
+      <Button variant="primary">Know more</Button>
+    </Link>
+  </Card.Body>
+</Card>
+</div>
   );
-};
+}
 
-export default ProjectCard;
+export default ProjectCards;

@@ -1,70 +1,56 @@
 import React from "react";
+import ProjectCards from './ProjectCards'
+import sampleimage1 from '../molecular.png'
+import Container from 'react-bootstrap/Container'
+import Row from 'react-bootstrap/Row'
+import Col from 'react-bootstrap/Col'
+import Jumbotron from 'react-bootstrap/Jumbotron'
 
-import ProjectCard from "./ProjectCards";
+import {sampleData} from '../data/sampleData'
 
-import { dummyProjects } from "./dummyProjects";
-import { Container } from "react-bootstrap";
+const Projects  = () => {
 
 
-const Projects =() => {
-  const renderProjects = dummyProjects.map((details) => (
-    <ProjectCard details={details} />
-  ));
+  const renderCards = sampleData.map((details) => (
+    <div className="col-md-2 col-sm-6">
+      <ProjectCards details={details} />
+    </div>
+  ))
 
   return (
-    <div className="container">
-      {/* Header */}
-      <h1 className="font-weight-light">Project Pool</h1>
-      <h4 className="font-weight-lighter">
-        Invest in Project to earn revenue as the Project Grows
-      </h4>
-      <h5 className="font-weight-lighter">
-        <em></em>
-      </h5>
+    <div className="home">
+      <Jumbotron fluid>
+  <Container>
+    <h1>Projects</h1>
+    <p>
+      Upload your project profile  and start raising capital.
+    </p>
+  </Container>
+</Jumbotron>
 
-      <hr />
+      <Container fluid>
+  <Row>
+    <Col> 
+            <p>
+              
+            </p>
+            </Col>
+  </Row>  
 
-      {/* Body - Divided into 2 columns*/}
-      {/* Column 1 for filtering, Column 2 for displaying projects */}
-      <div className="row">
-        {/* Filters column */}
-        <div className="col-3">
-          <h5>Filter Projects</h5>
-          <div>Defi</div>
-          <div>Tech</div>
-          <div>Community</div>
-        </div>
+                <div className="row pl-5 ml-5 text-center">
+                  <h1 class="font-weight-light ">A List of all Projects Open for Intake</h1>
+                </div>
+                <div className="row pt-5">          
+                    <div className="col-md-2 col-sm-6">
 
-        {/* Projects column */}
-        <div className="col">
-          {/* Search input with button */}
-          <div className="input-group">
-            <div className="input-group mb-3">
-              <input
-                type="text"
-                className="form-control"
-                placeholder="Search"
-                aria-label="Search"
-              />
-              <div className="input-group-append">
-                <button
-                  className="btn btn-success"
-                  type="button"
-                  id="button-addon2"
-                >
-                  Search
-                </button>
-              </div>
-            </div>
-          </div>
+                    </div>
+                    {renderCards}
+                </div>
+            
 
-          {/* Projects */}
-          <div className="container-fluid">
-            <div className="row">{renderProjects}</div>
-          </div>
-        </div>
-      </div>
-    </div>
+          
+       </Container>
+       </div>
   );
 }
 

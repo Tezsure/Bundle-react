@@ -50,6 +50,24 @@ function Navigation(props) {
                   DAO
                 </Link>
               </li>
+              <li
+                class={`nav-item  ${
+                  props.location.pathname === "/Project" ? "active" : ""
+                }`}
+              >
+                <Link class="nav-link" to="/Project">
+                  Project
+                </Link>
+              </li>
+              <li
+                class={`nav-item  ${
+                  props.location.pathname === "/wallet" ? "active" : ""
+                }`}
+              >
+                <Link class="nav-link" to="/Wallet">
+                  Wallet
+                </Link>
+              </li>
             </ul>
           </div>
         </div>

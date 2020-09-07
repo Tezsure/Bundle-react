@@ -6,7 +6,17 @@ import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 import Jumbotron from 'react-bootstrap/Jumbotron'
 
-function DAO() {
+import {sampleData} from '../data/sampleData'
+
+const DAO  = () => {
+
+
+  const renderCards = sampleData.map((details) => (
+    <div className="col-md-2 col-sm-6">
+      <DaoCards details={details} />
+    </div>
+  ))
+
   return (
     <div className="home">
       <Jumbotron fluid>
@@ -21,24 +31,24 @@ function DAO() {
       <Container fluid>
   <Row>
     <Col> 
-    <h1 class="font-weight-light">A List of all DAO's Open for Intake</h1>
             <p>
               
             </p>
             </Col>
-  </Row>
+  </Row>  
 
+                <div className="row pl-5 ml-5 text-center">
+                  <h1 class="font-weight-light ">A List of all DAO's Open for Intake</h1>
+                </div>
+                <div className="row pt-5">          
+                    <div className="col-md-2 col-sm-6">
+
+                    </div>
+                    {renderCards}
+                </div>
             
-          <Row>
-          <div class="col-lg-3">
-            <DaoCards cardimage={sampleimage1}></DaoCards >
-            <DaoCards cardimage={sampleimage1}></DaoCards>
-            </div>
-            <div class="col-lg-4">
-            <DaoCards cardimage={sampleimage1}></DaoCards>
-            <DaoCards cardimage={sampleimage1}></DaoCards>
-            </div>
-            </Row>
+
+          
        </Container>
        </div>
   );
