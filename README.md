@@ -10,3 +10,6 @@
 
 ## Website:
 https://ap-aryanpandey.github.io/tijoriui/
+
+## UI Git:
+https://github.com/ap-aryanpandey/tijoriui
