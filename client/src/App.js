@@ -1,43 +1,59 @@
+//import React, {Component} from "react";
+//import logo from "./bundle.png";
+//import "./App.css";
+//import Button from 'react-bootstrap/Button';
+//import Navbar from 'react-bootstrap/Navbar'
+//import Nav from 'react-bootstrap/Nav'
+//import NavDropdown from 'react-bootstrap/NavDropdown'
+//import Form from 'react-bootstrap/Form'
+//import FormControl from 'react-bootstrap/FormControl'
+//import Card from 'react-bootstrap/Card'
+
+
 import React from "react";
-import logo from "./bundle.png";
-import "./App.css";
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+import { Navigation, Footer, Home, About, DAO, Projects, ProjectProfile, DaoCards, ProjectPage, ReactPage} from "./components";
+import AboutPage from "./components/AboutPage"
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <h2 className="headerName">Bundle React</h2>
-      </header>
+      <Router>
+        <Navigation />
+        <Switch>
+        
+          <Route path="/" exact component={() => <Home />} />
+          <Route path="/Project" exact component={() => <Projects />} />
+          <Route path="/DAO" exact component={() => <DAO />} />
 
-      <a href="https://tezsure.com/">
-        <img className="logo" src={logo} alt="logo" />
-      </a>
-      <div className="container">
-        <div class="row">
-          <div class="col-sm-6">
-            <div class="card">
-              <div class="card-body">
-                <h5 class="card-title">Learn React for the Frontend</h5>
-                <a href="https://reactjs.org/tutorial/tutorial.html" class="btn btn-primary">
-                  Explore ReactJs
-                </a>
-              </div>
-            </div>
-          </div>
-          <div class="col-sm-6">
-            <div class="card">
-              <div class="card-body">
-                <h5 class="card-title">Learn ConseilJs for interacting with Smart Contract</h5>
-                <a href="https://cryptonomic.github.io/ConseilJS/#/" class="btn btn-primary">
-                  Explore ConseilJS
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+          <Route 
+            exact
+            path="/DAO/:id"
+            component={ReactPage}
+          />
+
+          <Route 
+            exact
+            path="/Project/:id"
+            component={ReactPage}
+          />
+
+          <Route path="/about" exact component ={() => <AboutPage /> } />
+
+          <Route path="/ProjectPage" exact component={() => <ProjectPage />} />
+          <Route path="/ReactPage" exact component={() => <ReactPage />} />
+
+
+        </Switch>
+        
+      </Router>
     </div>
   );
 }
+
+
+
+
+
 
 export default App;
