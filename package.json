@@ -35,6 +35,8 @@
   },
   "homepage": "https://github.com/Tezsure/Bundle-react#readme",
   "dependencies": {
+    "@taquito/taquito": "^6.3.5-beta.0",
+    "@thanos-wallet/dapp": "^0.6.0",
     "bootstrap": "^4.5.2",
     "bs58check": "^2.1.2",
     "chalk": "^4.1.0",

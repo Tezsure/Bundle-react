@@ -1,11 +1,25 @@
 import React from "react";
 import { Link, withRouter } from "react-router-dom";
+import { Tezos } from '@taquito/taquito';
+import { ThanosWallet } from '@thanos-wallet/dapp';
+
+const check = async () => {
+  try {
+    const available = await ThanosWallet.isAvailable();
+    if (!available) {
+      throw new Error('Thanos Wallet not installed');
+    }
+  } catch (err) {
+    console.log(err);
+  }
+}
 
 function Navigation(props) {
   return (
     <div className="navigation">
       <nav class="navbar navbar-expand-lg navbar-dark bg-dark" style={{ backgroundColor: '#232323' }}>
         <div class="container">
+          
           <Link class="navbar-brand" to="/">
             Tijori
           </Link>
