@@ -12,13 +12,51 @@ import Container from 'react-bootstrap/Container'
 import { sampleData } from '../data/sampleData';
 import { Tezos } from '@taquito/taquito';
 import { ThanosWallet } from '@thanos-wallet/dapp';
+import ProposalForm from './ProposalForm';
+//functions for proposal form
+import Form from 'react-bootstrap/Form'
+import InputGroup from 'react-bootstrap/InputGroup'
+import FormControl from 'react-bootstrap/FormControl'
 
 
 const ReactPage = (props) => {
 
-const[addinitiate,setaddinitiate] = useState('False')
 
-const check = async () => {
+
+// const addProposal = async () => {
+// 
+// try {
+  // const available = await ThanosWallet.isAvailable();
+  // if (!available) {
+    // throw new Error('Thanos Wallet not installed');
+  // }
+// } catch (err) {
+  // console.log(err);
+// }
+// const wallet = new ThanosWallet('Tijori');
+// await wallet.connect("carthagenet");
+// 
+// const tezos = wallet.toTezos();
+// const accountPkh = await tezos.wallet.pkh();
+// const accountBalance = await tezos.tz.getBalance(accountPkh);
+// const DaoContract = await tezos.wallet.at(
+  // "KT1AgQZ6EBxFQ1JnhxPFZiLaSvA9iZa2EQif"
+// );
+// 
+// const operation = await DaoContract.methods.addmember(transfervalue).send();
+// setaddinitiate('True');
+// await operation.confirmation();
+// 
+// const addmemberValue = await DaoContract.storage();
+// console.info(`Member: ${addmemberValue}`);
+// 
+// }
+
+//State for addmember 
+const[addinitiate,setaddinitiate] = useState('False')
+const[addsuccess,setaddsuccess] = useState('False')
+//function for add member interface
+const addmember = async () => {
   try {
     const available = await ThanosWallet.isAvailable();
     if (!available) {
@@ -34,10 +72,12 @@ const check = async () => {
   const accountPkh = await tezos.wallet.pkh();
   const accountBalance = await tezos.tz.getBalance(accountPkh);
   const DaoContract = await tezos.wallet.at(
-    "KT1DYeNkszZatQNqJB7S97ct4fUENTF4UWSg"
+    "KT1AgQZ6EBxFQ1JnhxPFZiLaSvA9iZa2EQif"
   );
-  const operation = await DaoContract.methods.addmember(10).send();
+  const operation = await DaoContract.methods.addmember(20).send();
+  setaddinitiate('True');
   await operation.confirmation();
+  
   const addmemberValue = await DaoContract.storage();
   console.info(`Member: ${addmemberValue}`);
 }
@@ -75,7 +115,7 @@ const check = async () => {
                     <br/>
                     <br/>
                     <div>
-                      <button type="button" onClick={check}class="btn btn-primary btn-lg btn-block">Become a Member</button> 
+                      <button type="button" onClick={addmember}class="btn btn-primary btn-lg btn-block">Become a Member</button> 
                     </div>
               </div>
             </div>
@@ -98,7 +138,23 @@ const check = async () => {
                   </Tab>
                   <Tab eventKey="Round Allocation" title="Round Allocation">
                     <div className="container container pt-5 pl-5">
-                        Contributers List:-
+                      Fill in the Market and Amount that you want to allocate for the first round of funding.
+                        <ProposalForm/>
+                    </div>
+                  </Tab>
+                  <Tab eventKey="Add Projects" title="Add Projects">
+                    <div className="container container pt-5 pl-5">
+                        Enter Projects
+                    </div>
+                  </Tab>
+                  <Tab eventKey="Vote for Projects" title="Vote for Project">
+                    <div className="container container pt-5 pl-5">
+                        
+                    </div>
+                  </Tab>
+                  <Tab eventKey="Vote for Proposals" title="Vote for Proposal">
+                    <div className="container container pt-5 pl-5">
+                        
                     </div>
                   </Tab>
                 </Tabs>                  
