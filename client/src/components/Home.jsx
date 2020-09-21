@@ -2,9 +2,9 @@ import React from "react";
 import DaoCards from './DaoCards'
 import sampleimage1 from '../molecular.png'
 import Carousel from 'react-bootstrap/Carousel'
-import img1 from '../assets/img/carousel1.svg'
-import img2 from '../assets/img/carousel2.svg'
-import img3 from '../assets/img/carousel4.svg'
+import img1 from '../assets/img/1st img.png'
+import img2 from '../assets/img/DAO.png'
+import img3 from '../assets/img/project.png'
 
 
 function Home() {
@@ -19,7 +19,7 @@ function Home() {
           <div className="col-md-8">
             
 
-            <div className="pt-5 mt-5">
+            <div className="py-5 mt-5">
             <Carousel>
                 <Carousel.Item>
                   <img
@@ -28,8 +28,8 @@ function Home() {
                     alt="First slide"
                   />
                   <Carousel.Caption>
-                    <h3 className="text-dark">First slide label</h3>
-                    <p className="text-dark">Nulla vitae elit libero, a pharetra augue mollis interdum.</p>
+                    <h3 className="text-dark"></h3>
+                    <p className="text-dark"></p>
                   </Carousel.Caption>
                 </Carousel.Item>
                 <Carousel.Item>
@@ -41,8 +41,8 @@ function Home() {
 
                   <Carousel.Caption>
                     <div className="pt-5 pl-5">
-                    <h3 className="text-dark">Second slide label</h3>
-                    <p className="text-dark">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                    <h3 className="text-dark"></h3>
+                    <p className="text-dark"></p>
                     </div>
                   </Carousel.Caption>
                 </Carousel.Item>
@@ -54,8 +54,8 @@ function Home() {
                   />
 
                   <Carousel.Caption>
-                    <h3 className="text-dark">Third slide label</h3>
-                    <p className="text-dark">Praesent commodo cursus magna, vel scelerisque nisl consectetur.</p>
+                    <h3 className="text-dark"></h3>
+                    <p className="text-dark"></p>
                   </Carousel.Caption>
                 </Carousel.Item>
               </Carousel>
@@ -66,6 +66,19 @@ function Home() {
 
           <div className="col-md-2">
             
+          </div>
+        </div>
+        <div className="py-5">
+          <hr className ="pb-4" />
+          <div className="text-center">
+            <h2 className="">Become the Part of a new movement</h2>
+            <h1 className="text-primary text-bold pb-2">Decentralized Autonomous Organization</h1> 
+            <br />
+            <p className="text-mute">To explore, click on "DAO"</p>
+            <button className="btn btn-secondary btn-lg">Create DAO</button>
+            &nbsp;&nbsp;&nbsp;&nbsp;
+            <button className="btn btn-primary btn-lg">Create Project Profile</button>
+
           </div>
         </div>
       </div>

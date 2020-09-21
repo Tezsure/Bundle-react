@@ -8,13 +8,13 @@ import Jumbotron from 'react-bootstrap/Jumbotron'
 import Tabs from 'react-bootstrap/Tabs'
 import Tab from 'react-bootstrap/Tab'
 import {sampleData} from '../data/sampleData'
-import ProjectCards from './ProjectCards'
-const Projects  = () => {
+
+const MyProfile  = () => {
 
 
   const renderCards = sampleData.map((details) => (
-    <div className="col-md-2 col-sm-6">
-      <ProjectCards details={details} />
+    <div className="col-md-3 col-sm-6">
+      <DaoCards details={details} />
     </div>
   ))
 
@@ -22,20 +22,29 @@ const Projects  = () => {
     <div className="home">
       <Jumbotron fluid>
   <Container>
-    <h1>Projects</h1>
+    <h1>Decentralised Autonomous Organisation</h1>
     <p>
-    Upload your project profile  and start raising capital.
+      Here are the all available DAO's which are accepting members for creation of funding pool, you can choose according to your risk appetite, click on "Know more" to get further details
     </p>
   </Container>
-      </Jumbotron>
+</Jumbotron>
 
-      <div className="row pl-5 ml-5 text-center">
-                  <h1 class="font-weight-light ">Projects open for Funding </h1>
+      <Container fluid>
+  <Row>
+    <Col> 
+            <p>
+              
+            </p>
+            </Col>
+  </Row>  
+
+                <div className="row pl-5 ml-5 text-center">
+                  <h1 class="font-weight-light ">A List of all DAO's Open for Intake</h1>
                 </div>
                 
                 <div className="p-5 m-5 border">
-                <Tabs defaultActiveKey="De-fi" id="uncontrolled-tab-example">
-                    <Tab eventKey="De-fi" title="De-fi">
+                <Tabs defaultActiveKey="Diversified" id="uncontrolled-tab-example">
+                    <Tab eventKey="Diversified" title="Diversified">
                       <div className="row p-5">
                           {renderCards}
                       </div>
@@ -46,7 +55,7 @@ const Projects  = () => {
                           {renderCards}
                       </div>
                     </Tab>
-                    <Tab eventKey="Crypto-Games" title="Crypto-Games">
+                    <Tab eventKey="High Risk Profile" title="High Risk Profile">
                         <div className="row p-5">
                               {renderCards}
                           </div>
@@ -57,7 +66,7 @@ const Projects  = () => {
                               {renderCards}
                           </div>
                     </Tab>
-                    <Tab eventKey="E-Commerce" title="E-Commerce">
+                    <Tab eventKey="Safe" title="Safe">
                         <div className="row p-5">
                               {renderCards}
                           </div>
@@ -73,9 +82,9 @@ const Projects  = () => {
             
 
           
-       
-       </div>
+      </Container>
+      </div>
   );
 }
 
-export default Projects;
+export default MyProfile;
