@@ -17,7 +17,7 @@ const check = async () => {
 function Navigation(props) {
   return (
     <div className="navigation">
-      <nav class="navbar navbar-expand-lg navbar-dark bg-dark" style={{ backgroundColor: '#232323' }}>
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark" style={{ backgroundColor: '#18222f' }}>
         <div class="container">
           
           <Link class="navbar-brand" to="/">
