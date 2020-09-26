@@ -14,7 +14,7 @@ import {createStore} from "react";
 
 import React from "react";
 import { HashRouter as Router, Route, Switch } from "react-router-dom";
-import { Navigation, Footer, Home, About, DAO, Projects, ProjectProfile, DaoCards, ProjectPage, ReactPage} from "./components";
+import { Navigation, Footer, Home, About, DAO, Projects, ProjectProfile, DaoCards, ProjectPage, ReactPage, FormComp} from "./components";
 import AboutPage from "./components/AboutPage"
 import { ThanosWallet } from '@thanos-wallet/dapp';
 
@@ -45,7 +45,7 @@ function App() {
           />
 
           <Route path="/about" exact component ={() => <AboutPage /> } />
-
+          <Route path="/create" exact component ={() => <FormComp /> } />
           <Route path="/ProjectPage" exact component={() => <ProjectPage />} />
           <Route path="/ReactPage" exact component={() => <ReactPage />} />
 

@@ -6,4 +6,5 @@ export { default as DAO } from "./DAO";
 export {default as ProjectProfile} from "./ProjectProfile";
 export {default as DaoCards} from "./DaoCards";
 export {default as ProjectPage} from "./ProjectPage";
-export {default as ReactPage} from "./ReactPage"
+export {default as ReactPage} from "./ReactPage";
+export {default as FormComp} from "./FormComp";

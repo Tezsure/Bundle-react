@@ -21,7 +21,7 @@ function Home() {
 
     <div className="home">
 
-      <div className="one">
+      <div className="container">
           <Container fluid>
           <div className="row mt-5">
           <div className="col-md-2"></div>
@@ -73,7 +73,7 @@ function Home() {
             <button className="btn btn-secondary btn-lg">Create DAO</button>
             &nbsp;&nbsp;&nbsp;&nbsp;
             </Link>
-            <Link to={FormComp}>
+            <Link to={'/FormComp'}>
             <button className="btn btn-primary btn-lg">Create Project Profile</button>
             </Link>
           </div>

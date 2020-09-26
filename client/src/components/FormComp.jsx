@@ -7,7 +7,7 @@ import Col from 'react-bootstrap/Col'
 
 const FormComp = () => {
 
-const ipfsclient = require('ipfs-http-clint')
+const ipfsclient = require('ipfs-http-client')
 const ipfs = ipfsclient({host: 'ipfs-infura-io',port: 5001,protocol:'https'})
 
 return (

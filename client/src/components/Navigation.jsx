@@ -78,8 +78,8 @@ function Navigation(props) {
                   props.location.pathname === "/wallet" ? "active" : ""
                 }`}
               >
-                <Link class="nav-link" to="/Wallet">
-                  Wallet
+                <Link class="nav-link" to="/Create">
+                  Create
                 </Link>
               </li>
             </ul>
