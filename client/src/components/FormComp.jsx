@@ -1,67 +1,65 @@
-import React from "react";
+import React, {useState} from "react";
 import { Link } from "react-router-dom";
 import Card from 'react-bootstrap/Card'
 import Button from 'react-bootstrap/Button'
 import Form from 'react-bootstrap/Form'
 import Col from 'react-bootstrap/Col'
 
-const FormComp = () => {
+const all = require('it-all')
 
+
+const FormComp = () =>{
+
+const[adddata,setadddata] = useState('')
+const[addinfo,setaddinfo] = useState('')
+  
 const ipfsclient = require('ipfs-http-client')
 const ipfs = ipfsclient({host: 'ipfs-infura-io',port: 5001,protocol:'https'})
 
+
+const handleChange = (event) => {
+  setadddata(event.target.data)
+  setaddinfo(event.target.info)
+}
+const onSubmit = async(event) => {
+  event.preventDefault()
+  console.log("Submitting file to ipfs...")
+  const data = JSON.stringify({
+  data: adddata,
+  info: addinfo
+  })
+  const ipfsHash = ipfs.add(data)
+  const arr = await all (ipfsHash)
+  console.log(arr)
+  
+    
+}
+
 return (
-    <Form>
-    <Form.Row>
-      <Form.Group as={Col} controlId="formGridEmail">
-        <Form.Label>Email</Form.Label>
-        <Form.Control type="email" placeholder="Enter email" />
-      </Form.Group>
-  
-      <Form.Group as={Col} controlId="formGridPassword">
-        <Form.Label>Password</Form.Label>
-        <Form.Control type="password" placeholder="Password" />
-      </Form.Group>
-    </Form.Row>
-  
-    <Form.Group controlId="formGridAddress1">
-      <Form.Label>Address</Form.Label>
-      <Form.Control placeholder="1234 Main St" />
-    </Form.Group>
-  
-    <Form.Group controlId="formGridAddress2">
-      <Form.Label>Address 2</Form.Label>
-      <Form.Control placeholder="Apartment, studio, or floor" />
-    </Form.Group>
-  
-    <Form.Row>
-      <Form.Group as={Col} controlId="formGridCity">
-        <Form.Label>City</Form.Label>
-        <Form.Control />
-      </Form.Group>
-  
-      <Form.Group as={Col} controlId="formGridState">
-        <Form.Label>State</Form.Label>
-        <Form.Control as="select" defaultValue="Choose...">
-          <option>Choose...</option>
-          <option>...</option>
-        </Form.Control>
-      </Form.Group>
-  
-      <Form.Group as={Col} controlId="formGridZip">
-        <Form.Label>Zip</Form.Label>
-        <Form.Control />
-      </Form.Group>
-    </Form.Row>
-  
-    <Form.Group id="formGridCheckbox">
-      <Form.Check type="checkbox" label="Check me out" />
-    </Form.Group>
-  
-    <Button variant="primary" type="submit">
-      Submit
-    </Button>
-  </Form>  
+  <Form>
+  <Form.Group controlId="formBasicEmail">
+    <Form.Label>Email address</Form.Label>
+    <Form.Control type="email" placeholder="Enter email"
+    data = {adddata}
+    onChange = {(event)=>handleChange(event)}
+    />
+    <Form.Text className="text-muted">
+      We'll never share your email with anyone else.
+    </Form.Text>
+  </Form.Group>
+
+  <Form.Group controlId="formBasicPassword">
+    <Form.Label>Password</Form.Label>
+    <Form.Control type="password" placeholder="Password" 
+    info = {addinfo}
+    onChange = {(event)=>handleChange(event)}
+    />
+  </Form.Group>
+  <Form.Group controlId="formBasicCheckbox">
+    <Form.Check type="checkbox" label="Check me out" />
+  </Form.Group>
+  <Button type="button" onClick={onSubmit} class="btn btn-primary btn-lg btn-block">Submit</Button>
+</Form>
 );
 
 }
