@@ -17,7 +17,7 @@ const ProjectAdd = (props) => {
 
 const sendProposal = async () => {
 
-    const addmember = async () => {
+    
         try {
           const available = await ThanosWallet.isAvailable();
           if (!available) {
@@ -41,7 +41,7 @@ const sendProposal = async () => {
         
         const addmemberValue = await DaoContract.storage();
         console.info(`Member: ${addmemberValue}`);
-    }
+    
 
 }
     
