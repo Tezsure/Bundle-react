@@ -15,8 +15,11 @@ import { ThanosWallet } from '@thanos-wallet/dapp';
 import ProposalForm from './ProposalForm';
 import ProposalVote from './ProposalVote';
 import ProjectVote from './ProjectVote';
+import ProjectAdd from './ProjectAdd';
 
 const ReactPage = (props) => {
+
+// make sure to add daoid as a json object in ipfs so as to reuse it to add members
 
 //State for addmember 
 const[addinitiate,setaddinitiate] = useState('False')
@@ -38,9 +41,9 @@ const addmember = async () => {
   const accountPkh = await tezos.wallet.pkh();
   const accountBalance = await tezos.tz.getBalance(accountPkh);
   const DaoContract = await tezos.wallet.at(
-    "KT1AgQZ6EBxFQ1JnhxPFZiLaSvA9iZa2EQif"
+    "KT1MTcvzeGwpUMmQyAtBV2iwGdbJPWJHqXyw"
   );
-  const operation = await DaoContract.methods.addmember(20).send();
+  const operation = await DaoContract.methods.addMember(1).send( {amount: 0.00002});
   setaddinitiate('True');
   await operation.confirmation();
   
@@ -77,7 +80,7 @@ const addmember = async () => {
                     <h2 className="font-weight-bold"> {sampleData[id-1].title} </h2>
                     <br/>
                     <h5 className="font-weight-light">
-                      Lorem ipsum dolor sit amet consectetur adipisicing elit. Consequatur, earum dolorem eveniet ratione voluptatibus incidunt ad quo expedita modi animi. Magni expedita architecto commodi dolorem ipsam adipisci id esse dicta?
+                      Minimum contribution to be added is - 20 mutez
 
                     </h5>
                     <br/>
@@ -110,7 +113,7 @@ const addmember = async () => {
                   </Tab>
                   <Tab eventKey="Add Projects" title="Add Projects">
                     <div className="container container pt-5 pl-5">
-                        Enter Projects
+                        <ProjectAdd/>
                     </div>
                   </Tab>
                   <Tab eventKey="Vote for Projects" title="Vote for Project">

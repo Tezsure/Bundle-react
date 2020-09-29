@@ -13,37 +13,37 @@ import { ThanosWallet } from '@thanos-wallet/dapp';
 
 
 
-const ProposalForm = (props) => {
+const ProjectAdd = (props) => {
 
-    
+const sendProposal = async () => {
 
-        const sendProposal = async () => {
-            try {
-              const available = await ThanosWallet.isAvailable();
-              if (!available) {
-                throw new Error('Thanos Wallet not installed');
-              }
-            } catch (err) {
-              console.log(err);
-            }
-            const wallet = new ThanosWallet('Tijori');
-            await wallet.connect("carthagenet");
-            
-            const tezos = wallet.toTezos();
-            const accountPkh = await tezos.wallet.pkh();
-            const accountBalance = await tezos.tz.getBalance(accountPkh);
-            const DaoContract = await tezos.wallet.at(
-              "KT1MTcvzeGwpUMmQyAtBV2iwGdbJPWJHqXyw"
-            );
-            const operation = await DaoContract.methods.addProject('1','1').send();
-            
-            await operation.confirmation();
-            
-            const addmemberValue = await DaoContract.storage();
-            console.info(`Member: ${addmemberValue}`);
+    const addmember = async () => {
+        try {
+          const available = await ThanosWallet.isAvailable();
+          if (!available) {
+            throw new Error('Thanos Wallet not installed');
+          }
+        } catch (err) {
+          console.log(err);
         }
-    
-    
+        const wallet = new ThanosWallet('Tijori');
+        await wallet.connect("carthagenet");
+        
+        const tezos = wallet.toTezos();
+        const accountPkh = await tezos.wallet.pkh();
+        const accountBalance = await tezos.tz.getBalance(accountPkh);
+        const DaoContract = await tezos.wallet.at(
+          "KT1MTcvzeGwpUMmQyAtBV2iwGdbJPWJHqXyw"
+        );
+        const operation = await DaoContract.methods.addProject(1).send();
+        
+        await operation.confirmation();
+        
+        const addmemberValue = await DaoContract.storage();
+        console.info(`Member: ${addmemberValue}`);
+    }
+
+}
     
 //State for amount in proposal
 const[value,setValue] = useState(0)
@@ -88,5 +88,5 @@ const handleChange = (event) => {
         );
 }
 
-export default ProposalForm;
+export default ProjectAdd;
 
