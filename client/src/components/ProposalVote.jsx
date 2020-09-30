@@ -17,7 +17,7 @@ const ProposalVote = (props) => {
     const[value,setValue] = useState(0)
     const[index,setIndex] = useState(0)
 
-    const sendProposal = async () => {
+    const proposalVote = async () => {
 
     
         try {
@@ -37,7 +37,7 @@ const ProposalVote = (props) => {
         const DaoContract = await tezos.wallet.at(
           "KT1MTcvzeGwpUMmQyAtBV2iwGdbJPWJHqXyw"
         );
-        const operation = await DaoContract.methods.addProject(1).send();
+        const operation = await DaoContract.methods.voteproposal(value,5).send();
         
         await operation.confirmation();
         
@@ -56,7 +56,7 @@ const handleChange = (event) => {
 
 }
         return (
-            <Form onSubmit={sendProposal}>
+            <Form onSubmit={proposalVote}>
             <Form.Row className="align-items-center">
             <Col xs="auto">
                 <Form.Label htmlFor="inlineFormInput" srOnly>

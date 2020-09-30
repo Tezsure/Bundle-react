@@ -20,48 +20,64 @@ function Home() {
     
 
     <div className="home">
-
-      <div className="container">
-          <Container fluid>
-          <div className="row mt-5">
-          <div className="col-md-2"></div>
-            <div className="col-md-5">
-            <h1 className="text-primary text-bold pb-2">Invest together</h1>
-            <h1 className="text-primary text-bold pb-2">Diversify Risks</h1>
-            <h1 className="text-primary text-bold pb-2">Earn Returns</h1>
-            </div>
-          <div className="col-md-5">
-          
-          <img alt="about page" src="https://image.freepik.com/free-vector/characters-people-holding-blockchain-network_53876-26824.jpg" style={{ width: '500px' }} />
-          
-          </div>
-          </div>  
-          </Container>
-        </div>
-
       <div className="container">
         <div className="row mt-5">
-          
+          <div className="col-md-2">
+
+          </div>
+
+          <div className="col-md-8">
             
-          <Jumbotron fluid>
-          <Container>
-          <h1>Fluid jumbotron</h1>
-          <p>
-          This is a modified jumbotron that occupies the entire horizontal space of
-          its parent.
-          </p>
-           
 
-           
+            <div className="py-5 mt-5">
+            <Carousel>
+                <Carousel.Item>
+                  <img
+                    className="d-block w-100"
+                    src={img1}
+                    alt="First slide"
+                  />
+                  <Carousel.Caption>
+                    <h3 className="text-dark"></h3>
+                    <p className="text-dark"></p>
+                  </Carousel.Caption>
+                </Carousel.Item>
+                <Carousel.Item>
+                  <img
+                    className="d-block w-100"
+                    src={img2}
+                    alt="Third slide"
+                  />
 
-          
+                  <Carousel.Caption>
+                    <div className="pt-5 pl-5">
+                    <h3 className="text-dark"></h3>
+                    <p className="text-dark"></p>
+                    </div>
+                  </Carousel.Caption>
+                </Carousel.Item>
+                <Carousel.Item>
+                  <img
+                    className="d-block w-100"
+                    src={img3}
+                    alt="Third slide"
+                  />
 
-        </Container>
-        </Jumbotron>
+                  <Carousel.Caption>
+                    <h3 className="text-dark"></h3>
+                    <p className="text-dark"></p>
+                  </Carousel.Caption>
+                </Carousel.Item>
+              </Carousel>
+            </div> 
+
+
+          </div>
+
+          <div className="col-md-2">
+            
+          </div>
         </div>
-
-        
-
         <div className="py-5">
           <hr className ="pb-4" />
           <div className="text-center">
@@ -69,13 +85,14 @@ function Home() {
             <h1 className="text-primary text-bold pb-2">Decentralized Autonomous Organization</h1> 
             <br />
             <p className="text-mute">To explore, click on "DAO"</p>
-            <Link to={FormComp}>
-            <button className="btn btn-secondary btn-lg">Create DAO</button>
+            <Link to="/DAOForm">
+              <button className="btn btn-secondary btn-lg">Create DAO</button>
+            </Link>
             &nbsp;&nbsp;&nbsp;&nbsp;
+            <Link to="ProjectForm">
+              <button className="btn btn-primary btn-lg">Create Project Profile</button>
             </Link>
-            <Link to={'/FormComp'}>
-            <button className="btn btn-primary btn-lg">Create Project Profile</button>
-            </Link>
+
           </div>
         </div>
       </div>

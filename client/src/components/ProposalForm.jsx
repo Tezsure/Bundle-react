@@ -35,7 +35,7 @@ const ProposalForm = (props) => {
             const DaoContract = await tezos.wallet.at(
               "KT1MTcvzeGwpUMmQyAtBV2iwGdbJPWJHqXyw"
             );
-            const operation = await DaoContract.methods.addProject('1','1').send();
+            const operation = await DaoContract.methods.addProposal(5,value).send();
             
             await operation.confirmation();
             
@@ -79,7 +79,7 @@ const handleChange = (event) => {
             </Col>
             
             <Col xs="auto">
-                <Button type="submit" className="mb-2">
+                <Button type="submit" className="mb-2" onClick={sendProposal}>
                 Submit
                 </Button>
             </Col>
@@ -89,4 +89,3 @@ const handleChange = (event) => {
 }
 
 export default ProposalForm;
-

@@ -43,7 +43,7 @@ const addmember = async () => {
   const DaoContract = await tezos.wallet.at(
     "KT1MTcvzeGwpUMmQyAtBV2iwGdbJPWJHqXyw"
   );
-  const operation = await DaoContract.methods.addMember(1).send( {amount: 0.00002});
+  const operation = await DaoContract.methods.addMember(5).send( {amount: 0.00002});
   setaddinitiate('True');
   await operation.confirmation();
   

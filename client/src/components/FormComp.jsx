@@ -1,67 +1,94 @@
-import React, {useState} from "react";
-import { Link } from "react-router-dom";
-import Card from 'react-bootstrap/Card'
-import Button from 'react-bootstrap/Button'
-import Form from 'react-bootstrap/Form'
-import Col from 'react-bootstrap/Col'
-
-const all = require('it-all')
-
-
-const FormComp = () =>{
-
-//const[adddata] = useState('')
-//const[addinfo,setaddinfo] = useState('')
-  
-const ipfsclient = require('ipfs-http-client')
-const ipfs = ipfsclient({host: 'ipfs-infura-io',port: 5001,protocol:'https'})
+import React from "react";
+import DaoCards from './DaoCards'
+import sampleimage1 from '../molecular.png'
+import Carousel from 'react-bootstrap/Carousel'
+import img1 from '../assets/img/1st img.png'
+import img2 from '../assets/img/DAO.png'
+import img3 from '../assets/img/project.png'
+import {Link} from 'react-router-dom'
 
 
-const handleChange = (event) => {
-  //setadddata(event.target.data)
-  //setaddinfo(event.target.info)
-}
-const onSubmit = async(event) => {
-  event.preventDefault()
-  console.log("Submitting file to ipfs...")
-  const data = JSON.stringify({
-  //data: adddata,
-  //info: addinfo
-  })
-  const ipfsHash = ipfs.add(data)
-  const arr = await all (ipfsHash)
-  console.log(arr)
-  
-    
-}
+function FormComp() {
+  return (
+    <div className="home">
+      <div className="container">
+        <div className="row mt-5">
+          <div className="col-md-2">
 
-return (
-  <Form>
-  <Form.Group controlId="formBasicEmail">
-    <Form.Label>Email address</Form.Label>
-    <Form.Control type="email" placeholder="Enter email"
-    //data = {adddata}
-    onChange = {(event)=>handleChange(event)}
-    />
-    <Form.Text className="text-muted">
-      We'll never share your email with anyone else.
-    </Form.Text>
-  </Form.Group>
+          </div>
 
-  <Form.Group controlId="formBasicPassword">
-    <Form.Label>Password</Form.Label>
-    <Form.Control type="password" placeholder="Password" 
-    //info = {addinfo}
-    onChange = {(event)=>handleChange(event)}
-    />
-  </Form.Group>
-  <Form.Group controlId="formBasicCheckbox">
-    <Form.Check type="checkbox" label="Check me out" />
-  </Form.Group>
-  <Button type="button" onClick={onSubmit} class="btn btn-primary btn-lg btn-block">Submit</Button>
-</Form>
-);
+          <div className="col-md-8">
+            
 
+            <div className="py-5 mt-5">
+            <Carousel>
+                <Carousel.Item>
+                  <img
+                    className="d-block w-100"
+                    src={img1}
+                    alt="First slide"
+                  />
+                  <Carousel.Caption>
+                    <h3 className="text-dark"></h3>
+                    <p className="text-dark"></p>
+                  </Carousel.Caption>
+                </Carousel.Item>
+                <Carousel.Item>
+                  <img
+                    className="d-block w-100"
+                    src={img2}
+                    alt="Third slide"
+                  />
+
+                  <Carousel.Caption>
+                    <div className="pt-5 pl-5">
+                    <h3 className="text-dark"></h3>
+                    <p className="text-dark"></p>
+                    </div>
+                  </Carousel.Caption>
+                </Carousel.Item>
+                <Carousel.Item>
+                  <img
+                    className="d-block w-100"
+                    src={img3}
+                    alt="Third slide"
+                  />
+
+                  <Carousel.Caption>
+                    <h3 className="text-dark"></h3>
+                    <p className="text-dark"></p>
+                  </Carousel.Caption>
+                </Carousel.Item>
+              </Carousel>
+            </div> 
+
+
+          </div>
+
+          <div className="col-md-2">
+            
+          </div>
+        </div>
+        <div className="py-5">
+          <hr className ="pb-4" />
+          <div className="text-center">
+            <h2 className="">Become the Part of a new movement</h2>
+            <h1 className="text-primary text-bold pb-2">Decentralized Autonomous Organization</h1> 
+            <br />
+            <p className="text-mute">To explore, click on "DAO"</p>
+            <Link to="/DAOForm">
+              <button className="btn btn-secondary btn-lg">Create DAO</button>
+            </Link>
+            &nbsp;&nbsp;&nbsp;&nbsp;
+            <Link to="ProjectForm">
+              <button className="btn btn-primary btn-lg">Create Project Profile</button>
+            </Link>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default FormComp;

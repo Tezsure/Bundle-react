@@ -15,7 +15,7 @@ import { ThanosWallet } from '@thanos-wallet/dapp';
 
 const ProjectAdd = (props) => {
 
-const sendProposal = async () => {
+const addProject = async () => {
 
     
         try {
@@ -35,7 +35,7 @@ const sendProposal = async () => {
         const DaoContract = await tezos.wallet.at(
           "KT1MTcvzeGwpUMmQyAtBV2iwGdbJPWJHqXyw"
         );
-        const operation = await DaoContract.methods.addProject(1).send();
+        const operation = await DaoContract.methods.addProject("tz1d2p8WKg5jQkSWYmbuL9P4Ga8Ev2c1TSMe",5).send();
         
         await operation.confirmation();
         
@@ -52,7 +52,7 @@ const handleChange = (event) => {
     setValue(event.target.value)
 }
         return (
-            <Form onSubmit={sendProposal}>
+            <Form>
             <Form.Row className="align-items-center">
             <Col xs="auto">
                 <Form.Label htmlFor="inlineFormInput" srOnly>
@@ -79,7 +79,7 @@ const handleChange = (event) => {
             </Col>
             
             <Col xs="auto">
-                <Button type="submit" className="mb-2">
+                <Button type="submit" className="mb-2" onClick={addProject}>  
                 Submit
                 </Button>
             </Col>
@@ -89,4 +89,3 @@ const handleChange = (event) => {
 }
 
 export default ProjectAdd;
-
