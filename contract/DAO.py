@@ -1,6 +1,6 @@
 import smartpy as sp
 
-class FA12(sp.Contract):
+class DAO_Token(sp.Contract):
     def __init__(self, admin):
         self.init(paused = False, balances = sp.big_map(tvalue = sp.TRecord(approvals = sp.TMap(sp.TAddress, sp.TNat), balance = sp.TNat)), administrator = admin, totalSupply = 0)
 
@@ -45,21 +45,6 @@ class FA12(sp.Contract):
         self.addAddressIfNecessary(params.address)
         self.data.balances[params.address].balance += params.value
         self.data.totalSupply += params.value
-        sp.transfer(
-            sp.record(
-                address = params.address, 
-                value = params.value
-            ), 
-            sp.tez(0), 
-            sp.contract(
-                sp.TRecord(
-                    address = sp.TAddress, 
-                    value = sp.TNat
-                ),
-               self.data.administrator, 
-                "addTokens"
-            ).open_some()
-        )
 
     @sp.entry_point
     def burn(self, params):
@@ -73,351 +58,353 @@ class FA12(sp.Contract):
         sp.if ~ self.data.balances.contains(address):
             self.data.balances[address] = sp.record(balance = 0, approvals = {})
 
-    @sp.entry_point
+    @sp.view(sp.TNat)
     def getBalance(self, params):
-        sp.transfer(self.data.balances[params.arg.owner].balance, sp.tez(0), sp.contract(sp.TNat, params.target).open_some())
+        sp.result(self.data.balances[params].balance)
 
-    @sp.entry_point
+    @sp.view(sp.TNat)
     def getAllowance(self, params):
-        sp.transfer(self.data.balances[params.arg.owner].approvals[params.arg.spender], sp.tez(0), sp.contract(sp.TNat, params.target).open_some())
+        sp.result(self.data.balances[params.owner].approvals[params.spender])
 
-    @sp.entry_point
+    @sp.view(sp.TNat)
     def getTotalSupply(self, params):
-        sp.transfer(self.data.totalSupply, sp.tez(0), sp.contract(sp.TNat, params.target).open_some())
+        sp.set_type(params, sp.TUnit)
+        sp.result(self.data.totalSupply)
+
+    @sp.view(sp.TAddress)
+    def getAdministrator(self, params):
+        sp.set_type(params, sp.TUnit)
+        sp.result(self.data.administrator)
+        
+        
+class Project_token(sp.Contract):
+    def __init__(self, admin):
+        self.init(paused = False, balances = sp.big_map(tvalue = sp.TRecord(approvals = sp.TMap(sp.TAddress, sp.TNat), balance = sp.TNat)), administrator = admin, totalSupply = 0)
 
     @sp.entry_point
+    def transfer(self, params):
+        sp.set_type(params, sp.TRecord(from_ = sp.TAddress, to_ = sp.TAddress, value = sp.TNat).layout(("from_ as from", ("to_ as to", "value"))))
+        sp.verify((sp.sender == self.data.administrator) |
+            (~self.data.paused &
+                ((params.from_ == sp.sender) |
+                 (self.data.balances[params.from_].approvals[sp.sender] >= params.value))))
+        self.addAddressIfNecessary(params.to_)
+        sp.verify(self.data.balances[params.from_].balance >= params.value)
+        self.data.balances[params.from_].balance = sp.as_nat(self.data.balances[params.from_].balance - params.value)
+        self.data.balances[params.to_].balance += params.value
+        sp.if (params.from_ != sp.sender) & (self.data.administrator != sp.sender):
+            self.data.balances[params.from_].approvals[sp.sender] = sp.as_nat(self.data.balances[params.from_].approvals[sp.sender] - params.value)
+
+    @sp.entry_point
+    def approve(self, params):
+        sp.set_type(params, sp.TRecord(spender = sp.TAddress, value = sp.TNat).layout(("spender", "value")))
+        sp.verify(~self.data.paused)
+        alreadyApproved = self.data.balances[sp.sender].approvals.get(params.spender, 0)
+        sp.verify((alreadyApproved == 0) | (params.value == 0), "UnsafeAllowanceChange")
+        self.data.balances[sp.sender].approvals[params.spender] = params.value
+
+    @sp.entry_point
+    def setPause(self, params):
+        sp.set_type(params, sp.TBool)
+        sp.verify(sp.sender == self.data.administrator)
+        self.data.paused = params
+
+    @sp.entry_point
+    def setAdministrator(self, params):
+        sp.set_type(params, sp.TAddress)
+        sp.verify(sp.sender == self.data.administrator)
+        self.data.administrator = params
+
+    @sp.entry_point
+    def mint(self, params):
+        sp.set_type(params, sp.TRecord(address = sp.TAddress, value = sp.TNat))
+        sp.verify(sp.sender == self.data.administrator)
+        self.addAddressIfNecessary(params.address)
+        self.data.balances[params.address].balance += params.value
+        self.data.totalSupply += params.value
+
+    @sp.entry_point
+    def burn(self, params):
+        sp.set_type(params, sp.TRecord(address = sp.TAddress, value = sp.TNat))
+        sp.verify(sp.sender == self.data.administrator)
+        sp.verify(self.data.balances[params.address].balance >= params.value)
+        self.data.balances[params.address].balance = sp.as_nat(self.data.balances[params.address].balance - params.value)
+        self.data.totalSupply = sp.as_nat(self.data.totalSupply - params.value)
+
+    def addAddressIfNecessary(self, address):
+        sp.if ~ self.data.balances.contains(address):
+            self.data.balances[address] = sp.record(balance = 0, approvals = {})
+
+    @sp.view(sp.TNat)
+    def getBalance(self, params):
+        sp.result(self.data.balances[params].balance)
+
+    @sp.view(sp.TNat)
+    def getAllowance(self, params):
+        sp.result(self.data.balances[params.owner].approvals[params.spender])
+
+    @sp.view(sp.TNat)
+    def getTotalSupply(self, params):
+        sp.set_type(params, sp.TUnit)
+        sp.result(self.data.totalSupply)
+
+    @sp.view(sp.TAddress)
     def getAdministrator(self, params):
-        sp.transfer(self.data.administrator, sp.tez(0), sp.contract(sp.TAddress, params.target).open_some())
+        sp.set_type(params, sp.TUnit)
+        sp.result(self.data.administrator)        
         
         
-class DAOContract(sp.Contract):
-    def _init_(self,_Admin,members,amt):
-        self.init (
-            admin = _Admin,
-            mincontribution = amt,
-            tokencontract = sp.TAddress,
-            totalmembers = members,
-            allocprop = sp.big_map(tkey = sp.TNat, 
-                                            tvalue = 
-                                                sp.TRecord(
-                                                    creator = sp.TAddress,
-                                                    amount  = sp.TNat,
-                                                    votesfor   = sp.TNat,
-                                                    votesagainst = sp.TNat,
-                                                    voteCount = sp.TNat,
-                                                    allocexpiry  = sp.TTimestamp,
-                                                    accepted = sp.TBool,
-                                                    voteexpiry = sp.TTimestamp,
-                                                    diff = sp.TInt
-                                                    
-                                                )
-                                    ),
-            membermap = sp.big_map(tkey = sp.TAddress,
-                            tvalue = sp.TBool),                                
-            addmemberdata = sp.big_map(tkey = sp.TNat,
-                                   tvalue = sp.record(
-                                       address = sp.TAddress,
-                                       balance = sp.TNat,
-                                       status = sp.TBool
-                                       )
-                                    ),
-            addmemberdataid = sp.nat(0),
-            membermapid = sp.nat(0),
-            membercount = sp.nat(0),
-            allocpropid = sp.nat(0),
-            indispute = sp.TBool,
-            finalproject = sp.TAddress,
-            projectdata = sp.big_map(tkey = sp.TAddress,
-                                    tvalue = sp.TRecord(
-                                funded = sp.TBool,
-                                votesfor   = sp.TNat,
-                                votesagainst = sp.TNat,
-                                voteCount = sp.TNat,
-                                expiry  = sp.TTimestamp,
-                                diff = sp.TInt)
-                                ),
-                holders = sp.big_map(  # Holder address to balance, approvals map
+class Tijoricontract(sp.Contract):
+    def __init__(self,tijoriadmin):
+        self.init(
+            admin=tijoriadmin,
+            daotoken=sp.none,
+            projecttoken=sp.none,
+            DAO_id=0,
+            project_id=0,
+            proposal_id=0,
+            addDAOdata = sp.big_map( 
+                tkey = sp.TInt, 
+                tvalue = sp.TRecord(
+                    serialno=sp.TInt,
+                    admin=sp.TAddress,
+                    strength= sp.TInt,
+                    maxtoken=sp.TInt,
+                    min_contribution=sp.TMutez,
+                    winproposalid=sp.TInt,
+                    winprojectid=sp.TInt,
+                    maxmember=sp.TInt,
+                    disputevotecount=sp.TInt,
+                    proposedproposalid=sp.TInt,
+                    proposedprojectid=sp.TInt,
+                    disputestatus=sp.TInt
+                )
+            ),
+            addmemberdata = sp.big_map( 
                 tkey = sp.TAddress, 
                 tvalue = sp.TRecord(
-                    approvals = sp.TMap(sp.TAddress, sp.TNat),
-                    balance = sp.TNat
+                    tokenbalance=sp.TInt,
+                    contribution=sp.TMutez,
+                    DAO= sp.TInt
                 )
-            ) 
-                                
-            
-        )
-        
-        
-    """@sp.entry_point
-    def addTokens(self, params):
-        sp.set_type(
-            params,
-            sp.TRecord(
-                address = sp.TAddress,
-                value = sp.TNat
+            ),
+            addprojectdata = sp.big_map( 
+                tkey = sp.TInt, 
+                tvalue = sp.TRecord(
+                    serialno=sp.TInt,
+                    proowner=sp.TAddress,
+                    vote = sp.TInt,
+                    DAO = sp.TInt
+                )
+            ),
+            addpropoasldata = sp.big_map(
+                tkey = sp.TInt, 
+                tvalue = sp.TRecord(
+                    proposer=sp.TAddress,
+                    fund=sp.TInt,
+                    serialno=sp.TInt,
+                    vote = sp.TInt,
+                    DAO = sp.TInt
+                )
             )
-        ).layout(
-            (
-                "address",
-                "value"
-            )    
-        )
-        sp.verify(sp.sender == self.data.token.open_some())
-        #sp.if ~self.data.holders.contains(params.address):
-            #self.data.holders[params.address] = sp.record(approvals = {}, balance = 0)
-        self.data.holders[params.address].balance += params.value"""
-        
-       
-    def settokencontract(self,token):
-        sp.set_type(token, sp.TAddress)
-        sp.verify(sp.sender == self.data.admin)
-        #sp.verify(~self.data.tokencontract.is_some())
-        self.data.tokencontract = token
-        
-    @sp.entry_point    
-    def intialize (self,token):
-        
-        sp.verify(sp.sender == self.data.admin)
-        
-        self.settokencontract(token)
-        
-        tokenDAO = sp.contract(sp.TRecord(address = sp.TAddress, value = sp.TNat),
-                            self.data.tokencontract, entry_point = "mint").open_some()
-        
-        sp.transfer(sp.record(address = self.data.admin, value = 100), sp.tez(0), tokenDAO)                    
-    
-    def addMembers(self,params):
-        sp.verify(sp.sender == self.data.admin)
-        sp.verify(self.data.membercount <= totalmembers)
-        memberaddress = self.data.addmemberdata[params.id].address
-        fa = sp.contract(sp.TRecord(address = sp.TAddress, value = sp.TNat),
-                            self.data.tokencontract, entry_point = "mint").open_some()
-        sp.transfer(sp.record(address = memberaddress, value = 100), sp.tez(0), fa)
-        self.data.membermap[params.id] = True
-        self.data.membercount+=1
-    
+            )
             
-            
-            
-    def addrequest(self, amt):
-        sp.if amt == self.data.mincontribution:
-         sp.send(self.data.admin, amt)
-         addmemberdata[self.data.addmemberdataid] = sp.sender
-         self.data.addmemberdataid += 1
-        
-    
-    
-    
-       
-
-    def allocationrequest(self,params):
-        sp.verify(self.data.membermap[sp.sender] == True)
-        self.data.allocprop[self.data.allocpropid] = sp.record(
-            
-                                                    creator = params.address,
-                                                    amount  = params.amt,
-                                                    votesfor   = sp.nat(0),
-                                                    voteagainst = sp.nat(0),
-                                                    voteCount = sp.nat(0),
-                                                    allocexpiry  = sp.TTimestamp,
-                                                    accepted = False,
-                                                    voteexpiry = sp.TTimestamp,
-                                                    diff = sp.nat(0)
-                                                    )
-                                                    
-        self.data.allocpropid += 1
-    
-    
-    
-        
-    """QV implementation first go"""
-    def vote(self, params):
-        sp.verify(self.data.membermap[sp.sender] == True)
-        burn = sp.nat(0)
-        propvote = self.data.allocprop[params.id]
-        sp.verify(propvote.allocexpiry > sp.now)
-        sp.verify(propvote.voteexpiry > sp.now)
-        sp.if params.infavor == True:
-            propvote.votesfor += params.value
-            propvote.voteCount +=params.value
-            burn = params.value * params.value
-            burnfunc = sp.contract(sp.TRecord(address = sp.TAddress, value = sp.TNat),
-                            self.data.tokencontract, entry_point = "burn").open_some()
-            sp.transfer(sp.record(address = sp.sender, value = burn), sp.tez(0), burnfunc)
-            self.data.holder[sp.sender].balance-=burn
-        sp.if params.infavor == False:
-            propvote.voteagainst += params.value
-            propvote.voteCount +=params.value
-            burn = params.value * params.value
-            burnfunc = sp.contract(sp.TRecord(address = sp.TAddress, value = sp.TNat),
-                            self.data.tokencontract, entry_point = "burn").open_some()
-            sp.transfer(sp.record(address = sp.sender, value = burn), sp.tez(0), burnfunc)
-            self.data.holder[sp.sender].balance-=burn
-        
-        propvote.diff = propvote.votesfor - prop.voteagainst
-        
-        
-    def finaliseallocation(self,params):
-        sp.verify(self.data.membermap[sp.sender] == True)
-        sp.for x in self.data.allocpropid:
-            k = sp.nat(0)
-            sp.verify(self.data.allocprop[x].accepted == False)
-            sp.verify(self.data.allocprop[x].allocexpiry > sp.now)
-            sp.verify(self.data.allocprop[x].voteexpiry < sp.now)
-            aldiff = self.data.allocprop[x].diff
-            sp.if aldiff > k:
-                k = aldiff
-            
-        self.data.allocprop[k].accepted = True
-        
-        
-    def projectvote(self,params):
-         projectd = projectdata[params.address]
-         sp.verify(projectd.funded == False)
-         #sp.verify(sp.now < projectd.expiry)
-         sp.if params.favour == True:
-             projectd.votesfor +=1
-         sp.if params.against == False:
-             projectd.votesagainst += 1
-         projectd.diff = projectd.votesfor - projectd.votesagainst
-    
-     
-    def finaliseproject(self,params):
-        sp.verify(self.data.membermap[sp.sender] == True)
-        self.data.finalproject = projectdata[params.address]
-        sp.send(self.data.finalproject,)
-        
-    def dispute(self,params):
-        sp.verify(self.data.indispute == False)
-        sp.if projectdata[params.address].diff > self.data.finalproject:
-            self.data.finalproject = projectdata[params.address]
-        
-    
-
-class Viewer(sp.Contract):
-    def __init__(self, t):
-        self.init(last = sp.none)
-        self.init_type(sp.TRecord(last = sp.TOption(t)))
     @sp.entry_point
-    def target(self, params):
-        self.data.last = sp.some(params)
-
+    def set_daotoken(self,Token):
+        sp.set_type(Token, sp.TAddress)
+        sp.verify(sp.sender==self.data.admin)
+        sp.verify(~self.data.daotoken.is_some())
+        self.data.daotoken=sp.some(Token)
+        
+    @sp.entry_point
+    def set_projecttoken(self,Token):
+        sp.set_type(Token, sp.TAddress)
+        sp.verify(sp.sender == self.data.admin)
+        sp.verify(~self.data.projecttoken.is_some())
+        self.data.projecttoken = sp.some(Token)
+        
+        
+    @sp.entry_point
+    def addDAO(self,stre,mincontribution,mtoken):
+        sp.set_type(mincontribution, sp.TMutez)
+        mincontribution=mincontribution
+        self.data.DAO_id +=1
+        keyindex=self.data.DAO_id
+        self.data.addDAOdata[keyindex] = sp.record(admin=sp.sender,strength=stre,min_contribution=mincontribution,serialno=keyindex,winproposalid=-1,winprojectid=-1,maxtoken=mtoken,proposedproposalid=-1,proposedprojectid=-1,disputevotecount=0,maxmember=0,disputestatus=0)
+        
+    @sp.entry_point
+    def addMember(self,dao):
+        mem_address = sp.sender
+        sp.if ~self.data.addmemberdata.contains(mem_address):
+            sp.if self.data.addDAOdata.contains(dao):
+                sp.verify(sp.amount == self.data.addDAOdata[dao].min_contribution)
+                self.data.addmemberdata[mem_address]=sp.record(DAO=dao,contribution=sp.amount,tokenbalance=self.data.addDAOdata[dao].maxtoken)
+                self.data.addDAOdata[dao].maxmember+=1
+    
+    @sp.entry_point
+    def addProject(self,dao,adminaddress):
+        sp.set_type(adminaddress, sp.TAddress)
+        adminaddress=adminaddress
+        sp.if self.data.addDAOdata.contains(dao):
+            self.data.project_id +=1
+            keyindex=self.data.project_id
+            self.data.addprojectdata[keyindex] = sp.record(proowner=adminaddress,DAO=dao,serialno=keyindex,vote=0)
+        
+            
+        
+    @sp.entry_point
+    def addProposal(self,dao,fundingamt):
+        mem_address = sp.sender
+        sp.if self.data.addDAOdata.contains(dao):
+            sp.if self.data.addmemberdata.contains(mem_address):
+                self.data.proposal_id+=1
+                keyindex=self.data.proposal_id
+                self.data.addpropoasldata[keyindex]=sp.record(proposer=mem_address,fund=fundingamt,serialno=keyindex,vote=0,DAO=dao)
+                
+                
+    @sp.entry_point
+    def voteproject(self,castedvotes,projectid):
+        mem_address = sp.sender
+        sp.if self.data.addmemberdata.contains(mem_address):
+            sp.verify(self.data.addmemberdata[mem_address].DAO== self.data.addprojectdata[projectid].DAO)
+            burntokens=castedvotes*castedvotes
+            sp.verify(burntokens <= self.data.addmemberdata[mem_address].tokenbalance)
+            self.data.addprojectdata[projectid].vote+=castedvotes
+            self.data.addmemberdata[mem_address].tokenbalance-=burntokens
+            
+            
+            
+    @sp.entry_point
+    def voteproposal(self,castedvotes,proposalid):
+        mem_address = sp.sender
+        sp.if self.data.addmemberdata.contains(mem_address):
+            sp.verify(self.data.addmemberdata[mem_address].DAO== self.data.addpropoasldata[proposalid].DAO)
+            burntokens=castedvotes*castedvotes
+            sp.verify(burntokens <= self.data.addmemberdata[mem_address].tokenbalance)
+            self.data.addpropoasldata[proposalid].vote+=castedvotes
+            self.data.addmemberdata[mem_address].tokenbalance-=burntokens    
+            
+            
+            
+    
+    @sp.entry_point
+    def proposeresult(self,projectid,proposalid):
+        mem_address=sp.sender
+        daoid=self.data.addprojectdata[projectid].DAO
+        sp.if self.data.addmemberdata.contains(mem_address):
+           sp.verify(mem_address== self.data.addDAOdata[daoid].admin)
+           sp.verify(self.data.addprojectdata[projectid].DAO== self.data.addpropoasldata[proposalid].DAO)
+           self.data.addDAOdata[daoid].proposedprojectid=projectid
+           self.data.addDAOdata[daoid].proposedproposalid=proposalid
+           
+           
+           
+    @sp.entry_point
+    def disputeresult(self,dao,vote):
+        mem_address=sp.sender
+        sp.if self.data.addmemberdata.contains(mem_address):
+            self.data.addDAOdata[dao].disputevotecount+=vote
+           
+    
+    @sp.entry_point
+    def finaliseresult(self,projectid,proposalid):
+        mem_address=sp.sender
+        daoid=self.data.addprojectdata[projectid].DAO
+        sp.if self.data.addmemberdata.contains(mem_address):
+           sp.verify(mem_address== self.data.addDAOdata[daoid].admin)
+           sp.verify(self.data.addprojectdata[projectid].DAO== self.data.addpropoasldata[proposalid].DAO)
+           #sp.verify(self.data.addDAOdata[daoid].disputevotecount< (self.data.addDAOdata[daoid].maxmember)//2)
+           self.data.addDAOdata[daoid].winprojectid=self.data.addDAOdata[daoid].proposedprojectid
+           self.data.addDAOdata[daoid].winproposalid=self.data.addDAOdata[daoid].proposedproposalid
+           self.data.addDAOdata[daoid].disputestatus=1  
+        
+        
+    @sp.entry_point
+    def rewardfunds(self,dao):
+        sp.set_type(dao,sp.TInt)
+        sp.verify(self.data.addDAOdata[dao].disputestatus==1)
+        x=self.data.addDAOdata[dao].winprojectid
+        y=self.data.addDAOdata[dao].winproposalid
+        sendadd=self.data.addprojectdata[x].proowner
+        sendfunds=self.data.addpropoasldata[x].fund
+        #sp.send(sendadd,sendfunds)
+        
+        
+    @sp.entry_point
+    def regaintez(self,daoid):
+        mem_address=sp.sender
+        sp.verify(self.data.addDAOdata[daoid].disputestatus==0)
+        sp.verify(self.data.addmemberdata[mem_address].DAO== daoid)
+        sendfunds=self.data.addmemberdata[mem_address].contribution
+        #sp.send(sp.address,contribution)
+        
+        
+        
 if "templates" not in __name__:
-    """@sp.add_test(name = "FA12")
-    def test():
-
-        scenario = sp.test_scenario()
-    
-        scenario.h1("FA1.2 template - Fungible assets")
-
-        scenario.table_of_contents()
-
-        # sp.test_account generates ED25519 key-pairs deterministically:
-        admin = sp.test_account("Administrator")
-        alice = sp.test_account("Alice")
-        bob   = sp.test_account("Robert")
-
-        # Let's display the accounts:
-        scenario.h1("Accounts")
-        scenario.show([admin, alice, bob])
-
-        scenario.h1("Contract")
-        c1 = FA12(admin.address)
-
-        scenario.h1("Entry points")
-        scenario += c1
-        scenario.h2("Admin mints a few coins")
-        scenario += c1.mint(address = alice.address, value = 12).run(sender = admin)
-        scenario += c1.mint(address = alice.address, value = 3).run(sender = admin)
-        scenario += c1.mint(address = alice.address, value = 3).run(sender = admin)
-        scenario.h2("Alice transfers to Bob")
-        scenario += c1.transfer(from_ = alice.address, to_ = bob.address, value = 4).run(sender = alice)
-        scenario.verify(c1.data.balances[alice.address].balance == 14)
-        scenario.h2("Bob tries to transfer from Alice but he doesn't have her approval")
-        scenario += c1.transfer(from_ = alice.address, to_ = bob.address, value = 4).run(sender = bob, valid = False)
-        scenario.h2("Alice approves Bob and Bob transfers")
-        scenario += c1.approve(spender = bob.address, value = 5).run(sender = alice)
-        scenario += c1.transfer(from_ = alice.address, to_ = bob.address, value = 4).run(sender = bob)
-        scenario.h2("Bob tries to over-transfer from Alice")
-        scenario += c1.transfer(from_ = alice.address, to_ = bob.address, value = 4).run(sender = bob, valid = False)
-        scenario.h2("Admin burns Bob token")
-        scenario += c1.burn(address = bob.address, value = 1).run(sender = admin)
-        scenario.verify(c1.data.balances[alice.address].balance == 10)
-        scenario.h2("Alice tries to burn Bob token")
-        scenario += c1.burn(address = bob.address, value = 1).run(sender = alice, valid = False)
-        scenario.h2("Admin pauses the contract and Alice cannot transfer anymore")
-        scenario += c1.setPause(True).run(sender = admin)
-        scenario += c1.transfer(from_ = alice.address, to_ = bob.address, value = 4).run(sender = alice, valid = False)
-        scenario.verify(c1.data.balances[alice.address].balance == 10)
-        scenario.h2("Admin transfers while on pause")
-        scenario += c1.transfer(from_ = alice.address, to_ = bob.address, value = 1).run(sender = admin)
-        scenario.h2("Admin unpauses the contract and transferts are allowed")
-        scenario += c1.setPause(False).run(sender = admin)
-        scenario.verify(c1.data.balances[alice.address].balance == 9)
-        scenario += c1.transfer(from_ = alice.address, to_ = bob.address, value = 1).run(sender = alice)
-
-        scenario.verify(c1.data.totalSupply == 17)
-        scenario.verify(c1.data.balances[alice.address].balance == 8)
-        scenario.verify(c1.data.balances[bob.address].balance == 9)
-
-        scenario.h1("Views")
-        scenario.h2("Balance")
-        view_balance = Viewer(sp.TNat)
-        scenario += view_balance
-        scenario += c1.getBalance(arg = sp.record(owner = alice.address), target = view_balance.address)
-        scenario.verify_equal(view_balance.data.last, sp.some(8))
-
-        scenario.h2("Administrator")
-        view_administrator = Viewer(sp.TAddress)
-        scenario += view_administrator
-        scenario += c1.getAdministrator(target = view_administrator.address)
-        scenario.verify_equal(view_administrator.data.last, sp.some(admin.address))
-
-        scenario.h2("Total Supply")
-        view_totalSupply = Viewer(sp.TNat)
-        scenario += view_totalSupply
-        scenario += c1.getTotalSupply(target = view_totalSupply.address)
-        scenario.verify_equal(view_totalSuppy.data.last, sp.some(17))
-
-        scenario.h2("Allowance")
-        view_allowance = Viewer(sp.TNat)
-        scenario += view_allowance
-        scenario += c1.getAllowance(arg = sp.record(owner = alice.address, spender = bob.address), target = view_allowance.address)
-        scenario.verify_equal(view_allowance.data.last, sp.some(1))
-       """ 
-        
-        
-        
-    @sp.add_test(name = "DAOContract")
-    def test():    
-        # DAO Contract testing#
-        
-        scenario = sp.test_scenario()
-        scenario.h1("Accounts")
-        #scenarionew.show([newadmin, newalice, newbob])
-        
-        admin = sp.test_account("Administrator")
-        alice = sp.test_account("Alice")
-        bob   = sp.test_account("Robert")
-        
-        scenario.show([admin, alice, bob])
-    
-        
-        daoContract = DAOContract(_Admin=admin.address, members=5, amt=10)
-        fa12 = FA12(daoContract.address)
-        scenario.show([daoContract.address])
-        scenario.show([fa12.address])
-        scenario +=daoContract
-        
-        #scenario.h1("Initialize")
-        #scenario += daoContract.intialize(fa12.address).run(sender = admin)
-        
-        
-        scenario.h2("AddRequest")
-        scenario += daoContract.addrequest(amt=10).run(sender=alice)
-        
-        
-        
+    @sp.add_test(name="Test_contract")
+    def contracttesting():
+        scenario=sp.test_scenario()
+        admin = sp.test_account('Administrator')
+        dhruv = sp.test_account('Dhruv')
+        aryan = sp.test_account('Aryan')
+        devansh = sp.test_account('Devansh')  
+        komal = sp.test_account('Komal')
+        shikhar = sp.test_account('Shikhar')
+        tijoric=Tijoricontract(admin.address)
+        dtokenc=DAO_Token(tijoric.address)
+        ptokenc=Project_token(tijoric.address)
+        scenario.h1("TIJORI Contract testing")
+        scenario.h2("List of test accounts")
+        scenario.show([admin,komal])
+        scenario.h2("list of contracts")
+        scenario.h3("FA1.2 token(DAO Token)")
+        scenario.show([dtokenc.address])
+        scenario.h3("Tijori contract")
+        scenario.show([tijoric.address])
+        scenario.h3("FA1.2 token(Project Token)")
+        scenario.show([ptokenc.address])
+        scenario += tijoric
+        scenario.h3("Tijori Initialized")
+        scenario.h2('Set DAO token')
+        scenario += tijoric.set_daotoken(dtokenc.address).run(sender = admin)
+        scenario.h3("Set  DAO token succesful")
+        scenario.h2('Set Project token')
+        scenario += tijoric.set_projecttoken(ptokenc.address).run(sender = admin)
+        scenario.h3("Set Project token succesful")
+        scenario.h2("Add DAO")
+        scenario+=tijoric.addDAO(stre=10,mincontribution=sp.mutez(100),mtoken=100).run(sender=komal)
+        scenario.h3("Add DAO successful")
+        scenario.h2("Add Member")
+        scenario+=tijoric.addMember(1).run(sender=aryan,amount=sp.mutez(10),valid=False)
+        scenario+=tijoric.addMember(1).run(sender=komal,amount=sp.mutez(100))
+        scenario.h3("Add member succesful")
+        scenario.h2("Add project")
+        scenario+=tijoric.addProject(dao=1,adminaddress=devansh.address).run(sender=devansh)
+        scenario.h3("Add project successful")
+        scenario.h2("Add proposal")
+        scenario+=tijoric.addProposal(dao=1,fundingamt=1000).run(sender=komal)
+        scenario.h2("Project voting")
+        scenario+=tijoric.voteproject(castedvotes=5,projectid=1).run(sender=komal)
+        scenario.h3("Project voting successful")
+        scenario+=tijoric.addProposal(dao=1,fundingamt=1000).run(sender=komal)
+        scenario.h2("Proposal voting")
+        scenario+=tijoric.voteproposal(castedvotes=8,proposalid=1).run(sender=komal)
+        scenario.h3("Proposal voting successful")
+        scenario.h2("Propose results")
+        scenario+=tijoric.proposeresult(projectid=1,proposalid=1).run(sender=komal)
+        scenario.h3("Propose result succesful")
+        scenario.h2("dispute results")
+        scenario+=tijoric.disputeresult(dao=1,vote=1).run(sender=komal)
+        scenario.h3("dispute resut succesful")
+        scenario.h2("Finalise results")
+        scenario+=tijoric.finaliseresult(projectid=1,proposalid=1).run(sender=komal)
+        scenario.h3("Finalise result succesful")
+        # scenario.h2("Reward funds")
+        # scenario+=tijoric.rewardfunds(dao=1).run(sender=komal)
+        # scenario.h3("reward funds successful")
+        # scenario.h2("Regain Tezos")
+        # scenario+=tijoric.rewardfunds(daoid=1).run(sender=komal)
+        # scenario.h3("regain tezos successful")
         
         
         
