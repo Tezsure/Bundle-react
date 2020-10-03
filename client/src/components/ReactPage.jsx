@@ -16,7 +16,13 @@ import ProposalForm from './ProposalForm';
 import ProposalVote from './ProposalVote';
 import ProjectVote from './ProjectVote';
 import ProjectAdd from './ProjectAdd';
-
+import AddDAO from "./AddDAO";
+import ProposeResults from "./ProposeResults";
+import DisputeResults from "./DisputeResults"
+import FinaliseResults from "./FinaliseResults";
+import RewardFunds from "./RewardFunds";
+import RegainFunds from "./RegainFunds";
+import GainToken from "./GainToken";
 const ReactPage = (props) => {
 
 // make sure to add daoid as a json object in ipfs so as to reuse it to add members
@@ -41,9 +47,9 @@ const addmember = async () => {
   const accountPkh = await tezos.wallet.pkh();
   const accountBalance = await tezos.tz.getBalance(accountPkh);
   const DaoContract = await tezos.wallet.at(
-    "KT1MTcvzeGwpUMmQyAtBV2iwGdbJPWJHqXyw"
+    "KT1Wv17QNADUyQRbiVrp5TquHKFvoEyG7wV8"
   );
-  const operation = await DaoContract.methods.addMember(5).send( {amount: 0.00002});
+  const operation = await DaoContract.methods.addMember(2).send( {amount: 0.0001});
   setaddinitiate('True');
   await operation.confirmation();
   
@@ -105,9 +111,16 @@ const addmember = async () => {
                         Contributers List:-
                     </div>
                   </Tab>
-                  <Tab eventKey="Round Allocation" title="Round Allocation">
+                  <Tab eventKey="Add DAO" title="Add DAO">
                     <div className="container container pt-5 pl-5">
-                      Fill in the Market and Amount that you want to allocate for the first round of funding.
+                        ADD DAO from here
+                        <AddDAO/>
+
+                    </div>
+                  </Tab>
+                  <Tab eventKey="Add proposal" title="Add proposal">
+                    <div className="container container pt-5 pl-5">
+                      Fill in the Market and category that you want to allocate for the first round of funding.
                         <ProposalForm/>
                     </div>
                   </Tab>
@@ -126,9 +139,34 @@ const addmember = async () => {
                         <ProposalVote/>
                     </div>
                   </Tab>
-                  <Tab eventKey="Deploy" title="Deploy">
+                  <Tab eventKey="Propose Results" title="Propose">
                     <div className="container container pt-5 pl-5">
-                        <ProposalVote/>
+                        <ProposeResults/>
+                    </div>
+                  </Tab>
+                  <Tab eventKey="Dispute Results" title="Dispute">
+                    <div className="container container pt-5 pl-5">
+                        <DisputeResults/>
+                    </div>
+                  </Tab>
+                  <Tab eventKey="Finalise" title="Finalise Results">
+                    <div className="container container pt-5 pl-5">
+                        <FinaliseResults/>
+                    </div>
+                  </Tab>
+                  <Tab eventKey="Reward Funds" title="Reward Funds">
+                    <div className="container container pt-5 pl-5">
+                        <RewardFunds/>
+                    </div>
+                  </Tab>
+                  <Tab eventKey="Regain Tez" title="Regain XTZ">
+                    <div className="container container pt-5 pl-5">
+                        <RegainFunds/>
+                    </div>
+                  </Tab>
+                  <Tab eventKey="Gain" title="Gain Tokens">
+                    <div className="container container pt-5 pl-5">
+                        <GainToken/>
                     </div>
                   </Tab>
                 </Tabs>                  

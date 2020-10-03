@@ -33,9 +33,9 @@ await wallet.connect("carthagenet");
 const tezos = wallet.toTezos();
 const accountPkh = await tezos.wallet.pkh();
 const accountBalance = await tezos.tz.getBalance(accountPkh);
-const DaoContract = await tezos.wallet.at("KT1MTcvzeGwpUMmQyAtBV2iwGdbJPWJHqXyw");
+const DaoContract = await tezos.wallet.at("KT1Wv17QNADUyQRbiVrp5TquHKFvoEyG7wV8");
 //need to look into dynamic index change
-const operation = await DaoContract.methods.voteproject(value,5).send();
+const operation = await DaoContract.methods.voteproject(5,2).send();
 
 await operation.confirmation();
 

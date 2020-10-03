@@ -41,8 +41,12 @@
     "bs58check": "^2.1.2",
     "chalk": "^4.1.0",
     "conseiljs": "0.4.3",
+    "ipfs-http-client": "^47.0.1",
     "libsodium-wrappers-sumo": "^0.7.6",
+    "react": "^16.13.1",
     "react-bootstrap": "^1.3.0",
-    "react-router-dom": "^5.2.0"
+    "react-dom": "^16.13.1",
+    "react-router-dom": "^5.2.0",
+    "react-scripts": "^3.4.3"
   }
 }

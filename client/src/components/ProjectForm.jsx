@@ -6,8 +6,8 @@ import Card from 'react-bootstrap/Card'
 const ProjectForm = () => {
     
     const all = require("it-all");
-    const [adddata, setadddata] = useState("");
-    const [addinfo, setaddinfo] = useState("");
+    //const [adddata, setadddata] = useState("");
+    //const [addinfo, setaddinfo] = useState("");
 
 const ipfsclient = require("ipfs-http-client");
   const ipfs = ipfsclient({

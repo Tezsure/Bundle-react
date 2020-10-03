@@ -13,9 +13,11 @@ import { ThanosWallet } from '@thanos-wallet/dapp';
 
 
 
-const ProjectAdd = (props) => {
+const ProposeResults = (props) => {
+    const[value,setValue] = useState(0)
+    const[index,setIndex] = useState(0)
 
-const addProject = async () => {
+    const proposalVote = async () => {
 
     
         try {
@@ -35,7 +37,7 @@ const addProject = async () => {
         const DaoContract = await tezos.wallet.at(
           "KT1Wv17QNADUyQRbiVrp5TquHKFvoEyG7wV8"
         );
-        const operation = await DaoContract.methods.addProject("tz1d2p8WKg5jQkSWYmbuL9P4Ga8Ev2c1TSMe",1,2).send();
+        const operation = await DaoContract.methods.proposeresult(2,2).send();
         
         await operation.confirmation();
         
@@ -44,42 +46,44 @@ const addProject = async () => {
     
 
 }
+
     
-//State for amount in proposal
-const[value,setValue] = useState(0)
+
+
 
 const handleChange = (event) => {
     setValue(event.target.value)
+
 }
         return (
-            <Form>
+            <Form onSubmit={proposalVote}>
             <Form.Row className="align-items-center">
             <Col xs="auto">
                 <Form.Label htmlFor="inlineFormInput" srOnly>
-                Amount
+                Votes
                 </Form.Label>
                 <Form.Control
                 className="mb-2"
                 id="inlineFormInput"
-                placeholder="Amount"
+                placeholder="Index"
                 value = {value}
                 onChange = {(event)=>handleChange(event)}
                 />
             </Col>
             <Col xs="auto">
                 <Form.Label htmlFor="inlineFormInputGroup" srOnly>
-                Market
+                Index
                 </Form.Label>
                 <InputGroup className="mb-2">
                 <InputGroup.Prepend>
-                    <InputGroup.Text>@</InputGroup.Text>
+                    <InputGroup.Text></InputGroup.Text>
                 </InputGroup.Prepend>
-                <FormControl id="inlineFormInputGroup" placeholder="Market" />
+                <FormControl id="inlineFormInputGroup" placeholder="Votes" />
                 </InputGroup>
             </Col>
             
             <Col xs="auto">
-                <Button type="submit" className="mb-2" onClick={addProject}>  
+                <Button type="submit" className="mb-2">
                 Submit
                 </Button>
             </Col>
@@ -88,4 +92,4 @@ const handleChange = (event) => {
         );
 }
 
-export default ProjectAdd;
+export default ProposeResults;

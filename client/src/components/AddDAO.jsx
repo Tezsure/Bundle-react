@@ -13,37 +13,37 @@ import { ThanosWallet } from '@thanos-wallet/dapp';
 
 
 
-const ProjectAdd = (props) => {
-
-const addProject = async () => {
+const AddDAO = (props) => {
 
     
-        try {
-          const available = await ThanosWallet.isAvailable();
-          if (!available) {
-            throw new Error('Thanos Wallet not installed');
-          }
-        } catch (err) {
-          console.log(err);
+
+        const sendProposal = async () => {
+            try {
+              const available = await ThanosWallet.isAvailable();
+              if (!available) {
+                throw new Error('Thanos Wallet not installed');
+              }
+            } catch (err) {
+              console.log(err);
+            }
+            const wallet = new ThanosWallet('Tijori');
+            await wallet.connect("carthagenet");
+            
+            const tezos = wallet.toTezos();
+            const accountPkh = await tezos.wallet.pkh();
+            const accountBalance = await tezos.tz.getBalance(accountPkh);
+            const DaoContract = await tezos.wallet.at(
+              "KT1Wv17QNADUyQRbiVrp5TquHKFvoEyG7wV8"
+            );
+            const operation = await DaoContract.methods.addDAO("1601741726",100,100,10,"1601734526","1601727326").send({amount: 0.0001});
+            
+            await operation.confirmation();
+            
+            const addmemberValue = await DaoContract.storage();
+            console.info(`Member: ${addmemberValue}`);
         }
-        const wallet = new ThanosWallet('Tijori');
-        await wallet.connect("carthagenet");
-        
-        const tezos = wallet.toTezos();
-        const accountPkh = await tezos.wallet.pkh();
-        const accountBalance = await tezos.tz.getBalance(accountPkh);
-        const DaoContract = await tezos.wallet.at(
-          "KT1Wv17QNADUyQRbiVrp5TquHKFvoEyG7wV8"
-        );
-        const operation = await DaoContract.methods.addProject("tz1d2p8WKg5jQkSWYmbuL9P4Ga8Ev2c1TSMe",1,2).send();
-        
-        await operation.confirmation();
-        
-        const addmemberValue = await DaoContract.storage();
-        console.info(`Member: ${addmemberValue}`);
     
-
-}
+    
     
 //State for amount in proposal
 const[value,setValue] = useState(0)
@@ -52,7 +52,7 @@ const handleChange = (event) => {
     setValue(event.target.value)
 }
         return (
-            <Form>
+            <Form onSubmit={sendProposal}>
             <Form.Row className="align-items-center">
             <Col xs="auto">
                 <Form.Label htmlFor="inlineFormInput" srOnly>
@@ -79,7 +79,7 @@ const handleChange = (event) => {
             </Col>
             
             <Col xs="auto">
-                <Button type="submit" className="mb-2" onClick={addProject}>  
+                <Button type="submit" className="mb-2" onClick={sendProposal}>
                 Submit
                 </Button>
             </Col>
@@ -88,4 +88,4 @@ const handleChange = (event) => {
         );
 }
 
-export default ProjectAdd;
+export default AddDAO;
