@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { useParams } from 'react-router-dom';
 import Card from 'react-bootstrap/Card'
 import Button from 'react-bootstrap/Button'
+import Nav from 'react-bootstrap/Nav'
+
 import Image from 'react-bootstrap/Image'
 import Tabs from 'react-bootstrap/Tabs'
 import Tab from 'react-bootstrap/Tab'
@@ -23,6 +25,10 @@ import FinaliseResults from "./FinaliseResults";
 import RewardFunds from "./RewardFunds";
 import RegainFunds from "./RegainFunds";
 import GainToken from "./GainToken";
+import ProjectCard from "./ProjectCard";
+
+
+
 const ReactPage = (props) => {
 
 // make sure to add daoid as a json object in ipfs so as to reuse it to add members
@@ -70,16 +76,19 @@ const addmember = async () => {
             <div className="row">
               <div className="col-md-5">
 
-                <img  alt="daocardimage"  src={sampleData[id-1].image}   style={{ width:'90%' }}  />
+                <img  alt="daocardimage"  src={sampleData[id-1].image}   style={{ width:'80%' }}  />
                   <br />
                   <br />
-                  <h5 className="font-weight-light">
+                  {/* <h5 className="font-weight-light">
                       <a href="/" className="btn btn-outline-info btn-lg pr-2">Connect with us</a>
                       &nbsp;&nbsp;&nbsp;
                       <a href="/" className="btn btn-outline-success btn-lg ">Github Link</a>
 
-                    </h5>
+                    </h5> */}
               </div>
+              
+
+              
               
               <div className="col-md-7">
                   
@@ -96,12 +105,101 @@ const addmember = async () => {
                   </div>
               </div>
             </div>
+            <hr className ="pb-4" />
+
+            <div className="row">
+                <div className="col">
+                <Tabs defaultActiveKey="tab1" id="uncontrolled-tab-example2">
+                    <Tab eventKey="tab1" title="Proposal">
+                        <br />
+                        <ProjectCard title="Vera Loans"/>
+                    </Tab>
+                  <Tab eventKey="tab2" title="Project">
+                        <br />
+                        <ProjectCard title="Vera Loans"/>
+                  </Tab>
+                </Tabs>
+                </div>
+            </div>
 
             <br/>
             <br/>
 
-            <br/>
-            <br/>
+            <hr className ="pb-4" />
+
+
+          
+            <div className="row">
+                <div className="col">
+                <Tabs defaultActiveKey="Admin" id="uncontrolled-tab-example3">
+                    <Tab eventKey="Admin" title="Admin Operations">
+                        <br />
+                              <Tab.Container id="left-tabs-example" defaultActiveKey="first">
+                                <Row>
+                                  <Col sm={3}>
+                                    <Nav variant="pills" className="flex-column">
+                                      <Nav.Item>
+                                        <Nav.Link eventKey="first">Propose Results</Nav.Link>
+                                      </Nav.Item>
+                                      <Nav.Item>
+                                        <Nav.Link eventKey="second">Finalise Results</Nav.Link>
+                                      </Nav.Item>
+                                      <Nav.Item>
+                                        <Nav.Link eventKey="third">Reward Funds</Nav.Link>
+                                      </Nav.Item>
+                                    </Nav>
+                                  </Col>
+                                  <Col sm={9}>
+                                    <Tab.Content>
+                                      <Tab.Pane eventKey="first">
+                                      </Tab.Pane>
+                                      <Tab.Pane eventKey="second">
+                                      </Tab.Pane>
+                                      <Tab.Pane eventKey="third">
+                                        sdfas
+                                      </Tab.Pane>
+                                    </Tab.Content>
+                                  </Col>
+                                </Row>
+                              </Tab.Container>
+                    </Tab>
+                  <Tab eventKey="Member" title="Member Operations">
+                        <br />
+                              <Tab.Container id="left-tabs-example2" defaultActiveKey="first">
+                                <Row>
+                                  <Col sm={3}>
+                                    <Nav variant="pills" className="flex-column">
+                                      <Nav.Item>
+                                        <Nav.Link eventKey="first">Dipute DAO</Nav.Link>
+                                      </Nav.Item>
+                                      <Nav.Item>
+                                        <Nav.Link eventKey="second">Regain Contribution</Nav.Link>
+                                      </Nav.Item>
+                                      <Nav.Item>
+                                        <Nav.Link eventKey="third">Gain Project Tokens</Nav.Link>
+                                      </Nav.Item>
+                                    </Nav>
+                                  </Col>
+                                  <Col sm={9}>
+                                    <Tab.Content>
+                                      <Tab.Pane eventKey="first">
+                                      </Tab.Pane>
+                                      <Tab.Pane eventKey="second">
+                                      </Tab.Pane>
+                                      <Tab.Pane eventKey="third">
+                                        <GainToken/>
+                                      </Tab.Pane>
+                                    </Tab.Content>
+                                  </Col>
+                                </Row>
+                              </Tab.Container>
+                  </Tab>
+                </Tabs>
+                </div>
+            </div>
+
+
+            
             <div className="row">
                 <div className="col">
                 <Tabs defaultActiveKey="Round Allocations" id="uncontrolled-tab-example">
