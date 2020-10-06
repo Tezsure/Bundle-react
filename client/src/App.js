@@ -18,6 +18,8 @@ import { Navigation, Footer, Home, About, DAO, Projects, ProjectProfile, DaoCard
 import ProjectForm from './components/ProjectForm'
 import DAOForm from './components/DAOForm'
 import CreateproposalForm from './components/CreateproposalForm'
+import ProjectDetails from './components/ProjectDetails'
+import ProposalDetails from './components/ProposalDetails'
 import AboutPage from "./components/AboutPage"
 import { ThanosWallet } from '@thanos-wallet/dapp';
 
@@ -54,6 +56,8 @@ function App() {
           <Route path="/ProjectForm" exact component={() => <ProjectForm />} />
           <Route path="/DAOForm" exact component={() => <DAOForm />} />
           <Route path="/CreateproposalForm" exact component={() => <CreateproposalForm/>} />
+          <Route path="/ProjectDetails" exact component={() => <ProjectDetails/>} />
+          <Route path="/ProposalDetails" exact component={() => <ProposalDetails/>} />
 
 
 

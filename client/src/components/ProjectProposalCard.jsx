@@ -25,7 +25,7 @@ const ProjectProposalCard = ( {details} ) => {
       </center>
     </div>
     <div className="pt-5 mt-5">
-    <Link to="/ProjectForm">
+    <Link to="/ProposalDetails">
       <center >
       <Button variant="primary">Know Mmore</Button>
       </center>

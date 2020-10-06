@@ -153,7 +153,7 @@ const addmember = async () => {
 
 
             <div className="text-center">
-            <h3 className="text-primary text-bold pb-2">Project and Proposals</h3> 
+            <h3 className="text-primary text-bold pb-2">Operations</h3> 
             </div>
             <div className="row">
                 <div className="col">

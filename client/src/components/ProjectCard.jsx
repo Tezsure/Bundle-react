@@ -15,7 +15,9 @@ const ProjectCard = ( props ) => {
   <Card.Img variant="top" src='https://image.freepik.com/free-photo/beautiful-sunset-mountains-landscape-with-sun-light-shining-through-orange-clouds-fog_146671-18476.jpg' style={{width:'230px'}} />
     </center>
   <Card.Body>
+  <Link to="/ProjectDetails">
   <Card.Title>{props.title}</Card.Title>
+  
     <Card.Text>
       Some quick example text to build on the card title and make up the bulk of
       the card's content.
@@ -23,6 +25,7 @@ const ProjectCard = ( props ) => {
     
     
       <Button variant="primary">Know more</Button>
+      </Link>
 
   </Card.Body>
 </Card>
