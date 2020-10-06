@@ -2,8 +2,39 @@ import React from 'react'
 import Form from 'react-bootstrap/Form'
 import Button from 'react-bootstrap/Button'
 import Card from 'react-bootstrap/Card'
+import { Tezos } from '@taquito/taquito';
+import { ThanosWallet } from '@thanos-wallet/dapp';
 
 const DAOForm = () => {
+    const CreateDao = async () => {
+        try {
+          const available = await ThanosWallet.isAvailable();
+          if (!available) {
+            throw new Error('Thanos Wallet not installed');
+          }
+        } catch (err) {
+          console.log(err);
+        }
+        const wallet = new ThanosWallet('Tijori');
+        await wallet.connect("carthagenet");
+        
+        const tezos = wallet.toTezos();
+        const accountPkh = await tezos.wallet.pkh();
+        const accountBalance = await tezos.tz.getBalance(accountPkh);
+        const DaoContract = await tezos.wallet.at(
+          "KT1Wv17QNADUyQRbiVrp5TquHKFvoEyG7wV8"
+        );
+        const operation = await DaoContract.methods.addDAO("1601835000",100,100,10,"1601830800","1601825400").send({amount: 0.0001});
+        
+        await operation.confirmation();
+        
+        const addmemberValue = await DaoContract.storage();
+        console.info(`Member: ${addmemberValue}`);
+    }
+
+
+
+
     return (
         <React.Fragment>
             
@@ -65,7 +96,7 @@ const DAOForm = () => {
                     <br />
 
 <center>
-                    <Button variant="primary" type="createdao">
+                    <Button variant="primary" type="createdao"onClick={CreateDao}>
                         Create DAO
                     </Button>
                     </center>

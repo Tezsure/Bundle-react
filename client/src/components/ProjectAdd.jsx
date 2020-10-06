@@ -35,7 +35,7 @@ const addProject = async () => {
         const DaoContract = await tezos.wallet.at(
           "KT1Wv17QNADUyQRbiVrp5TquHKFvoEyG7wV8"
         );
-        const operation = await DaoContract.methods.addProject("tz1d2p8WKg5jQkSWYmbuL9P4Ga8Ev2c1TSMe",1,2).send();
+        const operation = await DaoContract.methods.addProject("tz1d2p8WKg5jQkSWYmbuL9P4Ga8Ev2c1TSMe",1,4).send();
         
         await operation.confirmation();
         

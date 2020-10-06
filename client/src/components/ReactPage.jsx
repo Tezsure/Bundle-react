@@ -49,7 +49,7 @@ const addmember = async () => {
   const DaoContract = await tezos.wallet.at(
     "KT1Wv17QNADUyQRbiVrp5TquHKFvoEyG7wV8"
   );
-  const operation = await DaoContract.methods.addMember(2).send( {amount: 0.0001});
+  const operation = await DaoContract.methods.addMember(4).send( {amount: 0.0001});
   setaddinitiate('True');
   await operation.confirmation();
   
@@ -109,13 +109,6 @@ const addmember = async () => {
                   <Tab eventKey="Contributers" title="Contributers">
                     <div className="container container pt-5 pl-5">
                         Contributers List:-
-                    </div>
-                  </Tab>
-                  <Tab eventKey="Add DAO" title="Add DAO">
-                    <div className="container container pt-5 pl-5">
-                        ADD DAO from here
-                        <AddDAO/>
-
                     </div>
                   </Tab>
                   <Tab eventKey="Add proposal" title="Add proposal">

@@ -35,7 +35,7 @@ const AddDAO = (props) => {
             const DaoContract = await tezos.wallet.at(
               "KT1Wv17QNADUyQRbiVrp5TquHKFvoEyG7wV8"
             );
-            const operation = await DaoContract.methods.addDAO("1601741726",100,100,10,"1601734526","1601727326").send({amount: 0.0001});
+            const operation = await DaoContract.methods.addDAO("1601835054000",100,100,10,"1601827854000","1601824254000").send({amount: 0.0001});
             
             await operation.confirmation();
             

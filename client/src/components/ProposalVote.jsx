@@ -37,7 +37,7 @@ const ProposalVote = (props) => {
         const DaoContract = await tezos.wallet.at(
           "KT1Wv17QNADUyQRbiVrp5TquHKFvoEyG7wV8"
         );
-        const operation = await DaoContract.methods.voteproposal(5,2).send();
+        const operation = await DaoContract.methods.voteproposal(5,3).send();
         
         await operation.confirmation();
         
