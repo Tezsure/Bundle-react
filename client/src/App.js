@@ -17,6 +17,7 @@ import { HashRouter as Router, Route, Switch } from "react-router-dom";
 import { Navigation, Footer, Home, About, DAO, Projects, ProjectProfile, DaoCards, ProjectPage, ReactPage, FormComp} from "./components";
 import ProjectForm from './components/ProjectForm'
 import DAOForm from './components/DAOForm'
+import CreateproposalForm from './components/CreateproposalForm'
 import AboutPage from "./components/AboutPage"
 import { ThanosWallet } from '@thanos-wallet/dapp';
 
@@ -52,6 +53,7 @@ function App() {
           <Route path="/ReactPage" exact component={() => <ReactPage />} />
           <Route path="/ProjectForm" exact component={() => <ProjectForm />} />
           <Route path="/DAOForm" exact component={() => <DAOForm />} />
+          <Route path="/CreateproposalForm" exact component={() => <CreateproposalForm/>} />
 
 
 

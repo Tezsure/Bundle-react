@@ -26,6 +26,9 @@ import RewardFunds from "./RewardFunds";
 import RegainFunds from "./RegainFunds";
 import GainToken from "./GainToken";
 import ProjectCard from "./ProjectCard";
+import AddprojectCard from "./AddprojectCard"
+import ProjectProposalCard from "./ProjectProposalCard"
+import AddproposalCard from "./AddproposalCard"
 
 
 
@@ -95,7 +98,8 @@ const addmember = async () => {
                     <h2 className="font-weight-bold"> {sampleData[id-1].title} </h2>
                     <br/>
                     <h5 className="font-weight-light">
-                      Minimum contribution to be added is - 20 mutez
+                    Description:
+                    Amount:
 
                     </h5>
                     <br/>
@@ -106,17 +110,37 @@ const addmember = async () => {
               </div>
             </div>
             <hr className ="pb-4" />
+            <div className="text-center">
+            <h3 className="text-primary text-bold pb-2">Project and Proposals</h3> 
+            </div>
 
             <div className="row">
                 <div className="col">
                 <Tabs defaultActiveKey="tab1" id="uncontrolled-tab-example2">
                     <Tab eventKey="tab1" title="Proposal">
                         <br />
-                        <ProjectCard title="Vera Loans"/>
+                        <div className="row">
+                          <div className="col-md-3">
+                            <AddproposalCard />
+                          </div>
+                          <div className="col-md-3" >
+                          <ProjectProposalCard />
+
+                          </div>
+                        </div>
+                        
                     </Tab>
                   <Tab eventKey="tab2" title="Project">
                         <br />
-                        <ProjectCard title="Vera Loans"/>
+                        <div className="row">
+                          <div className="col-md-3">
+                            <AddprojectCard />
+                          </div>
+                          <div className="col-md-3" >
+                          <ProjectCard title="Vera Loans"/>
+
+                          </div>
+                        </div>
                   </Tab>
                 </Tabs>
                 </div>
@@ -128,7 +152,9 @@ const addmember = async () => {
             <hr className ="pb-4" />
 
 
-          
+            <div className="text-center">
+            <h3 className="text-primary text-bold pb-2">Project and Proposals</h3> 
+            </div>
             <div className="row">
                 <div className="col">
                 <Tabs defaultActiveKey="Admin" id="uncontrolled-tab-example3">

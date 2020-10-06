@@ -22,7 +22,7 @@ const DaoCards = ( {details} ) => {
     </Card.Text>
     
     <Link to={`/DAO/${details.id}`}>
-      <Button variant="primary">Know more</Button>
+      <Button variant="primary">  Know more</Button>
     </Link>
   </Card.Body>
 </Card>
