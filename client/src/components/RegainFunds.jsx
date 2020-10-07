@@ -13,11 +13,17 @@ import { ThanosWallet } from '@thanos-wallet/dapp';
 
 
 
-const RegainFunds = (props) => {
+const GainToken = (props) => {
     const[value,setValue] = useState(0)
     const[index,setIndex] = useState(0)
 
+    const [value2, setValue2] = useState("");
+
+
+
     const proposalVote = async () => {
+
+        console.log(value2)
 
     
         try {
@@ -35,9 +41,9 @@ const RegainFunds = (props) => {
         const accountPkh = await tezos.wallet.pkh();
         const accountBalance = await tezos.tz.getBalance(accountPkh);
         const DaoContract = await tezos.wallet.at(
-          "KT1Wv17QNADUyQRbiVrp5TquHKFvoEyG7wV8"
+          "KT1BLFCd7359ZndXtLGbMn8fPt9utSBxE6yJ"
         );
-        const operation = await DaoContract.methods.regaintez(2).send();
+        const operation = await DaoContract.methods.regaintez(value2).send();
         
         await operation.confirmation();
         
@@ -60,30 +66,20 @@ const handleChange = (event) => {
             <Form.Row className="align-items-center">
             <Col xs="auto">
                 <Form.Label htmlFor="inlineFormInput" srOnly>
-                Votes
+                DAO ID: 
                 </Form.Label>
                 <Form.Control
                 className="mb-2"
                 id="inlineFormInput"
-                placeholder="Index"
-                value = {value}
-                onChange = {(event)=>handleChange(event)}
+                placeholder="DAO Id"
+                value = {value2}
+                onChange = {e => setValue2(e.target.value)}
                 />
             </Col>
-            <Col xs="auto">
-                <Form.Label htmlFor="inlineFormInputGroup" srOnly>
-                Index
-                </Form.Label>
-                <InputGroup className="mb-2">
-                <InputGroup.Prepend>
-                    <InputGroup.Text></InputGroup.Text>
-                </InputGroup.Prepend>
-                <FormControl id="inlineFormInputGroup" placeholder="Votes" />
-                </InputGroup>
-            </Col>
+            
             
             <Col xs="auto">
-                <Button type="submit" className="mb-2">
+                <Button type="submit" className="mb-2" onClick={proposalVote}>
                 Submit
                 </Button>
             </Col>
@@ -92,4 +88,4 @@ const handleChange = (event) => {
         );
 }
 
-export default RegainFunds;
+export default GainToken;

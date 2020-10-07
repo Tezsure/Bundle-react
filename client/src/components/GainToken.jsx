@@ -41,7 +41,7 @@ const GainToken = (props) => {
         const accountPkh = await tezos.wallet.pkh();
         const accountBalance = await tezos.tz.getBalance(accountPkh);
         const DaoContract = await tezos.wallet.at(
-          "KT1Wv17QNADUyQRbiVrp5TquHKFvoEyG7wV8"
+          "KT1BLFCd7359ZndXtLGbMn8fPt9utSBxE6yJ"
         );
         const operation = await DaoContract.methods.gaintoken(value2).send();
         
@@ -66,12 +66,12 @@ const handleChange = (event) => {
             <Form.Row className="align-items-center">
             <Col xs="auto">
                 <Form.Label htmlFor="inlineFormInput" srOnly>
-                Votes
+                DAO ID: 
                 </Form.Label>
                 <Form.Control
                 className="mb-2"
                 id="inlineFormInput"
-                placeholder="Index"
+                placeholder="DAO Id"
                 value = {value2}
                 onChange = {e => setValue2(e.target.value)}
                 />

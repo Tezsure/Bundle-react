@@ -178,11 +178,13 @@ const addmember = async () => {
                                   <Col sm={9}>
                                     <Tab.Content>
                                       <Tab.Pane eventKey="first">
+                                      <ProposeResults/>
                                       </Tab.Pane>
                                       <Tab.Pane eventKey="second">
+                                      <FinaliseResults/>
                                       </Tab.Pane>
                                       <Tab.Pane eventKey="third">
-                                        sdfas
+                                      <RewardFunds/>
                                       </Tab.Pane>
                                     </Tab.Content>
                                   </Col>
@@ -209,8 +211,10 @@ const addmember = async () => {
                                   <Col sm={9}>
                                     <Tab.Content>
                                       <Tab.Pane eventKey="first">
+                                      <DisputeResults/>
                                       </Tab.Pane>
                                       <Tab.Pane eventKey="second">
+                                      <RegainFunds/>
                                       </Tab.Pane>
                                       <Tab.Pane eventKey="third">
                                         <GainToken/>
@@ -224,72 +228,14 @@ const addmember = async () => {
                 </div>
             </div>
 
+            <br/>
+
+            <hr className ="pb-4" />
+
+
 
             
-            <div className="row">
-                <div className="col">
-                <Tabs defaultActiveKey="Round Allocations" id="uncontrolled-tab-example">
-                  
-                  <Tab eventKey="Contributers" title="Contributers">
-                    <div className="container container pt-5 pl-5">
-                        Contributers List:-
-                    </div>
-                  </Tab>
-                  <Tab eventKey="Add proposal" title="Add proposal">
-                    <div className="container container pt-5 pl-5">
-                      Fill in the Market and category that you want to allocate for the first round of funding.
-                        <ProposalForm/>
-                    </div>
-                  </Tab>
-                  <Tab eventKey="Add Projects" title="Add Projects">
-                    <div className="container container pt-5 pl-5">
-                        <ProjectAdd/>
-                    </div>
-                  </Tab>
-                  <Tab eventKey="Vote for Projects" title="Vote for Project">
-                    <div className="container container pt-5 pl-5">
-                        <ProjectVote/>
-                    </div>
-                  </Tab>
-                  <Tab eventKey="Vote for Proposals" title="Vote for Proposal">
-                    <div className="container container pt-5 pl-5">
-                        <ProposalVote/>
-                    </div>
-                  </Tab>
-                  <Tab eventKey="Propose Results" title="Propose">
-                    <div className="container container pt-5 pl-5">
-                        <ProposeResults/>
-                    </div>
-                  </Tab>
-                  <Tab eventKey="Dispute Results" title="Dispute">
-                    <div className="container container pt-5 pl-5">
-                        <DisputeResults/>
-                    </div>
-                  </Tab>
-                  <Tab eventKey="Finalise" title="Finalise Results">
-                    <div className="container container pt-5 pl-5">
-                        <FinaliseResults/>
-                    </div>
-                  </Tab>
-                  <Tab eventKey="Reward Funds" title="Reward Funds">
-                    <div className="container container pt-5 pl-5">
-                        <RewardFunds/>
-                    </div>
-                  </Tab>
-                  <Tab eventKey="Regain Tez" title="Regain XTZ">
-                    <div className="container container pt-5 pl-5">
-                        <RegainFunds/>
-                    </div>
-                  </Tab>
-                  <Tab eventKey="Gain" title="Gain Tokens">
-                    <div className="container container pt-5 pl-5">
-                        <GainToken/>
-                    </div>
-                  </Tab>
-                </Tabs>                  
-                </div>  
-            </div>
-
+           
           </div>
       </React.Fragment>
   );
