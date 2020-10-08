@@ -125,7 +125,7 @@ const ProjectForm = () => {
 
 <center>
                     <Button variant="primary" type="createdao"onClick={CreateDao}>
-                        Create DAO
+                        Add Project
                     </Button>
                     </center>
                 </Form>

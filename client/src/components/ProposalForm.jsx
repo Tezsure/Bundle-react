@@ -98,7 +98,7 @@ const ProposalForm = () => {
 
 <center>
                     <Button variant="primary" type="createdao"onClick={CreateDao}>
-                        Create DAO
+                        Add Proposal 
                     </Button>
                     </center>
                 </Form>
