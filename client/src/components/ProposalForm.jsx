@@ -1,91 +1,119 @@
-import React, {useState} from "react";
-import { Link } from "react-router-dom";
-import { useParams } from 'react-router-dom';
+import React , {useState} from 'react'
 import Form from 'react-bootstrap/Form'
-import InputGroup from 'react-bootstrap/InputGroup'
-import FormControl from 'react-bootstrap/FormControl'
-
-import Col from 'react-bootstrap/Col'
-import Row from 'react-bootstrap/Row'
 import Button from 'react-bootstrap/Button'
+import Card from 'react-bootstrap/Card'
 import { Tezos } from '@taquito/taquito';
 import { ThanosWallet } from '@thanos-wallet/dapp';
 
+const ProposalForm = () => {
 
-
-const ProposalForm = (props) => {
-
+    const [dao, daoid] = useState("");
+    const [category, cat] = useState("");
+   
     
 
-        const sendProposal = async () => {
-            try {
-              const available = await ThanosWallet.isAvailable();
-              if (!available) {
-                throw new Error('Thanos Wallet not installed');
-              }
-            } catch (err) {
-              console.log(err);
-            }
-            const wallet = new ThanosWallet('Tijori');
-            await wallet.connect("carthagenet");
-            
-            const tezos = wallet.toTezos();
-            const accountPkh = await tezos.wallet.pkh();
-            const accountBalance = await tezos.tz.getBalance(accountPkh);
-            const DaoContract = await tezos.wallet.at(
-              "KT1Wv17QNADUyQRbiVrp5TquHKFvoEyG7wV8"
-            );
-            const operation = await DaoContract.methods.addProposal(1,4).send();
-            
-            await operation.confirmation();
-            
-            const addmemberValue = await DaoContract.storage();
-            console.info(`Member: ${addmemberValue}`);
+
+
+    const CreateDao = async () => {
+        try {
+          const available = await ThanosWallet.isAvailable();
+          if (!available) {
+            throw new Error('Thanos Wallet not installed');
+          }
+        } catch (err) {
+          console.log(err);
         }
-    
-    
-    
-//State for amount in proposal
-const[value,setValue] = useState(0)
-
-const handleChange = (event) => {
-    setValue(event.target.value)
-}
-        return (
-            <Form onSubmit={sendProposal}>
-            <Form.Row className="align-items-center">
-            <Col xs="auto">
-                <Form.Label htmlFor="inlineFormInput" srOnly>
-                Amount
-                </Form.Label>
-                <Form.Control
-                className="mb-2"
-                id="inlineFormInput"
-                placeholder="Amount"
-                value = {value}
-                onChange = {(event)=>handleChange(event)}
-                />
-            </Col>
-            <Col xs="auto">
-                <Form.Label htmlFor="inlineFormInputGroup" srOnly>
-                Market
-                </Form.Label>
-                <InputGroup className="mb-2">
-                <InputGroup.Prepend>
-                    <InputGroup.Text>@</InputGroup.Text>
-                </InputGroup.Prepend>
-                <FormControl id="inlineFormInputGroup" placeholder="Market" />
-                </InputGroup>
-            </Col>
-            
-            <Col xs="auto">
-                <Button type="submit" className="mb-2" onClick={sendProposal}>
-                Submit
-                </Button>
-            </Col>
-            </Form.Row>
-        </Form>
+        const wallet = new ThanosWallet('Tijori');
+        await wallet.connect("carthagenet");
+        
+        const tezos = wallet.toTezos();
+        const accountPkh = await tezos.wallet.pkh();
+        const accountBalance = await tezos.tz.getBalance(accountPkh);
+        const DaoContract = await tezos.wallet.at(
+          "KT1BLFCd7359ZndXtLGbMn8fPt9utSBxE6yJ"
         );
+        const operation = await DaoContract.methods.addProposal(category,dao).send();
+        
+        await operation.confirmation();
+        
+        const addmemberValue = await DaoContract.storage();
+        console.info(`Member: ${addmemberValue}`);
+    }
+
+
+
+
+    return (
+        <React.Fragment>
+            
+            <div className="container">
+                <div className="row pt-9" >
+                    <div className="col">
+                        <center>
+                        <h2 className="font-weight-bold">
+                            Create a Proposal for the DAO to choose a category
+                        </h2>
+                            
+                              </center>
+                        
+                    </div>
+                </div>
+                </div>
+                <div className="row">
+                <div className="col-md-5">
+                    
+                            <img className="pt-5 mt-5" alt="about page" src="https://www.pngkey.com/png/detail/304-3045071_pdf-icon-document-line-icon-vector.png" style={{ width: '700px' }} />
+                        </div>
+                        <div className="col-md-1">
+
+                        </div>
+                        <div className= "col-md-6">
+            <Card className="border border-dark">
+
+                <Card.Body>
+
+                <Form>
+                   
+                    <Form.Group controlId="dao">
+                        <Form.Label>DAO ID:</Form.Label>
+                        <Form.Control type="DAO" placeholder="Enter DAO ID"
+                                value = {dao}
+                                onChange = {e => daoid(e.target.value)}
+                        />
+                    </Form.Group>
+                    <Form.Group controlId="catindex">
+                        <Form.Label>Category:</Form.Label>
+                        <Form.Control type="category" placeholder="Enter category index " 
+                            value = {category}
+                            onChange = {e => cat(e.target.value)}
+                        />
+                    </Form.Group>
+                    <Form.Group controlId="Description">
+                        <Form.Label>Proposal description:</Form.Label>
+                        <Form.Control as="textarea" rows="3" />
+                    </Form.Group>
+                    
+
+                    <br />
+
+<center>
+                    <Button variant="primary" type="createdao"onClick={CreateDao}>
+                        Create DAO
+                    </Button>
+                    </center>
+                </Form>
+                </Card.Body>
+            </Card>
+
+            </div>
+                </div>
+                
+            
+            <div className= "col-md-4">
+                    </div>
+            
+        </React.Fragment>
+    );
 }
 
 export default ProposalForm;

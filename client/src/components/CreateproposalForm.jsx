@@ -1,20 +1,47 @@
-import React from 'react'
+import React , {useState} from 'react'
 import Form from 'react-bootstrap/Form'
 import Button from 'react-bootstrap/Button'
 import Card from 'react-bootstrap/Card'
+import { Tezos } from '@taquito/taquito';
+import { ThanosWallet } from '@thanos-wallet/dapp';
 
-const CreateproposalForm = () => {
+const ProposalForm = () => {
+
+    const [dao, daoid] = useState("");
+    const [category, cat] = useState("");
+   
     
-    const all = require("it-all");
-    //const [adddata, setadddata] = useState("");
-    //const [addinfo, setaddinfo] = useState("");
 
-const ipfsclient = require("ipfs-http-client");
-  const ipfs = ipfsclient({
-    host: "ipfs-infura-io",
-    port: 5001,
-    protocol: "https"
-  });
+
+
+    const CreateDao = async () => {
+        try {
+          const available = await ThanosWallet.isAvailable();
+          if (!available) {
+            throw new Error('Thanos Wallet not installed');
+          }
+        } catch (err) {
+          console.log(err);
+        }
+        const wallet = new ThanosWallet('Tijori');
+        await wallet.connect("carthagenet");
+        
+        const tezos = wallet.toTezos();
+        const accountPkh = await tezos.wallet.pkh();
+        const accountBalance = await tezos.tz.getBalance(accountPkh);
+        const DaoContract = await tezos.wallet.at(
+          "KT1BLFCd7359ZndXtLGbMn8fPt9utSBxE6yJ"
+        );
+        const operation = await DaoContract.methods.addProposal(category,dao).send();
+        
+        await operation.confirmation();
+        
+        const addmemberValue = await DaoContract.storage();
+        console.info(`Member: ${addmemberValue}`);
+    }
+
+
+
 
     return (
         <React.Fragment>
@@ -24,10 +51,10 @@ const ipfsclient = require("ipfs-http-client");
                     <div className="col">
                         <center>
                         <h2 className="font-weight-bold">
-                            Enter Project details and be a part of the DAO 
+                            Create a Proposal for the DAO to choose a category
                         </h2>
                             
-                            </center>
+                              </center>
                         
                     </div>
                 </div>
@@ -35,7 +62,7 @@ const ipfsclient = require("ipfs-http-client");
                 <div className="row">
                 <div className="col-md-5">
                     
-                            <img className="pt-1 mt-5" alt="about page" src="https://image.freepik.com/free-vector/man-presenting-project_65141-106.jpg" style={{ width: '700px' }} />
+                            <img className="pt-5 mt-5" alt="about page" src="https://www.pngkey.com/png/detail/304-3045071_pdf-icon-document-line-icon-vector.png" style={{ width: '700px' }} />
                         </div>
                         <div className="col-md-1">
 
@@ -46,15 +73,22 @@ const ipfsclient = require("ipfs-http-client");
                 <Card.Body>
 
                 <Form>
-                    <Form.Group controlId="category">
-                        <Form.Label>Category:</Form.Label>
-                        <Form.Control type="Category" placeholder="Enter Proposal category" />
-                        <Form.Text className="text-muted">
-                        </Form.Text>
-                    </Form.Group>
-
                    
-                    <Form.Group controlId="proposalDescription">
+                    <Form.Group controlId="dao">
+                        <Form.Label>DAO ID:</Form.Label>
+                        <Form.Control type="DAO" placeholder="Enter DAO ID"
+                                value = {dao}
+                                onChange = {e => daoid(e.target.value)}
+                        />
+                    </Form.Group>
+                    <Form.Group controlId="catindex">
+                        <Form.Label>Category:</Form.Label>
+                        <Form.Control type="category" placeholder="Enter category index " 
+                            value = {category}
+                            onChange = {e => cat(e.target.value)}
+                        />
+                    </Form.Group>
+                    <Form.Group controlId="Description">
                         <Form.Label>Proposal description:</Form.Label>
                         <Form.Control as="textarea" rows="3" />
                     </Form.Group>
@@ -63,8 +97,8 @@ const ipfsclient = require("ipfs-http-client");
                     <br />
 
 <center>
-                    <Button variant="primary" type="createdao">
-                        Submit Proposal
+                    <Button variant="primary" type="createdao"onClick={CreateDao}>
+                        Create DAO
                     </Button>
                     </center>
                 </Form>
@@ -82,4 +116,4 @@ const ipfsclient = require("ipfs-http-client");
     );
 }
 
-export default CreateproposalForm;
+export default ProposalForm;

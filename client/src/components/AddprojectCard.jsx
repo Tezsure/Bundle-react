@@ -10,7 +10,7 @@ const AddprojectCard = ( {details} ) => {
 
   return (
     <div className="pb-4">
-    <Card style={{ width: '15rem' , height:'24rem'}}>
+    <Card style={{ width: '15rem' , height:'27rem'}}>
       <center>
   <Card.Img variant="center" src="https://image.flaticon.com/icons/png/512/8/8820.png" style={{width:'150px' , paddingTop:'5rem', opacity: '0.6'}} />
     </center>

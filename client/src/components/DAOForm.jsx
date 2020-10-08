@@ -1,4 +1,4 @@
-import React from 'react'
+import React , {useState} from 'react'
 import Form from 'react-bootstrap/Form'
 import Button from 'react-bootstrap/Button'
 import Card from 'react-bootstrap/Card'
@@ -6,6 +6,17 @@ import { Tezos } from '@taquito/taquito';
 import { ThanosWallet } from '@thanos-wallet/dapp';
 
 const DAOForm = () => {
+
+    const [strength, setstrength] = useState("");
+    const [contribution, setcontribution] = useState("");
+    const [numberofToken, setnumberofToken] = useState("");
+    const [votestart, vstart] = useState("");
+    const [voteend, vend] = useState("");
+    const [disputeend, dend] = useState("");
+    
+
+
+
     const CreateDao = async () => {
         try {
           const available = await ThanosWallet.isAvailable();
@@ -22,9 +33,9 @@ const DAOForm = () => {
         const accountPkh = await tezos.wallet.pkh();
         const accountBalance = await tezos.tz.getBalance(accountPkh);
         const DaoContract = await tezos.wallet.at(
-          "KT1Wv17QNADUyQRbiVrp5TquHKFvoEyG7wV8"
+          "KT1BLFCd7359ZndXtLGbMn8fPt9utSBxE6yJ"
         );
-        const operation = await DaoContract.methods.addDAO("1601835000",100,100,10,"1601830800","1601825400").send({amount: 0.0001});
+        const operation = await DaoContract.methods.addDAO(disputeend,contribution,numberofToken,strength,voteend,votestart).send({amount: 0.0001});
         
         await operation.confirmation();
         
@@ -54,7 +65,7 @@ const DAOForm = () => {
                 <div className="row">
                 <div className="col-md-5">
                     
-                            <img className="pt-5 mt-5" alt="about page" src="https://png2.cleanpng.com/sh/f6e344d1fb9c208ff291a229e93d8bee/L0KzQYq3VsEzN5Z5jpH0aYP2gLBuTfRma5ZzjORqbHn9dbW0ggV1d590hdHAcz3ygrjojvl7aaVuh9C2cHB1hLLpjPUudpZ5RdNqLYD1f7vsiCR0NWZpSKJtMHXmR7KAUvY4Nmg2TKQCNUmzQYa9UMM0PGY8Sqc5MUaxgLBu/kisspng-decentralized-autonomous-organization-portable-net-aa-projekts-5d00d0ec7a72f7.7142759015603345725016.png" style={{ width: '700px' }} />
+                            <img className="pt-5 mt-5" alt="about page" src="https://cryptooa.com/wp-content/uploads/2018/12/DAO.png" style={{ width: '700px' }} />
                         </div>
                         <div className="col-md-1">
 
@@ -78,15 +89,45 @@ const DAOForm = () => {
                     </Form.Group>
                     <Form.Group controlId="strength">
                         <Form.Label>Strength:</Form.Label>
-                        <Form.Control type="strength" placeholder="Enter Strength of DAO" />
+                        <Form.Control type="strength" placeholder="Enter Strength of DAO"
+                                value = {strength}
+                                onChange = {e => setstrength(e.target.value)}
+                        />
                     </Form.Group>
                     <Form.Group controlId="minimumcontribution">
                         <Form.Label>Contribution:</Form.Label>
-                        <Form.Control type="minimumcontribution" placeholder="Enter Contribution of each member " />
+                        <Form.Control type="minimumcontribution" placeholder="Enter Contribution of each member in mutez " 
+                            value = {contribution}
+                            onChange = {e => setcontribution(e.target.value)}
+                        />
                     </Form.Group>
                     <Form.Group controlId="token">
                         <Form.Label>Number of Token:</Form.Label>
-                        <Form.Control type="token" placeholder="Enter No of tokens to be given to each person" />
+                        <Form.Control type="token" placeholder="Enter No of tokens to be given to each person" 
+                                value = {numberofToken}
+                                onChange = {e => setnumberofToken(e.target.value)}
+                        />
+                    </Form.Group>
+                    <Form.Group controlId="vstart">
+                        <Form.Label>Vote start Time:</Form.Label>
+                        <Form.Control type="token" placeholder="Enter vote start time in epoch" 
+                                value = {votestart}
+                                onChange = {e => vstart(e.target.value)}
+                        />
+                    </Form.Group>
+                    <Form.Group controlId="vend">
+                        <Form.Label>Vote end Time:</Form.Label>
+                        <Form.Control type="token" placeholder="Enter vote start time in epoch" 
+                                value = {voteend}
+                                onChange = {e => vend(e.target.value)}
+                        />
+                    </Form.Group>
+                    <Form.Group controlId="dend">
+                        <Form.Label>dispute vote end Time:</Form.Label>
+                        <Form.Control type="token" placeholder="Enter vote start time in epoch" 
+                                value = {disputeend}
+                                onChange = {e => dend(e.target.value)}
+                        />
                     </Form.Group>
                     <Form.Group controlId="daoimg">
                     <Form.Label>Dao cover image:</Form.Label>

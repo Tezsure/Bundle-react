@@ -21,6 +21,8 @@ import CreateproposalForm from './components/CreateproposalForm'
 import ProjectDetails from './components/ProjectDetails'
 import ProposalDetails from './components/ProposalDetails'
 import AboutPage from "./components/AboutPage"
+import Rules from "./components/Rules"
+
 import { ThanosWallet } from '@thanos-wallet/dapp';
 
 function App() {
@@ -51,6 +53,8 @@ function App() {
 
           <Route path="/about" exact component ={() => <AboutPage /> } />
           <Route path="/create" exact component ={() => <FormComp /> } />
+          <Route path="/Rules" exact component ={() => <Rules /> } />
+
           <Route path="/ProjectPage" exact component={() => <ProjectPage />} />
           <Route path="/ReactPage" exact component={() => <ReactPage />} />
           <Route path="/ProjectForm" exact component={() => <ProjectForm />} />

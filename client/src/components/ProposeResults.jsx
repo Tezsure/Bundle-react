@@ -13,11 +13,17 @@ import { ThanosWallet } from '@thanos-wallet/dapp';
 
 
 
-const ProposeResults = (props) => {
-    const[value,setValue] = useState(0)
-    const[index,setIndex] = useState(0)
+const GainToken = (props) => {
+    const[value,setValue] = useState("")
+
+    const [value2, setValue2] = useState("");
+
+
+
 
     const proposalVote = async () => {
+
+        console.log(value2)
 
     
         try {
@@ -35,9 +41,9 @@ const ProposeResults = (props) => {
         const accountPkh = await tezos.wallet.pkh();
         const accountBalance = await tezos.tz.getBalance(accountPkh);
         const DaoContract = await tezos.wallet.at(
-          "KT1Wv17QNADUyQRbiVrp5TquHKFvoEyG7wV8"
+          "KT1BLFCd7359ZndXtLGbMn8fPt9utSBxE6yJ"
         );
-        const operation = await DaoContract.methods.proposeresult(3,3).send();
+        const operation = await DaoContract.methods.proposeresult(value2,value).send();
         
         await operation.confirmation();
         
@@ -60,30 +66,31 @@ const handleChange = (event) => {
             <Form.Row className="align-items-center">
             <Col xs="auto">
                 <Form.Label htmlFor="inlineFormInput" srOnly>
-                Votes
+                Product ID
                 </Form.Label>
                 <Form.Control
                 className="mb-2"
                 id="inlineFormInput"
-                placeholder="Index"
-                value = {value}
-                onChange = {(event)=>handleChange(event)}
+                placeholder="Product ID"
+                value = {value2}
+                onChange = {e => setValue2(e.target.value)}
                 />
             </Col>
             <Col xs="auto">
-                <Form.Label htmlFor="inlineFormInputGroup" srOnly>
-                Index
+                <Form.Label htmlFor="inlineFormInput" srOnly>
+                Proposal ID 
                 </Form.Label>
-                <InputGroup className="mb-2">
-                <InputGroup.Prepend>
-                    <InputGroup.Text></InputGroup.Text>
-                </InputGroup.Prepend>
-                <FormControl id="inlineFormInputGroup" placeholder="Votes" />
-                </InputGroup>
+                <Form.Control
+                className="mb-2"
+                id="inlineFormInput"
+                placeholder="Proposal ID"
+                value = {value}
+                onChange = {e => setValue(e.target.value)}
+                />
             </Col>
             
             <Col xs="auto">
-                <Button type="submit" className="mb-2">
+                <Button type="submit" className="mb-2" onClick={proposalVote}>
                 Submit
                 </Button>
             </Col>
@@ -92,4 +99,4 @@ const handleChange = (event) => {
         );
 }
 
-export default ProposeResults;
+export default GainToken;

@@ -11,6 +11,8 @@ import Tab from 'react-bootstrap/Tab'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 import Container from 'react-bootstrap/Container'
+import Form from 'react-bootstrap/Form'
+
 import { sampleData } from '../data/sampleData';
 import { Tezos } from '@taquito/taquito';
 import { ThanosWallet } from '@thanos-wallet/dapp';
@@ -34,6 +36,9 @@ import AddproposalCard from "./AddproposalCard"
 
 const ReactPage = (props) => {
 
+  const [value2, setValue2] = useState("");
+  
+
 // make sure to add daoid as a json object in ipfs so as to reuse it to add members
 
 //State for addmember 
@@ -56,9 +61,9 @@ const addmember = async () => {
   const accountPkh = await tezos.wallet.pkh();
   const accountBalance = await tezos.tz.getBalance(accountPkh);
   const DaoContract = await tezos.wallet.at(
-    "KT1Wv17QNADUyQRbiVrp5TquHKFvoEyG7wV8"
+    "KT1BLFCd7359ZndXtLGbMn8fPt9utSBxE6yJ"
   );
-  const operation = await DaoContract.methods.addMember(4).send( {amount: 0.0001});
+  const operation = await DaoContract.methods.addMember(value2).send( {amount: 0.0001});
   setaddinitiate('True');
   await operation.confirmation();
   
@@ -105,7 +110,18 @@ const addmember = async () => {
                     <br/>
                     <br/>
                     <div>
-                      <button type="button" onClick={addmember}class="btn btn-primary btn-lg btn-block">Become a Member</button> 
+                      <Form>
+                        <Form.Group controlId="addmember">
+                          <Form.Control type="text" placeholder="DAO ID" 
+                            value = {value2}
+                            onChange = {e => setValue2(e.target.value)}
+                            
+                            />
+                          <Form.Text className="text-muted">
+                          </Form.Text>
+                        </Form.Group>
+                        <button type="button" onClick={addmember}class="btn btn-primary btn-lg btn-block">Become a Member</button> 
+                      </Form>
                   </div>
               </div>
             </div>
