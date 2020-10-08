@@ -32,7 +32,7 @@ const ProjectForm = () => {
         const DaoContract = await tezos.wallet.at(
           "KT1BLFCd7359ZndXtLGbMn8fPt9utSBxE6yJ"
         );
-        const operation = await DaoContract.methods.addProject(category,dao).send();
+        const operation = await DaoContract.methods.addProject(walletaddress,category,dao).send();
         
         await operation.confirmation();
         
