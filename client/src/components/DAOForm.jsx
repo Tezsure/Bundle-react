@@ -38,6 +38,7 @@ const DAOForm = () => {
         const operation = await DaoContract.methods.addDAO(disputeend,contribution,numberofToken,strength,voteend,votestart).send({amount: 0.0001});
         
         await operation.confirmation();
+        window.alert("Create DAO: transaction successful")
         
         const addmemberValue = await DaoContract.storage();
         console.info(`Member: ${addmemberValue}`);

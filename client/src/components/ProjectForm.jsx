@@ -35,6 +35,7 @@ const ProjectForm = () => {
         const operation = await DaoContract.methods.addProject(walletaddress,category,dao).send();
         
         await operation.confirmation();
+        window.alert("Add Project: transaction successful")
         
         const addmemberValue = await DaoContract.storage();
         console.info(`Member: ${addmemberValue}`);

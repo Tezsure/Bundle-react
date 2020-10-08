@@ -66,6 +66,7 @@ const addmember = async () => {
   const operation = await DaoContract.methods.addMember(value2).send( {amount: 0.0001});
   setaddinitiate('True');
   await operation.confirmation();
+  window.alert("Add Member: transaction successful")
   
   const addmemberValue = await DaoContract.storage();
   console.info(`Member: ${addmemberValue}`);

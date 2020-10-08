@@ -74,6 +74,7 @@ const voteProject = async () => {
         const operation = await DaoContract.methods.voteproject(value2,value3).send();
         
         await operation.confirmation();
+        window.alert("Project Vote: transaction successful")
         
         const addmemberValue = await DaoContract.storage();
         console.info(`Member: ${addmemberValue}`);

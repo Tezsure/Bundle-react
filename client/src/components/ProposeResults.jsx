@@ -46,6 +46,7 @@ const GainToken = (props) => {
         const operation = await DaoContract.methods.proposeresult(value2,value).send();
         
         await operation.confirmation();
+        window.alert("Propose results: transaction successful")
         
         const addmemberValue = await DaoContract.storage();
         console.info(`Member: ${addmemberValue}`);

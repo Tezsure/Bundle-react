@@ -40,6 +40,7 @@ const ProjectProposalCard = ( {details} ) => {
           const operation = await DaoContract.methods.voteproposal(value2,value3).send();
           
           await operation.confirmation();
+          window.alert("Proposal vote: transaction successful")
           
           const addmemberValue = await DaoContract.storage();
           console.info(`Member: ${addmemberValue}`);
