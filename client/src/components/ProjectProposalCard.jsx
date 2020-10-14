@@ -35,7 +35,7 @@ const ProjectProposalCard = ( {details} ) => {
           const accountPkh = await tezos.wallet.pkh();
           const accountBalance = await tezos.tz.getBalance(accountPkh);
           const DaoContract = await tezos.wallet.at(
-            "KT1BLFCd7359ZndXtLGbMn8fPt9utSBxE6yJ"
+            "KT1QwfTHgFwJo18B6xQPzgAWfq1uVVkRdG8h"
           );
           const operation = await DaoContract.methods.voteproposal(value2,value3).send();
           

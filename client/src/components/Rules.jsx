@@ -7,18 +7,21 @@ const Rules = () => {
                 <div className="row pt-5">
                     <div className="col">
                         <h2 className="font-weight-bold">
-                            About
+                            Rules and Working
                         </h2>
                     </div>
                 </div>
                 <div className="row">
                         <div className="col-md-4">
-                            <img alt="about page" src="https://image.freepik.com/free-vector/characters-people-holding-blockchain-network_53876-26824.jpg" style={{ width: '500px' }} />
+                            <img alt="about page" src="https://img.pngio.com/computer-icons-business-rules-engine-png-clipart-angle-business-rules-png-728_724.jpg" style={{ width: '500px' }} />
                         </div>
                         <div className="col-md-1">
 
                         </div>
                         <div className="col-md-7">
+                        <h2 className="font-weight-bold">
+                            Working
+                        </h2>
                             The` DAO (stylized Đ) was a digital decentralized autonomous organization, and a form of investor-directed venture capital fund. It launched in April 2016 after a crowdfunding campaign. By September 2016, it was delisted and had, in effect, become defunct.
                             <br /><br />
                             The DAO had an objective to provide a new decentralized business model for organizing both commercial and non-profit enterprises. It was instantiated on the Ethereum blockchain, and had no conventional management structure or board of directors. The code of the DAO is open-source.
