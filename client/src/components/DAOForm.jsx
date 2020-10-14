@@ -35,7 +35,7 @@ const DAOForm = () => {
         const DaoContract = await tezos.wallet.at(
           "KT1QwfTHgFwJo18B6xQPzgAWfq1uVVkRdG8h"
         );
-        const operation = await DaoContract.methods.addDAO(contribution,disputeend,contribution,numberofToken,strength,voteend,votestart).send({amount: 0.0001});
+        const operation = await DaoContract.methods.addDAO(contribution,disputeend,contribution,numberofToken,strength,voteend,votestart).send({amount:0.0001});
         
         await operation.confirmation();
         window.alert("Create DAO: transaction successful")
