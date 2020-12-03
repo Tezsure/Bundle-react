@@ -4,22 +4,24 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.10">
+<meta name="generator" content="Asciidoctor 2.0.12">
 <title>Reference Manual - SmartPy.io</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <link rel="stylesheet" href="./asciidoctor.css">
+<link rel="stylesheet" href="./coderay-asciidoctor.css">
 </head>
 <body class="article toc2 toc-left">
 <div id="header">
-<h1><span class="image"><img src="../logo-transp.png" alt="Logo" width="50"></span> Reference Manual - SmartPy.io</h1>
+<h1><span class="image"><img src="/static/img/logo-only.svg" alt="Logo" width="50"></span> Reference Manual - SmartPy.io</h1>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
-<li><a href="#_building_blocks">Building Blocks</a>
+<li><a href="#_building_blocks_for_the_smartpy_language">Building Blocks for the SmartPy language</a>
 <ul class="sectlevel2">
 <li><a href="#_expressions">Expressions</a></li>
 <li><a href="#_commands">Commands</a></li>
 <li><a href="#_entry_points">Entry Points</a></li>
+<li><a href="#_return_values">Return values</a></li>
 <li><a href="#_contracts">Contracts</a></li>
 <li><a href="#_types">Types</a></li>
 </ul>
@@ -31,7 +33,7 @@
 <li><a href="#_primitive_data_types_overview">Primitive Data Types Overview</a></li>
 <li><a href="#_container_types">Container Types</a></li>
 <li><a href="#_tezos_specific_data_types">Tezos-specific data types</a></li>
-<li><a href="#_records_and_variants">Records and Variants</a></li>
+<li><a href="#_record_types_variant_types_and_layouts">Record types, Variant types and layouts</a></li>
 <li><a href="#_setting_a_type_constraint_in_smartpy">Setting a type constraint in SmartPy</a></li>
 </ul>
 </li>
@@ -68,6 +70,20 @@
 <li><a href="#_raising_exceptions">Raising Exceptions</a></li>
 </ul>
 </li>
+<li><a href="#_experimental_features">Experimental Features</a>
+<ul class="sectlevel2">
+<li><a href="#_sapling">Sapling</a></li>
+<li><a href="#_levels">Levels</a></li>
+<li><a href="#_flags">Flags</a></li>
+<li><a href="#_lazy_entry_points">Lazy Entry Points</a></li>
+<li><a href="#_exception_optimization_levels">Exception Optimization Levels</a></li>
+<li><a href="#_no_comment_flag">No comment flag</a></li>
+<li><a href="#_views">Views</a></li>
+<li><a href="#_importing_smartpy_and_python_code">Importing SmartPy and Python code</a></li>
+<li><a href="#_metadata_support">Metadata support</a></li>
+<li><a href="#_debugging_contracts">Debugging contracts</a></li>
+</ul>
+</li>
 <li><a href="#_tests_and_test_scenarios">Tests and Test Scenarios</a>
 <ul class="sectlevel2">
 <li><a href="#_tests">Tests</a></li>
@@ -89,15 +105,25 @@
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p><a href="https://SmartPy.io">SmartPy</a> is a Python library for constructing Tezos smart
-contracts.
-It comes with a compiler that generates Michelson code.</p>
+<p><a href="https://SmartPy.io">SmartPy</a> is an intuitive and powerful smart contract development platform for Tezos.</p>
+</div>
+<div class="paragraph">
+<p>The SmartPy language is available through a Python library for
+building and analyzing Tezos smart contracts.<br>
+It comes with various tools: a compiler that generates Michelson code,
+a simulation engine, a contract explorer, etc.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_building_blocks">Building Blocks</h2>
+<h2 id="_building_blocks_for_the_smartpy_language">Building Blocks for the SmartPy language</h2>
 <div class="sectionbody">
+<div class="paragraph">
+<p>SmartPy is a Python library. SmartPy scripts are regular Python
+scripts that use SmartPy constructions.<br>
+This mechanism is useful because it brings very powerful
+<em>meta-programming</em> capabilities, as explained later.</p>
+</div>
 <div class="sect2">
 <h3 id="_expressions">Expressions</h3>
 <div class="paragraph">
@@ -106,28 +132,49 @@ It comes with a compiler that generates Michelson code.</p>
 represents the number 2, whereas <code>self.data.x + 2</code> represents their
 sum.</p>
 </div>
+<div class="paragraph">
+<p>Inside a contract, when we write</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="python">        y = <span class="predefined-constant">self</span>.data.x + <span class="integer">2</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>we declare <code>y</code> as an alias the SmartPy expression <code>self.data.x + 2</code>.<br>
+This is <em>not</em> a command for SmartPy.</p>
+</div>
 </div>
 <div class="sect2">
 <h3 id="_commands">Commands</h3>
 <div class="paragraph">
-<p>Commands <em>do</em> something. For example, <code>sp.verify(self.data.x &gt; 2)</code>
-checks that the field <code>x</code> is larger than 2 and raises an error if it
-isn&#8217;t.</p>
+<p>Commands <em>do</em> something. For example,</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="python">        sp.verify(<span class="predefined-constant">self</span>.data.x &gt; <span class="integer">2</span>)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>checks that the field <code>x</code> is larger than <code>2</code> and raises an error if it
+isn&#8217;t.
+This is performed <em>at run time</em>, i.e., in the blockchain, once
+translated into Michelson.</p>
 </div>
 </div>
 <div class="sect2">
 <h3 id="_entry_points">Entry Points</h3>
 <div class="paragraph">
 <p>An <em>entry point</em> is a method of a contract class that can be called
-from the outside. They need to be marked with the <code>@sp.entry_point</code>
-decorator. For example the following entry point checks that the
-argument given is larger than 2:</p>
+from the outside. Entry points need to be marked with the <code>@sp.entry_point</code>
+decorator. For example, the following entry point checks that the
+argument given is larger than <code>2</code>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="python">    <span class="decorator">@sp.entry_point</span>
-    <span class="keyword">def</span> <span class="function">checkLargerThanTwo</span>(p):
-        sp.verify(p &gt; <span class="integer">2</span>)</code></pre>
+    <span class="keyword">def</span> <span class="function">check_big_enough</span>(<span class="predefined-constant">self</span>, params):
+        sp.verify(params &gt; <span class="integer">2</span>)</code></pre>
 </div>
 </div>
 <div class="dlist">
@@ -138,6 +185,19 @@ argument given is larger than 2:</p>
 </dd>
 </dl>
 </div>
+<div class="paragraph">
+<p>See reference <a href="/ide?template=storeValue.py" target="_blank" rel="noopener">Store Value</a>
+template for simple entry points examples.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_return_values">Return values</h3>
+<div class="paragraph">
+<p>Entry points do not return values in Michelson.<br>
+SmartPy is respecting this constraint but allows other functions to return values.<br>
+These functions use <code>sp.result(value)</code> to return <code>value</code>.<br>
+See <a href="#_lambdas">Lambdas</a> for examples with <code>sp.global_lambda</code> and <code>sp.sub_entry_point</code>.</p>
+</div>
 <div class="sect3">
 <h4 id="_public_and_private_entry_point">Public and private entry point</h4>
 <div class="paragraph">
@@ -145,7 +205,9 @@ argument given is larger than 2:</p>
 the generated Michelson contract. This is useful to implement checks
 or initialization in SmartPy after origination in the test but before
 real blockchain origination. One can use the full SmartPy machinery
-such as <code>sp.verify</code>, etc.</p>
+such as <code>sp.verify</code>, etc.<br>
+See reference <a href="/ide?template=private_entry_point.py" target="_blank" rel="noopener">Private
+Entry Point</a> template.</p>
 </div>
 <div class="paragraph">
 <p>This is also useful to build custom UI through simulation by adding:</p>
@@ -153,8 +215,8 @@ such as <code>sp.verify</code>, etc.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="python">    <span class="decorator">@sp.private_entry_point</span>
-    <span class="keyword">def</span> <span class="function">editStorage</span>(<span class="predefined-constant">self</span>, params):
-        <span class="predefined-constant">self</span>.data.set(params)</code></pre>
+    <span class="keyword">def</span> <span class="function">set_x</span>(<span class="predefined-constant">self</span>, params):
+        <span class="predefined-constant">self</span>.data.x = params</code></pre>
 </div>
 </div>
 </div>
@@ -174,11 +236,11 @@ entry points. It is a class definition that inherits from
         <span class="predefined-constant">self</span>.init(x = <span class="integer">0</span>)
 
     <span class="decorator">@sp.entry_point</span>
-    <span class="keyword">def</span> <span class="function">setX</span>(newX):
+    <span class="keyword">def</span> <span class="function">set_x</span>(newX):
         <span class="predefined-constant">self</span>.data.x = newX
 
     <span class="decorator">@sp.entry_point</span>
-    <span class="keyword">def</span> <span class="function">checkLargerThanX</span>(p):
+    <span class="keyword">def</span> <span class="function">check_largerthan_x</span>(p):
         sp.verify(p &gt; <span class="predefined-constant">self</span>.data.x)</code></pre>
 </div>
 </div>
@@ -198,9 +260,8 @@ SmartPy types are all of the form <code>sp.T&lt;TypeName&gt;</code>.</p>
 <div class="paragraph">
 <p>The functions described here are used to <em>construct</em> a smart
 contract. Smart contracts are executed once they are deployed in the
-Tezos block chain (although they can be simulated). This is indeed
-<em>meta-programming</em>: we can write a programm that writes a program
-(a.k.a. constructs a contract).</p>
+Tezos blockchain (although they can be simulated). This is indeed
+<em>meta-programming</em>: we can write a programm that writes a program, i.e., constructs a contract.</p>
 </div>
 <div class="paragraph">
 <p>Note that in the example <code>self.data.x + 2</code>, the actual addition
@@ -216,13 +277,13 @@ point is called.</p>
 <h3 id="_type_inference">Type Inference</h3>
 <div class="paragraph">
 <p>Just like in Python, most of the time there is no need to specify the
-type of an object in SmartPy. For a number of reasons (e.g. because
+type of an object in SmartPy. For a number of reasons (e.g., because
 SmartPy&#8217;s target language, Michelson, requires types), each SmartPy
 expression does however need a type. Therefore SmartPy uses type
 inference in order to determine each expressions type.</p>
 </div>
 <div class="paragraph">
-<p>In practice this means that information about an expression is
+<p>In practice, this means that information about an expression is
 gathered according to its usage: for example, when somewhere in your
 contract you write <code>self.data.x == "abc"</code>, SmartPy will automatically
 determine and remember that <code>self.data.x</code> is a string.</p>
@@ -369,7 +430,7 @@ See <a href="#_contracts_and_addresses">Contracts and Addresses</a>.</p>
 <dt class="hdlist1"><code>sp.TKey</code></dt>
 <dd>
 <p>A public cryptographic key.<br>
-See <a href="#Key">[Key]</a>.</p>
+See <a href="#_keys">Keys</a>.</p>
 </dd>
 <dt class="hdlist1"><code>sp.TKeyHash</code></dt>
 <dd>
@@ -392,33 +453,99 @@ See <a href="#_chain_id">Chain Id</a>.</p>
 <p>The type of secret keys. Secret keys cannot appear in smart contracts but <a href="#_tests_and_test_scenarios">Tests and Test Scenarios</a> use them.<br>
 See <a href="#_secret_key">Secret Key</a>.</p>
 </dd>
+<dt class="hdlist1"><code>sp.TSaplingState(memo_size = None)</code></dt>
+<dt class="hdlist1"><code>sp.TSaplingTransaction(memo_size = None)</code></dt>
+<dd>
+<p>Experimental types for Sapling integration.<br>
+See <a href="#_sapling">Sapling</a>.</p>
+</dd>
 </dl>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_records_and_variants">Records and Variants</h3>
+<h3 id="_record_types_variant_types_and_layouts">Record types, Variant types and layouts</h3>
 <div class="paragraph">
-<p>In SmartPy, we can use custom data types called records and variants.</p>
+<p>In SmartPy, we can use custom data types called records and variants.<br>
+Records and variants are translated in Michelson into binary trees of <code>pair</code> and <code>or</code> with annotations corresponding to each field.<br>
+The geometry of these binary trees is described by a <em>layout</em>.</p>
+</div>
+<div class="sect3">
+<h4 id="_layouts">Layouts</h4>
+<div class="paragraph">
+<p>A layout is a Python expression listing all fields or constructors in a binary tree structure such as <code>("b", ("a", "c"))</code>.<br>
+There is no equivalent instruction in Michelson.<br>
+See reference <a href="/ide?template=layout.py" target="_blank" rel="noopener">Data Type Layouts</a> template.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_record_types">Record types</h4>
+<div class="paragraph">
+<p>A record type represents a cartesian product of several types similar to a struct
+in <code>C</code> with a layout.<br>
+Please see the <a href="#_records">Records</a> section.</p>
 </div>
 <div class="dlist">
 <dl>
-<dt class="hdlist1">Records</dt>
+<dt class="hdlist1"><code>sp.TRecord(**fields)</code></dt>
 <dd>
-<p>A record type is defined simply by enumerating the field names
-together with types, e.g. <code>sp.TRecord(x = sp.TInt, y = sp.TInt)</code>.<br>
-It represents a cartesian product of several types similar to a struct
-in <code>C</code>.<br>
-Please see the <a href="#_records">Records</a> section.</p>
+<p>A record type is introduced by enumerating the field names together with types, e.g., <code>sp.TRecord(x = sp.TInt, y = sp.TInt)</code>.<br>
+A <code>sp.TRecord(**fields)</code> uses the default layout as determined by SmartPy (today a binary tree, it will change in the future).</p>
 </dd>
-<dt class="hdlist1">Variants</dt>
+<dt class="hdlist1"><code>.layout(layout)</code></dt>
 <dd>
-<p>A variant type, or sum type, is defined simply by enumerating the constructor names
-  together with their inner types, e.g. <code>sp.TVariant(default_choice = sp.TInt, alternative_choice = sp.TString)</code>.<br>
-It represents a union of several choices, similar to a clean version of
-a struct with an enum/union pattern in <code>C</code>.<br>
-Please see <a href="#_variants">Variants</a>.</p>
+<p>A record type, i.e. something of the form <code>sp.TRecord(&#8230;&#8203;)</code>, can be used to define a record type with a layout by doing:</p>
 </dd>
 </dl>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="python">    t = sp.TRecord(owner    = sp.TAddress,
+                   operator = sp.TAddress,
+                   token_id = sp.TString)
+    t_with_layout = t.layout((<span class="string"><span class="delimiter">&quot;</span><span class="content">owner</span><span class="delimiter">&quot;</span></span>, (<span class="string"><span class="delimiter">&quot;</span><span class="content">operator</span><span class="delimiter">&quot;</span></span>, <span class="string"><span class="delimiter">&quot;</span><span class="content">token_id</span><span class="delimiter">&quot;</span></span>)))</code></pre>
+</div>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>.right_comb()</code></dt>
+<dd>
+<p>Like <code>.layout(..)</code> but the geometry used is <code>(f1, (f2, .. (f_{k-1}, f_k)))))</code>, the list of fields is determined automatically and sorted alphabetically.</p>
+</dd>
+<dt class="hdlist1"><code>.with_fields(**fields)</code></dt>
+<dd>
+<p>Add some fields to the <code>TRecord(..)</code> where <code>fields</code> is a Python (string, type)-dictionary of fields.</p>
+</dd>
+<dt class="hdlist1"><code>.without_fields(fields)</code></dt>
+<dd>
+<p>Remove some fields from the <code>TRecord(..)</code> where <code>fields</code> is a Python list of fields.</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_variant_types">Variant types</h4>
+<div class="paragraph">
+<p>A variant type represents a union of several choices, similar to a clean version of
+a struct with an enum/union pattern in <code>C</code>.<br>
+Please see <a href="#_variants">Variants</a>.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>sp.TVariant(**fields)</code></dt>
+<dd>
+<p>A variant type is introduced by enumerating the constructor names together with their inner types, e.g. <code>sp.TVariant(default_choice = sp.TInt, alternative_choice = sp.TString)</code>.<br>
+A <code>sp.TVariant(**fields)</code> uses the default layout as determined by SmartPy (today a binary tree, it will change in the future).</p>
+</dd>
+<dt class="hdlist1"><code>.layout(layout)</code></dt>
+<dd>
+<p>Similar to what happens for <code>TRecord</code>.</p>
+</dd>
+<dt class="hdlist1"><code>.right_comb(layout)</code></dt>
+<dd>
+<p>Similar to what happens for <code>TRecord</code>.</p>
+</dd>
+</dl>
+</div>
 </div>
 </div>
 <div class="sect2">
@@ -433,7 +560,7 @@ Please see <a href="#_variants">Variants</a>.</p>
 <p>Constrain the contract storage to be of type <code>t</code>  (called in the <code>__init__</code> constructor).<br>
 This is useful because it allows to precise the storage type or even to define storage-less contracts.<br>
 In a test, if not determined in the <code>__init__</code> method, the storage can be initialized by calling <code>c.set_storage(expression)</code>.<br>
-See reference <a href="index.html?template=init_type_only.py" target="_blank" rel="noopener">Init Type Only</a> template.<br>
+See reference <a href="/ide?template=init_type_only.py" target="_blank" rel="noopener">Init Type Only</a> template.<br>
 This is not mandatory but is appreciated by many in practice.</p>
 </dd>
 </dl>
@@ -518,35 +645,6 @@ There is no equivalent instruction in Michelson.</p>
     x = sp.set_type_expr(..., ...)
     scenario += c.f(x)</code></pre>
 </div>
-</div>
-<div class="dlist">
-<dl>
-<dt class="hdlist1"><code>sp.set_record_layout(expression, layout)</code></dt>
-<dt class="hdlist1"><code>sp.set_variant_layout(expression, layout)</code></dt>
-<dd>
-<p>Constrain <code>expression</code> to be of type record or variant with the corresponding <code>layout</code>.
-This can be used as an expression or a command.<br>
-A layout is a Python expression listing all fields or constructors in a binary tree structure such as <code>("b", ("a", "c"))</code>.<br>
-There is no equivalent instruction in Michelson.<br>
-See reference <a href="index.html?template=layout.py" target="_blank" rel="noopener">Data Type Layouts</a> template.</p>
-</dd>
-<dt class="hdlist1"><code>sp.set_type_record_layout(type_expression, layout)</code></dt>
-<dt class="hdlist1"><code>sp.set_type_variant_layout(type_expression, layout)</code></dt>
-<dd>
-<p>Same functionality directly applicable to type expressions.</p>
-</dd>
-<dt class="hdlist1"><code>self.init_storage_record_layout(layout)</code></dt>
-<dd>
-<p>Constrain the storage, supposed to be of type record (called in the <code>__init__</code>).<br>
-Useful for convenience.</p>
-</dd>
-<dt class="hdlist1"><code>self.init_entry_points_layout(layout)</code></dt>
-<dd>
-<p>Constrain the generated parameter type for entry points to be a variant of the declared layout (called in the <code>__init__</code>).<br>
-There is no equivalent instruction in Michelson.<br>
-See reference <a href="index.html?template=layout.py" target="_blank" rel="noopener">Data Type Layouts</a> template.</p>
-</dd>
-</dl>
 </div>
 <div class="paragraph">
 <p>Containers have built-in optional constraint arguments.</p>
@@ -649,7 +747,7 @@ The corresponding type in Michelson is
 <a href="https://michelson.nomadic-labs.com/?#type-bytes" target="_blank" rel="noopener"><code>bytes</code></a>.</p>
 </div>
 <div class="paragraph">
-<p>See reference <a href="index.html?template=stringManipulations.py" target="_blank" rel="noopener">Strings
+<p>See reference <a href="/ide?template=stringManipulations.py" target="_blank" rel="noopener">Strings
 and Bytes</a> template.</p>
 </div>
 <div class="dlist">
@@ -703,7 +801,12 @@ See Michelson
 <a href="https://michelson.nomadic-labs.com/#instr-SHA256" target="_blank" rel="noopener"><code>SHA256</code></a>, and
 <a href="https://michelson.nomadic-labs.com/#instr-SHA512" target="_blank" rel="noopener"><code>SHA512</code></a>.<br>
 See reference
-<a href="index.html?template=testHashFunctions.py" target="_blank" rel="noopener">Hash Functions</a> template.</p>
+<a href="/ide?template=testHashFunctions.py" target="_blank" rel="noopener">Hash Functions</a>
+template.</p>
+</dd>
+<dt class="hdlist1"><code>sp.bytes_of_string(s)</code></dt>
+<dd>
+<p>Encode a constant string as <code>sp.TBytes</code>.</p>
 </dd>
 </dl>
 </div>
@@ -749,7 +852,8 @@ See Michelson <a href="https://michelson.nomadic-labs.com/#instr-EQ" target="_bl
 <a href="https://michelson.nomadic-labs.com/#instr-GT" target="_blank" rel="noopener"><code>GT</code></a>, and
 <a href="https://michelson.nomadic-labs.com/#instr-COMPARE" target="_blank" rel="noopener"><code>COMPARE</code></a>.</p>
 </dd>
-<dt class="hdlist1"><code>sp.min(x, y)</code> and <code>sp.max(x, y)</code></dt>
+<dt class="hdlist1"><code>sp.min(x, y)</code></dt>
+<dt class="hdlist1"><code>sp.max(x, y)</code></dt>
 <dd>
 <p><code>sp.min(x, y)</code> and <code>sp.max(x, y)</code> return the minimum and maximum of <code>x</code>
 and <code>y</code>, respectively.</p>
@@ -768,7 +872,7 @@ The corresponding types in Michelson are
 <a href="https://michelson.nomadic-labs.com/?#type-address" target="_blank" rel="noopener"><code>address</code></a>.</p>
 </div>
 <div class="paragraph">
-<p>See reference <a href="index.html?template=collatz.py" target="_blank" rel="noopener">On Chain Contract Calls - Collatz</a> and <a href="index.html?template=FA1.2.py" target="_blank" rel="noopener">FA1.2</a> templates.</p>
+<p>See reference <a href="/ide?template=collatz.py" target="_blank" rel="noopener">On Chain Contract Calls - Collatz</a> and <a href="/ide?template=FA1.2.py" target="_blank" rel="noopener">FA1.2</a> templates.</p>
 </div>
 <div class="dlist">
 <dl>
@@ -788,8 +892,19 @@ If <code>entry_point</code> is empty, use current entry point.<br></p>
 </dd>
 <dt class="hdlist1"><code>sp.to_address(contract)</code></dt>
 <dd>
-<p>Computes the address, of type <code>sp.TAddress</code>, of a contract of type <code>sp.TContract(t)</code> for some type <code>t</code>.<br>
+<p>Compute the address, of type <code>sp.TAddress</code>, of a contract of type <code>sp.TContract(t)</code> for some type <code>t</code>.<br>
 See Michelson <a href="https://michelson.nomadic-labs.com/#instr-ADDRESS" target="_blank" rel="noopener"><code>ADDRESS</code></a>.</p>
+</dd>
+<dt class="hdlist1"><code>sp.self_address</code></dt>
+<dd>
+<p>Alias for <code>sp.to_address(sp.self)</code>.<br>
+This is the proper way to get a contract&#8217;s own address.<br>
+In tests, a contract&#8217;s address is accessible through the <code>address</code> field.</p>
+</dd>
+<dt class="hdlist1"><code>sp.self_entry_point_address(entry_point = "")</code></dt>
+<dd>
+<p>Alias for <code>sp.to_address(sp.self_entry_point(entry_point))</code>.<br>
+This is the proper way to get a contract&#8217;s own address of an entry point.</p>
 </dd>
 <dt class="hdlist1"><code>sp.sender</code></dt>
 <dd>
@@ -834,12 +949,12 @@ See Michelson
   i.e. the argument sent to the destination must be consistent with what it expects.<br>
 See Michelson <a href="https://michelson.nomadic-labs.com/#instr-TRANSFER_TOKENS" target="_blank" rel="noopener"><code>TRANSFER_TOKENS</code></a>.</p>
 </dd>
-<dt class="hdlist1"><code>sp.send(destination, amount)</code></dt>
+<dt class="hdlist1"><code>sp.send(destination, amount, message = None)</code></dt>
 <dd>
 <p>Send the specified <code>amount</code> to the <code>destination</code>
-  contract. Will fail if <code>destination</code> (of type <code>sp.TAddress</code>) does not resolve to a
-  contract that expects a <code>sp.TUnit</code> argument (e.g. an account that does not result
-  in any actions).</p>
+  contract. Will fail with optional error <code>message</code> if <code>destination</code> (of type <code>sp.TAddress</code>)
+  does not resolve to a contract that expects a <code>sp.TUnit</code> argument (e.g. an account that does
+  not result in any actions).</p>
 </dd>
 <dt class="hdlist1"><code>sp.implicit_account(key_hash)</code></dt>
 <dd>
@@ -866,6 +981,19 @@ can call the contract e.g. with the argument <code>-42</code> while sending alon
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="python">  sp.transfer(-<span class="integer">42</span>, sp.mutez(<span class="integer">0</span>), c)</code></pre>
 </div>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>sp.create_contract(contract, storage = None, amount = tez(0), baker = None)</code></dt>
+<dd>
+<p>Create a new contract from stored SmartPy contract with optional
+storage, amount and baker.<br>
+See Michelson
+<a href="https://michelson.nomadic-labs.com/#instr-CREATE_CONTRACT" target="_blank" rel="noopener"><code>CREATE_CONTRACT</code></a>.<br>
+See reference <a href="/ide?template=create_contract.py">Create
+Contract</a> template.</p>
+</dd>
+</dl>
 </div>
 </div>
 <div class="sect2">
@@ -952,9 +1080,9 @@ See Michelson <a href="https://michelson.nomadic-labs.com/#instr-INT" target="_b
 <p>Convert a <code>sp.TInt</code> into an <code>sp.TOption(sp.TNat)</code>. <code>sp.is_nat(i) == sp.some(n)</code> when <code>i</code> is a non negative <code>sp.TInt</code> and <code>sp.none</code> otherwise.<br>
 See Michelson <a href="https://michelson.nomadic-labs.com/#instr-ISNAT" target="_blank" rel="noopener"><code>ISNAT</code></a>.</p>
 </dd>
-<dt class="hdlist1"><code>sp.as_nat(i)</code></dt>
+<dt class="hdlist1"><code>sp.as_nat(i, message = None)</code></dt>
 <dd>
-<p>Convert an <code>sp.TInt</code> into a <code>sp.TNat</code> and fails if not possible, i.e., when <code>i</code> is negative. It is implemented as <code>sp.as_nat(i) = sp.is_nat(i).open_some()</code>.</p>
+<p>Convert an <code>sp.TInt</code> into a <code>sp.TNat</code> and fails if not possible with the optional <code>message</code>, i.e., when <code>i</code> is negative. It is implemented as <code>sp.as_nat(i) = sp.is_nat(i).open_some(message = message)</code>.</p>
 </dd>
 </dl>
 </div>
@@ -1013,7 +1141,7 @@ The corresponding type in Michelson is
 <a href="https://michelson.nomadic-labs.com/?#type-key_hash" target="_blank" rel="noopener"><code>key_hash</code></a>.</p>
 </div>
 <div class="paragraph">
-<p>See reference <a href="index.html?template=bakingSwap.py" target="_blank" rel="noopener">Baking Swap</a> template.</p>
+<p>See reference <a href="/ide?template=bakingSwap.py" target="_blank" rel="noopener">Baking Swap</a> template.</p>
 </div>
 <div class="dlist">
 <dl>
@@ -1031,7 +1159,9 @@ See Michelson <a href="https://michelson.nomadic-labs.com/#instr-HASH_KEY" targe
 <dt class="hdlist1"><code>sp.set_delegate(baker)</code></dt>
 <dd>
 <p>Set or unset an optional <code>baker</code> of type <code>sp.TOption(sp.TKeyHash)</code>.<br>
-See Michelson <a href="https://michelson.nomadic-labs.com/#instr-SET_DELEGATE" target="_blank" rel="noopener"><code>SET_DELEGATE</code></a>.</p>
+See Michelson
+<a href="https://michelson.nomadic-labs.com/#instr-SET_DELEGATE" target="_blank" rel="noopener"><code>SET_DELEGATE</code></a>.<br>
+In tests, a contract&#8217;s baker is accessible through the <code>baker</code> field.</p>
 </dd>
 <dt class="hdlist1"><code>sp.implicit_account(key_hash)</code></dt>
 <dd>
@@ -1061,7 +1191,7 @@ The corresponding type in Michelson is
 <a href="https://michelson.nomadic-labs.com/?#type-lambda" target="_blank" rel="noopener"><code>lambda</code></a>.<br></p>
 </div>
 <div class="paragraph">
-<p>See reference <a href="index.html?template=lambdas.py" target="_blank" rel="noopener">Lambdas</a> template.</p>
+<p>See reference <a href="/ide?template=lambdas.py" target="_blank" rel="noopener">Lambdas</a> template.</p>
 </div>
 <div class="dlist">
 <dl>
@@ -1069,11 +1199,16 @@ The corresponding type in Michelson is
 <dd>
 <p>Define a SmartPy lambda from a Python function or lambda.<br>
 For example, <code>sp.build_lambda(lambda x: x + 3)</code> represents a function that takes an argument <code>x</code> and returns <code>x + 3</code>.<br>
+This function is usually useless as it is called automatically by SmartPy in most contexts.<br>
 See Michelson <a href="https://michelson.nomadic-labs.com/#instr-LAMBDA" target="_blank" rel="noopener"><code>LAMBDA</code></a>.</p>
 </dd>
 <dt class="hdlist1"><code>sp.global_lambda</code></dt>
 <dd>
-<p>Decorator to introduce a lambda that is also a global variable.</p>
+<p>Decorator to introduce a lambda that is also a global variable.<br>
+This is used for pure functions that are expected to be used more than
+once and that do not change the global state nor create operations.<br>
+Values are returned by using <code>sp.result(value)</code>.<br>
+See reference <a href="/ide?template=worldCalculator.py" target="_blank" rel="noopener">WorldCalculator</a> template.</p>
 </dd>
 </dl>
 </div>
@@ -1089,11 +1224,45 @@ See Michelson <a href="https://michelson.nomadic-labs.com/#instr-LAMBDA" target=
         sp.while y.value * y.value &gt; x:
             y.value = (x // y.value + y.value) // <span class="integer">2</span>
         sp.verify((y.value * y.value &lt;= x) &amp; (x &lt; (y.value + <span class="integer">1</span>) * (y.value + <span class="integer">1</span>)))
-        <span class="keyword">return</span> y.value
+        sp.result(y.value)
 
     <span class="decorator">@sp.entry_point</span>
     <span class="keyword">def</span> <span class="function">h</span>(<span class="predefined-constant">self</span>, params):
-        <span class="predefined-constant">self</span>.data.result = square_root(params)</code></pre>
+        <span class="predefined-constant">self</span>.data.result = <span class="predefined-constant">self</span>.square_root(params)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>See Michelson <a href="https://michelson.nomadic-labs.com/#instr-LAMBDA" target="_blank" rel="noopener"><code>LAMBDA</code></a>.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>sp.sub_entry_point</code></dt>
+<dd>
+<p>Like <code>sp.global_lambda</code> but for functions that can change the global state or create operations.<br>
+Values are returned by using <code>sp.result(value)</code>.<br>
+See reference <a href="/ide?template=sub_entry_point.py" target="_blank" rel="noopener">Sub entry point</a> template.</p>
+</dd>
+</dl>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="python"><span class="keyword">class</span> <span class="class">MyContract</span>(sp.Contract):
+    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="predefined-constant">self</span>):
+        <span class="predefined-constant">self</span>.init(x = <span class="integer">2</span>, y = <span class="string"><span class="delimiter">&quot;</span><span class="content">aaa</span><span class="delimiter">&quot;</span></span>, z = <span class="integer">0</span>)
+
+    <span class="decorator">@sp.sub_entry_point</span>
+    <span class="keyword">def</span> <span class="function">a</span>(<span class="predefined-constant">self</span>, params):
+        sp.set_delegate(sp.none)
+        <span class="predefined-constant">self</span>.data.x += <span class="integer">1</span>
+        sp.result(params  * <span class="predefined-constant">self</span>.data.x)
+
+    <span class="decorator">@sp.entry_point</span>
+    <span class="keyword">def</span> <span class="function">f</span>(<span class="predefined-constant">self</span>, params):
+        <span class="predefined-constant">self</span>.data.z = <span class="predefined-constant">self</span>.a(<span class="integer">5</span>) + <span class="predefined-constant">self</span>.a(<span class="integer">10</span>)
+
+    <span class="decorator">@sp.entry_point</span>
+    <span class="keyword">def</span> <span class="function">g</span>(<span class="predefined-constant">self</span>, params):
+        <span class="predefined-constant">self</span>.data.z = <span class="predefined-constant">self</span>.a(<span class="integer">6</span>)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1125,14 +1294,14 @@ The corresponding type in Michelson is
 <a href="https://michelson.nomadic-labs.com/?#type-list" target="_blank" rel="noopener"><code>list</code></a>.</p>
 </div>
 <div class="paragraph">
-<p>See reference <a href="index.html?template=testLists.py" target="_blank" rel="noopener">Lists</a> template.</p>
+<p>See reference <a href="/ide?template=testLists.py" target="_blank" rel="noopener">Lists</a> template.</p>
 </div>
 <div class="dlist">
 <dl>
 <dt class="hdlist1">Literals: <code>sp.list(l = &#8230;&#8203;, t = &#8230;&#8203;)</code> and standard Python lists</dt>
 <dd>
 <p>Define a list of (optional) elements in <code>l</code> whose optional type is <code>t</code>.<br>
-See Michelson <a href="https://michelson.nomadic-labs.com/#instr-NIL"><code>NIL</code></a>.<br>
+See Michelson <a href="https://michelson.nomadic-labs.com/#instr-NIL" target="_blank" rel="noopener"><code>NIL</code></a>.<br>
 Standard Python lists are also accepted, e.g., <code>[1, 2, 3]</code>, <code>["aa", "bb", "cc"]</code>.</p>
 </dd>
 <dt class="hdlist1"><code>myList.push(element)</code></dt>
@@ -1162,7 +1331,8 @@ See Michelson <a href="https://michelson.nomadic-labs.com/#instr-CONCAT" target=
 <dt class="hdlist1"><code>sp.for &#8230;&#8203; in &#8230;&#8203;:</code></dt>
 <dd>
 <p>Iterate on a list.<br>
-See Michelson <a href="https://michelson.nomadic-labs.com/#instr-ITER" target="_blank" rel="noopener"><code>ITER</code></a> and <a href="https://michelson.nomadic-labs.com/#instr-MAP" target="_blank" rel="noopener"><code>MAP</code></a>.</p>
+See Michelson <a href="https://michelson.nomadic-labs.com/#instr-ITER" target="_blank" rel="noopener"><code>ITER</code></a> and <a href="https://michelson.nomadic-labs.com/#instr-MAP" target="_blank" rel="noopener"><code>MAP</code></a>.<br>
+To iterate on <code>sp.TMap(key, value)</code> or <code>sp.TSet(elem)</code>, we first convert to an <code>sp.TList(..)</code> with <code>e.items()</code>, <code>e.keys()</code>, <code>e.values()</code> or <code>e.elements()</code>.</p>
 </dd>
 </dl>
 </div>
@@ -1175,8 +1345,23 @@ See Michelson <a href="https://michelson.nomadic-labs.com/#instr-ITER" target="_
             <span class="predefined-constant">self</span>.data.result += x</code></pre>
 </div>
 </div>
-<div class="paragraph">
-<p>To iterate on <code>sp.TMap(key, value)</code> or <code>sp.TSet(elem)</code>, we first convert to an <code>sp.List(..)</code> with <code>e.items()</code>, <code>e.keys()</code>, <code>e.values()</code> or <code>e.elements()</code>.</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>sp.match_cons(l)</code></dt>
+<dd>
+<p>Match a list and expose its head and tail if any.<br>
+See reference <a href="/ide?template=testLists.py" target="_blank" rel="noopener">Lists</a> template.</p>
+</dd>
+</dl>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="python">    <span class="keyword">with</span> sp.match_cons(params) <span class="keyword">as</span> x1:
+        <span class="predefined-constant">self</span>.data.head = x1.head
+        <span class="predefined-constant">self</span>.data.tail = x1.tail
+    sp.else:
+        <span class="predefined-constant">self</span>.data.head = <span class="string"><span class="delimiter">&quot;</span><span class="content">abc</span><span class="delimiter">&quot;</span></span></code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>Please note that there is no way to perform random access on a list.</p>
@@ -1192,7 +1377,7 @@ The corresponding type in Michelson is
 <a href="https://michelson.nomadic-labs.com/?#type-map" target="_blank" rel="noopener"><code>map</code></a>.</p>
 </div>
 <div class="paragraph">
-<p>See reference <a href="index.html?template=testLists.py" target="_blank" rel="noopener">Lists</a> template.</p>
+<p>See reference <a href="/ide?template=testLists.py" target="_blank" rel="noopener">Lists</a> template.</p>
 </div>
 <div class="dlist">
 <dl>
@@ -1269,13 +1454,15 @@ The corresponding type in Michelson is
 We cannot iterate on big maps or compute their sizes.</p>
 </div>
 <div class="paragraph">
-<p>See reference <a href="index.html?template=testLists.py" target="_blank" rel="noopener">Lists</a> template.</p>
+<p>See reference <a href="/ide?template=testLists.py" target="_blank" rel="noopener">Lists</a> template.</p>
 </div>
 <div class="dlist">
 <dl>
 <dt class="hdlist1">Literals: <code>sp.big_map(l = &#8230;&#8203;, tkey = &#8230;&#8203;, tvalue = &#8230;&#8203;)</code></dt>
 <dd>
-<p>Define a big_map of (optional) elements in <code>l</code> with optional key type <code>tkey</code> and optional value type <code>tvalue</code>.</p>
+<p>Define a big_map of (optional) elements in <code>l</code> with optional key type
+<code>tkey</code> and optional value type <code>tvalue</code>.<br>
+See Michelson <a href="https://michelson.nomadic-labs.com/#instr-EMPTY_BIG_MAP" target="_blank" rel="noopener"><code>EMPTY_BIG_MAP</code></a>.</p>
 </dd>
 <dt class="hdlist1"><code>myBigMap[key] = value</code></dt>
 <dd>
@@ -1330,12 +1517,17 @@ See Michelson <a href="https://michelson.nomadic-labs.com/#instr-AMOUNT" target=
 <dt class="hdlist1"><code>sp.balance</code></dt>
 <dd>
 <p>The balance of the current contract.<br>
-See Michelson <a href="https://michelson.nomadic-labs.com/#instr-BALANCE" target="_blank" rel="noopener"><code>BALANCE</code></a>.</p>
+See Michelson
+<a href="https://michelson.nomadic-labs.com/#instr-BALANCE" target="_blank" rel="noopener"><code>BALANCE</code></a>.<br>
+Due to the unintuitive semantics in Michelson, we suggest that
+developers do <em>not</em> rely on balance too much. See
+<a href="https://forum.tezosagora.org/t/problems-with-balance/2194/3" target="_blank" rel="noopener">Tezos Agora post</a>.<br>
+In tests, a contract&#8217;s balance is accessible through the <code>balance</code> field.</p>
 </dd>
 <dt class="hdlist1"><code>e1 + e2</code> and <code>e1 - e2</code></dt>
 <dd>
 <p>Usual arithmetic operators on <code>sp.TMutez</code>.<br>
-See Michelson <a href="https://michelson.nomadic-labs.com/#instr-ADD"><code>ADD</code></a> and <a href="https://michelson.nomadic-labs.com/#instr-SUB" target="_blank" rel="noopener"><code>SUB</code></a>.</p>
+See Michelson <a href="https://michelson.nomadic-labs.com/#instr-ADD" target="_blank" rel="noopener"><code>ADD</code></a> and <a href="https://michelson.nomadic-labs.com/#instr-SUB" target="_blank" rel="noopener"><code>SUB</code></a>.</p>
 </dd>
 <dt class="hdlist1"><code>sp.split_tokens(amount, quantity, totalQuantity)</code></dt>
 <dd>
@@ -1387,15 +1579,10 @@ See Michelson <a href="https://michelson.nomadic-labs.com/#instr-NONE" target="_
 i.e., checks whether it is of the form <code>sp.some(&#8230;&#8203;)</code>.<br>
 See Michelson <a href="https://michelson.nomadic-labs.com/#instr-IF_NONE" target="_blank" rel="noopener"><code>IF_NONE</code></a>.</p>
 </dd>
-<dt class="hdlist1"><code>e.open_some()</code></dt>
+<dt class="hdlist1"><code>e.open_some(message = None)</code></dt>
 <dd>
-<p>If <code>e</code> is equal to <code>sp.some(x)</code>, return <code>x</code>. Otherwise
-fail.<br>
-See Michelson <a href="https://michelson.nomadic-labs.com/#instr-IF_NONE" target="_blank" rel="noopener"><code>IF_NONE</code></a>.</p>
-</dd>
-<dt class="hdlist1"><code>e.open_some()</code></dt>
-<dd>
-<p>Access the value contained in an optional value if it exists and fails otherwise.<br>
+<p>If <code>e</code> is equal to <code>sp.some(x)</code>, return <code>x</code>; otherwise
+fail. <code>message</code> is the optional error raised in case of error.<br>
 See Michelson <a href="https://michelson.nomadic-labs.com/#instr-IF_NONE" target="_blank" rel="noopener"><code>IF_NONE</code></a>.</p>
 </dd>
 </dl>
@@ -1413,9 +1600,10 @@ See Michelson <a href="https://michelson.nomadic-labs.com/#instr-IF_NONE" target
 <p>Define a pair of two elements.<br>
 See Michelson <a href="https://michelson.nomadic-labs.com/#instr-PAIR" target="_blank" rel="noopener"><code>PAIR</code></a>.</p>
 </dd>
-<dt class="hdlist1"><code>sp.fst(..)</code> and <code>sp.snd(..)</code></dt>
+<dt class="hdlist1"><code>sp.fst(..)</code></dt>
+<dt class="hdlist1"><code>sp.snd(..)</code></dt>
 <dd>
-<p><code>sp.fst(..)</code> and <code>sp.snd(..)</code> are used to access elements in pairs.
+<p><code>sp.fst(..)</code> and <code>sp.snd(..)</code> are used to access elements in pairs.<br>
 See Michelson <a href="https://michelson.nomadic-labs.com/#instr-CAR" target="_blank" rel="noopener"><code>CAR</code></a> and <a href="https://michelson.nomadic-labs.com/#instr-CDR" target="_blank" rel="noopener"><code>CDR</code></a>.</p>
 </dd>
 </dl>
@@ -1450,7 +1638,7 @@ The corresponding type in Michelson is
 <a href="https://michelson.nomadic-labs.com/?#type-set" target="_blank" rel="noopener"><code>set</code></a>.</p>
 </div>
 <div class="paragraph">
-<p>See reference <a href="index.html?template=testLists.py" target="_blank" rel="noopener">Lists</a> template.</p>
+<p>See reference <a href="/ide?template=testLists.py" target="_blank" rel="noopener">Lists</a> template.</p>
 </div>
 <div class="dlist">
 <dl>
@@ -1494,8 +1682,8 @@ The corresponding type in Michelson is
 </div>
 <div class="paragraph">
 <p>See reference
-<a href="index.html?template=testCheckSignature.py" target="_blank" rel="noopener">Signatures</a> and
-<a href="index.html?template=stateChannels.py" target="_blank" rel="noopener">State Channels</a> templates.</p>
+<a href="/ide?template=testCheckSignature.py" target="_blank" rel="noopener">Signatures</a> and
+<a href="/ide?template=stateChannels.py" target="_blank" rel="noopener">State Channels</a> templates.</p>
 </div>
 <div class="dlist">
 <dl>
@@ -1529,7 +1717,7 @@ The corresponding type in Michelson is
 <a href="https://michelson.nomadic-labs.com/?#type-string" target="_blank" rel="noopener"><code>string</code></a>.</p>
 </div>
 <div class="paragraph">
-<p>See reference <a href="index.html?template=stringManipulations.py" target="_blank" rel="noopener">Strings
+<p>See reference <a href="/ide?template=stringManipulations.py" target="_blank" rel="noopener">Strings
 and Bytes</a> template.</p>
 </div>
 <div class="dlist">
@@ -1571,7 +1759,7 @@ The corresponding type in Michelson is
 <a href="https://michelson.nomadic-labs.com/?#type-timestamp" target="_blank" rel="noopener"><code>timestamp</code></a>.</p>
 </div>
 <div class="paragraph">
-<p>See reference <a href="index.html?template=testTimestamp.py" target="_blank" rel="noopener">Timestamps</a> template.</p>
+<p>See reference <a href="/ide?template=testTimestamp.py" target="_blank" rel="noopener">Timestamps</a> template.</p>
 </div>
 <div class="dlist">
 <dl>
@@ -1660,7 +1848,7 @@ They are used to define sum-types, similar to enums in other languages
 with the extra feature that these enums contain values.</p>
 </div>
 <div class="paragraph">
-<p>See reference <a href="index.html?template=testVariant.py" target="_blank" rel="noopener">Variant</a> template.</p>
+<p>See reference <a href="/ide?template=testVariant.py" target="_blank" rel="noopener">Variant</a> template.</p>
 </div>
 <div class="dlist">
 <dl>
@@ -1763,6 +1951,36 @@ variables. The latter cannot be updated during contract execution.</p>
         <span class="predefined-constant">self</span>.data.value = y.value</code></pre>
 </div>
 </div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>sp.compute(expression)</code></dt>
+<dd>
+<p>This is defined as a local variable immediately created and returned with its value.</p>
+</dd>
+</dl>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="python"><span class="keyword">def</span> <span class="function">compute</span>(expression):
+    <span class="keyword">return</span> local(<span class="string"><span class="delimiter">&quot;</span><span class="content">compute_%i</span><span class="delimiter">&quot;</span></span> % (get_line_no()), expression).value</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It&#8217;s used to evaluate an expression and remember its value.</p>
+</div>
+<div class="paragraph">
+<p>When we evaluate this code:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="python">    x = sp.compute(<span class="predefined-constant">self</span>.data.a)
+    <span class="predefined-constant">self</span>.data.a += <span class="integer">1</span>
+    y = sp.compute(<span class="predefined-constant">self</span>.data.a)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then <code>y</code> contains a value equals to the value of <code>x</code> plus one.</p>
+</div>
 </div>
 <div class="sect2">
 <h3 id="_control_and_syntactic_sugar">Control and Syntactic Sugar</h3>
@@ -1853,6 +2071,10 @@ When <code>message</code> is not present, an exception of the form
 </div>
 <div class="sect2">
 <h3 id="_raising_exceptions">Raising Exceptions</h3>
+<div class="paragraph">
+<p>Once an exception is raised, it cannot be caught.<br>
+String error messages may take a lot of space in smart contracts so we try to be cautious there.</p>
+</div>
 <div class="dlist">
 <dl>
 <dt class="hdlist1"><code>sp.failwith(message)</code></dt>
@@ -1863,6 +2085,324 @@ See Michelson <a href="https://michelson.nomadic-labs.com/#instr-FAILWITH" targe
 </dd>
 </dl>
 </div>
+<div class="paragraph">
+<p>Besides <code>sp.verify</code> and <code>sp.verify_equal</code>, exceptions can also be raised by other constructions:</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Accessing fields <code>my_map[x]</code></dt>
+<dd>
+<p>The exception raised is now a pair containing the <code>(x, my_map)</code>.</p>
+</dd>
+<dt class="hdlist1">Opening variants</dt>
+<dd>
+<p>This may fail with <code>sp.unit</code>.</p>
+</dd>
+<dt class="hdlist1">Dividing by zero</dt>
+<dd>
+<p>A message is shown.</p>
+</dd>
+<dt class="hdlist1">Variable step in a range which is 0</dt>
+<dd>
+<p>A message is shown.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_experimental_features">Experimental Features</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_sapling">Sapling</h3>
+<div class="paragraph">
+<p><a href="https://blog.nomadic-labs.com/sapling-integration-in-tezos-tech-preview.html">Sapling</a> is an experimental feature in Michelson.
+SmartPy.io is already compatible with Sapling in different ways: types, michelson implementation, compiler, and a fake implementation for test scenarios.<br>
+See reference <a href="/ide?template=sapling.py" target="_blank" rel="noopener">Sapling</a> and <a href="/ide?template=sapling2.py" target="_blank" rel="noopener">Sapling2</a> templates.</p>
+</div>
+<div class="paragraph">
+<p>There are two types for Sapling: <code>sp.TSaplingState(memo_size)</code> for
+states and <code>sp.TSaplingTransaction(memo_size)</code> for transactions where
+<code>memo_size</code> is a constant integer between <code>0</code> and <code>65535</code> and
+corresponds to potentially included data in transaction. The
+<code>memo_size</code> parameter is optional in types <code>sp.TSaplingState</code> and
+<code>sp.TSaplingTransaction</code> as it may be computed through type inference.</p>
+</div>
+<div class="paragraph">
+<p>SmartPy doesn&#8217;t generate proper literals for Sapling types but an ad-hoc, fake, test implementation is provided for test scenarios.
+This is <strong>not</strong> a proper Sapling transaction but it is enough to test contracts (see reference templates).</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Literals: <code>sp.sapling_transaction(source, target, amount, memo_size)</code></dt>
+<dd>
+<p>This is a <em>fake / test</em> version.</p>
+</dd>
+<dt class="hdlist1"><code>source</code></dt>
+<dd>
+<p><code>source</code> is a Python string, empty string for minting tokens.</p>
+</dd>
+<dt class="hdlist1"><code>target</code></dt>
+<dd>
+<p><code>target</code> is a Python string, empty string for burning tokens.</p>
+</dd>
+<dt class="hdlist1"><code>amount</code></dt>
+<dd>
+<p><code>amount</code> is a non-negative Python integer.</p>
+</dd>
+<dt class="hdlist1"><code>memo_size</code></dt>
+<dd>
+<p><code>memo_size</code> is a non-negative Python integer between <code>0</code> and <code>65535</code>.</p>
+</dd>
+<dt class="hdlist1">Two operations</dt>
+<dt class="hdlist1"><code>sp.sapling_empty_state(memo_size)</code></dt>
+<dd>
+<p>Building an empty <code>sp.TSaplingState</code> with a default <code>memo_size</code> (Expected length for message of Sapling transaction)</p>
+</dd>
+<dt class="hdlist1"><code>memo_size</code></dt>
+<dd>
+<p><code>memo_size</code> is a uint16 value and represents the expected message length of the sapling transaction. <strong>(must be between 0 and 65535)</strong></p>
+</dd>
+<dt class="hdlist1"><code>sp.sapling_verify_update(transaction)</code></dt>
+<dd>
+<p>When <code>state</code> is a <code>sp.TSaplingState(memo_size)</code> and <code>transaction</code> a
+<code>sp.TSaplingTransaction(memo_size)</code>, <code>sp.sapling_verify_update(state,
+transaction)</code> applies the transaction to the state, validates it and
+returns <code>sp.none</code> if it fails and <code>sp.some(x)</code> where <code>x</code> is of type
+<code>sp.TPair(sp.TInt, sp.TSaplingState(memo_size))</code>.</p>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>It belongs to the Edo proposal.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_levels">Levels</h3>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>sp.level</code></dt>
+<dd>
+<p>Like <code>sp.now</code> but for the level of the transaction. It is of type <code>sp.TNat</code>.<br>
+It is discussed in the 007 proposal.</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_flags">Flags</h3>
+<div class="paragraph">
+<p>The compilation of contracts can be controlled by the use of flags.<br></p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>self.add_flag(flag)</code></dt>
+<dd>
+<p>Add a <code>flag</code> where <code>flag</code> is a string constant.<br>
+Examples are: <code>"lazy_entry_points"</code>, <code>"lazy_entry_points_multiple"</code>, <code>"no_comment"</code>, etc.</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_lazy_entry_points">Lazy Entry Points</h3>
+<div class="paragraph">
+<p>The class <code>sp.Contract</code>, inherited by all SmartPy contracts, gets two new methods that control the generation of entry points into lambdas stored in big maps.
+See reference <a href="/ide?template=send_back.py" target="_blank" rel="noopener">Send back</a> template.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>self.add_flag_lazy_entry_points()</code></dt>
+<dd>
+<p>Add one big map to store lazy entry points. This is the most efficient of these two methods.<br>
+<code>self.add_flag_lazy_entry_points()</code> is an alias for <code>self.add_flag("lazy_entry_points")</code>.</p>
+</dd>
+<dt class="hdlist1"><code>self.add_flag_lazy_entry_points_multiple()</code></dt>
+<dd>
+<p>An alternative method that creates a big map per entry point.<br>
+This is less efficient because big maps are costly to generate and this method enlarges the storage type too much.<br>
+<code>self.add_flag_lazy_entry_points_multiple()</code> is an alias for <code>self.add_flag("lazy_entry_points_multiple")</code>.</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_exception_optimization_levels">Exception Optimization Levels</h3>
+<div class="paragraph">
+<p>Exception reporting is determined for a contract by setting <code>self.exception_optimization_level = a_level</code>.<br>
+See reference <a href="/ide?template=test_exception_optimization.py" target="_blank" rel="noopener">Exception Optimization</a> template.</p>
+</div>
+<div class="paragraph">
+<p>Different levels are:</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">"FullDebug"</dt>
+<dd>
+<p>This is extremely costly in terms of size and gas. Useful for debugging purposes. Type of failure, line number, some parameters.</p>
+</dd>
+<dt class="hdlist1">"DebugMessage"</dt>
+<dd>
+<p>This is still very costly in terms of size and gas.</p>
+</dd>
+<dt class="hdlist1">"VerifyOrLine"</dt>
+<dd>
+<p>This is the default. Puts messages for <code>sp.verify</code> and <code>sp.failwith</code>, and line numbers for other failures.</p>
+</dd>
+<dt class="hdlist1">"DefaultLine"</dt>
+<dd>
+<p>Puts messages for <code>sp.verify</code> with custom messages and <code>sp.failwith</code>, and line numbers for other failures.</p>
+</dd>
+<dt class="hdlist1">"Line"</dt>
+<dd>
+<p>Only puts line numbers everywhere.</p>
+</dd>
+<dt class="hdlist1">"DefaultUnit"</dt>
+<dd>
+<p>Puts messages for <code>sp.verify</code> with custom messages, and <code>sp.failwith</code>, and unit for other failures.</p>
+</dd>
+<dt class="hdlist1">"Unit"</dt>
+<dd>
+<p>Always puts unit.</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_no_comment_flag">No comment flag</h3>
+<div class="paragraph">
+<p>A flag to remove comments that do not come from types in the generated Michelson.<br>
+See reference <a href="/ide?template=test_exception_optimization.py" target="_blank" rel="noopener">Exception Optimization</a> template.</p>
+</div>
+<div class="paragraph">
+<p>This is done by calling <code>self.add_flag("no_comment")</code> in the contract.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_views">Views</h3>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>sp.view</code></dt>
+<dd>
+<p>Decorator <code>sp.view(t, message = None)</code> to introduce an entry point that happens to be a <a href="https://gitlab.com/tzip/tzip/-/blob/master/proposals/tzip-7/tzip-7.md">view</a>.<br>
+A view is an entry point that</p>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Doesn&#8217;t change the storage;</p>
+</li>
+<li>
+<p>Calls a callback <code>sp.TContract(t)</code>.</p>
+</li>
+</ol>
+</div>
+</dd>
+</dl>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="python">    <span class="decorator">@sp.view</span>(sp.TNat)
+    <span class="keyword">def</span> <span class="function">getBalance</span>(<span class="predefined-constant">self</span>, params):
+        sp.result(<span class="predefined-constant">self</span>.data.balances[params].balance)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This code is a simpler version of the equivalent:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="python">    <span class="decorator">@sp.entry_point</span>
+    <span class="keyword">def</span> <span class="function">getBalance</span>(<span class="predefined-constant">self</span>, params):
+        __s3 = sp.local(<span class="string"><span class="delimiter">&quot;</span><span class="content">__s3</span><span class="delimiter">&quot;</span></span>, <span class="predefined-constant">self</span>.data.balances[sp.fst(params)].balance)
+        sp.set_type(sp.snd(params), sp.TContract(sp.TNat))
+        sp.transfer(__s3.value, sp.tez(<span class="integer">0</span>), sp.snd(params))</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_importing_smartpy_and_python_code">Importing SmartPy and Python code</h3>
+<div class="paragraph">
+<p>Importing regular Python code can be done in any template with the regular Python <code>import</code>.</p>
+</div>
+<div class="paragraph">
+<p>Importing SmartPy code that uses the syntactic sugar is also doable but needs specific functions.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>sp.import_template(template_name)</code></dt>
+<dd>
+<p>Import a template.<br>
+It only works in <a href="https://SmartPy.io" class="bare">https://SmartPy.io</a>, not with the CLI.</p>
+</dd>
+</dl>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="python">  FA2 = sp.import_template(<span class="string"><span class="delimiter">&quot;</span><span class="content">FA2.py</span><span class="delimiter">&quot;</span></span>)
+  <span class="keyword">class</span> <span class="class">my_token</span>(FA2.FA2):
+      ...</code></pre>
+</div>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>sp.import_script_from_url(url, name = None)</code></dt>
+<dd>
+<p>Same functionality but instead of using a template from within SmartPy.io; import any file.
+The <code>url</code> is a string of the form <code>http://</code>, <code>https://</code>, <code>file://</code>, <code>file:</code>, etc.
+The module obtained name is the optional <code>name</code> parameter, with default equal to <code>url</code>.</p>
+</dd>
+<dt class="hdlist1"><code>sp.import_stored_contract(name)</code></dt>
+<dd>
+<p>Same functionality but instead of importing a file from a <code>url</code>, import a script saved in the browser local storage.<br>
+It only works in <a href="https://SmartPy.io" class="bare">https://SmartPy.io</a>, not with the CLI.</p>
+</dd>
+<dt class="hdlist1"><code>sp.import_script_from_script(name, script)</code></dt>
+<dd>
+<p>Import some script where both <code>name</code> and <code>script</code> are strings.</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_metadata_support">Metadata support</h3>
+<div class="paragraph">
+<p>Helper function for
+<a href="https://gitlab.com/tzip/tzip/-/blob/master/proposals/tzip-16/tzip-16.md">TZip
+16 Standard</a>.<br>
+See reference <a href="/ide?template=metadata.py" target="_blank" rel="noopener">Metadata</a> template.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>metadata_of_url(url)</code></dt>
+<dd>
+<p>Initialize some metadata field in a storage with a constant <code>url</code>
+string.<br>
+Simple alias for <code>sp.big_map({"" : sp.bytes_of_string(url)})</code>.</p>
+</dd>
+<dt class="hdlist1"><code>self.init_metadata(name, expression)</code></dt>
+<dd>
+<p>Generate a JSON metadata document for string <code>name</code> containing an
+arbitraty constant Python <code>expression</code> converted into JSON.</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_debugging_contracts">Debugging contracts</h3>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>sp.trace(expression)</code></dt>
+<dd>
+<p>Compute an expression and print its value to std::out (or the console
+in a web-browser).</p>
+</dd>
+<dt class="hdlist1"><code>scenario.simulation</code></dt>
+<dd>
+<p>Graphical user interface and step by step simulation in a web-browser.</p>
+</dd>
+</dl>
+</div>
 </div>
 </div>
 </div>
@@ -1870,7 +2410,7 @@ See Michelson <a href="https://michelson.nomadic-labs.com/#instr-FAILWITH" targe
 <h2 id="_tests_and_test_scenarios">Tests and Test Scenarios</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>This has been introduced by the following <a href="https://medium.com/@SmartPy_io/introducing-test-scenarios-in-smartpy-io-fae1d3ee56ea" target="_blank" rel="noopener">Medium Post</a>.</p>
+<p>This has been introduced by the following <a href="https://smartpy-io.medium.com/introducing-test-scenarios-in-smartpy-io-fae1d3ee56ea" target="_blank" rel="noopener">Medium Post</a>.</p>
 </div>
 <div class="sect2">
 <h3 id="_tests">Tests</h3>
@@ -1910,7 +2450,7 @@ See Michelson <a href="https://michelson.nomadic-labs.com/#instr-FAILWITH" targe
 <dt class="hdlist1"><code>is_default=True</code></dt>
 <dd>
 <p>Determines if the test is performed by default when evaluating all tests. Can be typically used in conjonction with <code>sp.in_browser</code> in templates to improve speed in browser.<br>
-See reference <a href="index.html?template=FA2.py" target="_blank" rel="noopener">FA2</a> template.</p>
+See reference <a href="/ide?template=FA2.py" target="_blank" rel="noopener">FA2</a> template.</p>
 </dd>
 </dl>
 </div>
@@ -1974,9 +2514,28 @@ See reference <a href="index.html?template=FA2.py" target="_blank" rel="noopener
 <pre class="CodeRay highlight"><code data-lang="python">  scenario += c1
   <span class="comment"># This is identical to doing</span>
   scenario.register(c1, show = <span class="predefined-constant">True</span>)
+
   <span class="comment"># To only register the smart contract but not show it</span>
   scenario.register(c1)</code></pre>
 </div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_contract_methods">Contract Methods</h4>
+<div class="paragraph">
+<p>Additionaly to entry points, contracts have two additional methods that can be called once, before origination.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>c.set_storage(expression)</code></dt>
+<dd>
+<p>set the storage of a contract with no initial storage.</p>
+</dd>
+<dt class="hdlist1"><code>c.set_initial_balance(expression)</code></dt>
+<dd>
+<p>set the initial balance of a contract.</p>
+</dd>
+</dl>
 </div>
 </div>
 <div class="sect3">
@@ -2004,7 +2563,7 @@ See <a href="#_cryptography_in_test_scenarios">Cryptography in Test Scenarios</a
 <div class="listingblock">
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="python">  scenario += c1.myEntryPoint(<span class="integer">12</span>)
-  scenario += c1.myEntryPoint(...).run(sender = ..., source = ..., amount = ..., now = ..., valid = ..., chain_id = ...)
+  scenario += c1.myEntryPoint(...).run(sender = ..., source = ..., amount = ..., now = ..., level = ..., valid = ..., show = ..., chain_id = ...)
   <span class="comment"># To only execute a call to an entry point but not show it</span>
   scenario.register(c1.myEntryPoint(<span class="integer">12</span>))</code></pre>
 </div>
@@ -2016,11 +2575,15 @@ See <a href="#_cryptography_in_test_scenarios">Cryptography in Test Scenarios</a
 <dl>
 <dt class="hdlist1"><code>sender</code></dt>
 <dd>
-<p>the simulated sender of the transaction. It populates <code>sp.sender</code>. It can be either built by a <code>sp.test_account(&#8230;&#8203;)</code> or <code>sp.address(&#8230;&#8203;)</code>.</p>
+<p>the simulated sender of the transaction. It populates <code>sp.sender</code>. It
+can be either built by a <code>sp.test_account(&#8230;&#8203;)</code> or an expression of
+type <code>sp.TAddress</code>.</p>
 </dd>
 <dt class="hdlist1"><code>source</code></dt>
 <dd>
-<p>the simulated source of the transaction. It populates <code>sp.source</code>. It can be either built by a <code>sp.test_account(&#8230;&#8203;)</code> or <code>sp.address(&#8230;&#8203;)</code>.</p>
+<p>the simulated source of the transaction. It populates <code>sp.source</code>. It
+can be either built by a <code>sp.test_account(&#8230;&#8203;)</code> or an expression of
+type <code>sp.TAddress</code>.</p>
 </dd>
 <dt class="hdlist1"><code>amount</code></dt>
 <dd>
@@ -2029,6 +2592,14 @@ See <a href="#_cryptography_in_test_scenarios">Cryptography in Test Scenarios</a
 <dt class="hdlist1"><code>now</code></dt>
 <dd>
 <p>the timestamp of the transaction. Example: <code>sp.timestamp(1571761674)</code>. It populates <code>sp.now</code>.</p>
+</dd>
+<dt class="hdlist1"><code>level</code></dt>
+<dd>
+<p>the level of the transaction. Example: <code>1234</code>. It populates <code>sp.level</code>.</p>
+</dd>
+<dt class="hdlist1"><code>show</code></dt>
+<dd>
+<p>show or hide the transaction. <code>True</code> by default.</p>
 </dd>
 <dt class="hdlist1"><code>valid</code></dt>
 <dd>
@@ -2081,6 +2652,36 @@ See <a href="#_cryptography_in_test_scenarios">Cryptography in Test Scenarios</a
 </div>
 <div class="paragraph">
 <p>The variable <code>x</code> can now be used in the sequel of the scenario and its value is fixed.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_accessing_data_associated_to_contracts">Accessing Data associated to Contracts</h4>
+<div class="paragraph">
+<p>When <code>c</code> is a contract in a scenario, we can access some associated data:</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>c.data</code></dt>
+<dd>
+<p>Retrieve its storage.</p>
+</dd>
+<dt class="hdlist1"><code>c.balance</code></dt>
+<dd>
+<p>Retrieve its balance.</p>
+</dd>
+<dt class="hdlist1"><code>c.baker</code></dt>
+<dd>
+<p>Retrieve its optional delegated baker.</p>
+</dd>
+<dt class="hdlist1"><code>c.address</code></dt>
+<dd>
+<p>Retrieve its <em>testing</em> address.</p>
+</dd>
+<dt class="hdlist1"><code>c.typed</code></dt>
+<dd>
+<p>Retrieve its <em>testing</em> typed contract value.</p>
+</dd>
+</dl>
 </div>
 </div>
 <div class="sect3">
@@ -2177,7 +2778,7 @@ Michelson (a smart contract cannot manipulate secret keys).</p>
 <dt class="hdlist1"><code>is_default=True</code></dt>
 <dd>
 <p>Determines if the test is performed by default when evaluating all tests. Can be typically used in conjonction with <code>sp.in_browser</code> in templates to improve speed in browser.<br>
-See reference <a href="index.html?template=FA2.py" target="_blank" rel="noopener">FA2</a> template.</p>
+See reference <a href="/ide?template=FA2.py" target="_blank" rel="noopener">FA2</a> template.</p>
 </dd>
 </dl>
 </div>
@@ -2188,30 +2789,12 @@ See reference <a href="index.html?template=FA2.py" target="_blank" rel="noopener
 <h2 id="_command_line_interface">Command Line Interface</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The command line interface is called <strong>smartpy-cli</strong> and has been introduced by the following <a href="https://medium.com/@SmartPy_io/introducing-smartpybasic-a-simple-cli-to-build-tezos-smart-contract-in-python-f5bd8772b74a" target="_blank" rel="noopener">Medium Post</a>.</p>
+<p>The command line interface is called <strong>smartpy-cli</strong> and has been introduced by the following <a href="https://smartpy-io.medium.com/introducing-smartpybasic-a-simple-cli-to-build-tezos-smart-contract-in-python-f5bd8772b74a" target="_blank" rel="noopener">Medium Post</a>.</p>
 </div>
 <div class="sect2">
 <h3 id="_installation">Installation</h3>
 <div class="paragraph">
-<p>Installation in the <code>~</code> directory can be done by typing</p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre># for the official stable version
-sh &lt;(curl -s https://SmartPy.io/smartpy-cli/SmartPy.sh) local-install ~/smartpy-cli</pre>
-</div>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre># for the dev version (not as stable as the stable version but reasonably stable, new incremental features are here)
-sh &lt;(curl -s https://SmartPy.io/smartpy-cli-dev/SmartPy.sh) local-install-dev ~/smartpy-cli</pre>
-</div>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre># for the test version (quite experimental)
-sh &lt;(curl -s https://SmartPy.io/smartpy-cli-test/SmartPy.sh) local-install-test ~/smartpy-cli</pre>
-</div>
+<p>See installation <a href="cli/">instructions</a>.</p>
 </div>
 </div>
 <div class="sect2">
@@ -2222,17 +2805,6 @@ sh &lt;(curl -s https://SmartPy.io/smartpy-cli-test/SmartPy.sh) local-install-te
 </div>
 <div class="sect2">
 <h3 id="_execution">Execution</h3>
-<div class="sect3">
-<h4 id="_executing_a_smartpy_script">Executing a SmartPy Script</h4>
-<div class="literalblock">
-<div class="content">
-<pre>~/smartpy-cli/SmartPy.sh run &lt;myscript.py&gt;</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>This runs an arbitrary Python script that can happen to contain SmartPy code.</p>
-</div>
-</div>
 <div class="sect3">
 <h4 id="_executing_a_smartpy_script_with_its_tests">Executing a SmartPy Script with its tests</h4>
 <div class="literalblock">
@@ -2260,10 +2832,20 @@ sh &lt;(curl -s https://SmartPy.io/smartpy-cli-test/SmartPy.sh) local-install-te
 </div>
 </div>
 </div>
+<div class="sect3">
+<h4 id="_executing_a_smartpy_script">Executing a SmartPy Script</h4>
+<div class="literalblock">
+<div class="content">
+<pre>~/smartpy-cli/SmartPy.sh run &lt;myscript.py&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This runs an arbitrary Python script that can happen to contain SmartPy code.</p>
 </div>
 </div>
 </div>
 </div>
-<link rel="stylesheet" href="./coderay-asciidoctor.css">
+</div>
+</div>
 </body>
 </html>
