@@ -9,8 +9,8 @@
     },
     "deploy_config": {
         "node": "https://testnet.tezster.tech",
-        "contract_code": "demo_compiled.tz",
-        "contract_storage": "demo_storage_init.tz",
+        "contract_code": "contract_build_compiled.tz",
+        "contract_storage": "contract_build_storage_init.tz",
         "key": "test_key1",
         "amount": 1,
         "delegate_address": "",

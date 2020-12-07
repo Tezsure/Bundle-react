@@ -35,7 +35,8 @@ if __name__ == "__main__":
     context["alert"] = browser.alert
     context["window"] = browser.window
     try:
-        compiledCode = compile(adaptedCode, "SmartPy Script", "exec")
+        smartpyio.script_filename = "SmartPy Script"
+        compiledCode = compile(adaptedCode, smartpyio.script_filename, "exec")
     except Exception as e:
         print ("Exception while parsing " + args.filename)
         print ('-'*60)

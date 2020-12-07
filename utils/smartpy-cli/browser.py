@@ -15,25 +15,15 @@ class SmartmlCtx:
         # print ("  Calling %s(%s)" % (f, ', '.join(pp(x) for x in args)))
         return None
 
-
-class Window:
-    pythonTests = []
-    smartmlCtx = SmartmlCtx()
-    in_browser = False
+class SmartpyContext:
     contractNextId = 0
-    lambdaNextId = 0
-    activeTrace = None
-
-    class console: pass
-    console.log = print
-
-
+    
     def nextId(self):
         result = self.contractNextId
         self.contractNextId += 1
         return result
 
-    def cleanOutputPanel(self):
+    def clearOutputs():
         return
 
     def setOutput(self, s):
@@ -41,6 +31,17 @@ class Window:
 
     def addOutput(self, s):
         pass
+
+class Window:
+    pythonTests = []
+    smartmlCtx = SmartmlCtx()
+    smartpyContext = SmartpyContext()
+    in_browser = False
+    lambdaNextId = 0
+    activeTrace = None
+
+    class console: pass
+    console.log = print
 
 class Document:
     pass

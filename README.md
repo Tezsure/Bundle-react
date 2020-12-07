@@ -14,6 +14,8 @@
 
 - Support of SmartPy Dev mode.
 
+- SmartPy-CLI upgrade and tested for Delphi
+
 ## Prerequisites :
 
 - Python 3.x +
@@ -103,15 +105,15 @@ Your code will get compiled and stored in ./contract*build folder and the two fi
 
 #### contract_build folder will contain the following files :
 
-- demo_compiled.tz : Michelson Code of your Smart Contract.
+- contract_build_compiled.tz : Michelson Code of your Smart Contract.
 
-- demo_compiled.json : Micheline Code of your Smart Contract.
+- contract_build_compiled.json : Micheline Code of your Smart Contract.
 
-- demo.smlse : an internal expression between SmartPy and SmartML, kept for the record but not directly useful.
+- contract_build.smlse : an internal expression between SmartPy and SmartML, kept for the record but not directly useful.
 
-- demo_storage_init.tz : Micheline representation of the Storage.
+- contract_build_storage_init.tz : Micheline representation of the Storage.
 
-- demo_types.sp : It specifies the types of the params used in the contract.
+- contract_build_types.sp : It specifies the types of the params used in the contract.
 
 5.  `npm run deploy` will deploy your contract with the params respect to your config.json
 

@@ -5,7 +5,6 @@ from browser import alert, window
 window.activeScenario = None
 window.contracts = {}
 
-
 class Test:
     def __init__(self, name, shortname, f, profile, is_default):
         self.name = name
@@ -20,7 +19,7 @@ class Test:
         smartpy.setProfiling(self.profile)
         smartpy.profile("start")
         window.activeScenario = None
-        window.contractNextId = 0
+        window.smartpyContext.contractNextId = 0
         window.lambdaNextId = 0
         window.contracts = {}
         window.validityErrors = []
@@ -45,7 +44,7 @@ class Test:
                 raise Exception(badValidityText)
         smartpy.profile("end")
         if self.profile:
-            window.addOutput(
+            window.smartpyContext.addOutput(
                 "<hr/><h4>Profiling</h4>" + "<br>".join(smartpy.sp.profilingLogs)
             )
 
@@ -110,7 +109,7 @@ def showTraceback(title, trace):
             )
             or (
                 "module smartpyio line" in line
-                and ("in run" in line or "in eval" in line or "in toException" in line)
+                and ("in run" in line or "in eval" in line or "in toException" in line or "in $$eval" in line)
             )
             or ("module __main__" in line and "in run" in line)
         )
@@ -118,14 +117,10 @@ def showTraceback(title, trace):
             lineStrip = line.strip()
             lineId = None
             line = formatErrorLine(line)
-            if lineStrip.startswith("module <module>") or lineStrip.startswith(
-                "File <string>"
-            ):
+            if lineStrip.startswith("module <module>") or lineStrip.startswith("File <string>"):
                 lineId = line.strip().split()[3].strip(",")
                 line = line.replace(lineId, reverseLines.get(lineId, lineId))
-            line = line.replace("module <module>", "SmartPy code").replace(
-                "File <string>", "SmartPy code"
-            )
+            line = line.replace("module <module>", "SmartPy code").replace("File <string>", "SmartPy code")
             if "SmartPy code" in line:
                 line = "<span class='partialType'>%s</span>" % (line)
             if lineId:
@@ -136,7 +131,7 @@ def showTraceback(title, trace):
                 )
             lines.append(line)
     error = title + "\n\n" + lines[0] + "\n\n" + "\n".join(lines[1:-1])
-    window.showError(
+    window.smartpyContext.showError(
         "<div class='michelson'>%s</div>" % (error.replace("\n", "\n<br>"))
     )
 
@@ -258,7 +253,7 @@ testTemplate = """
 def test():
     # define a contract
     c1 = %s(..)
-    scenario  = sp.testScenario()
+    scenario  = sp.test_scenario()
     scenario += c1
     # scenario += c1.myEntryPoint(..)
     # scenario += c1.myEntryPoint(..)
@@ -272,13 +267,13 @@ def test():
 
 def run(withTests):
     window.pythonTests.clear()
-    window.cleanAll()
+    window.smartpyContext.clearOutputs()
     import smartpy
 
     smartpy.defaultVerifyMessage = None
     smartpy.sp.types.unknownIds = 0
     smartpy.sp.types.seqCounter = 0
-    code = window.editor.getValue()
+    code = window.smartpyContext.getEditorValue();
     changes = syntaxChanges()
     for change in changes:
         if change[0] in code:
@@ -305,9 +300,9 @@ def run(withTests):
     code = adaptBlocks(code)
     env = context.copy()
     exec(code, env)
-    window.cleanAll()
+    window.smartpyContext.clearOutputs()
     for test in window.pythonTests:
-        window.addButton(test.name, test.f)
+        window.smartpyContext.addButton(test.name, test.f)
         if withTests and test.is_default:
             test.eval()
     if withTests and len(window.pythonTests) == 0:
@@ -322,7 +317,6 @@ def run(withTests):
                 )
         if html:
             alert(html)
-
 
 def onContract(address, cont):
     window.onContract(address, cont)
@@ -478,4 +472,6 @@ window.toException = toException
 window.ppMichelsonEditor = ppMichelsonEditor
 window.ppMichelsonEditorCompress = ppMichelsonEditorCompress
 window.removeCommentsMichelson = removeCommentsMichelson
-window.cleanOutputPanel()
+
+if hasattr(window, 'dispatchEvent'):
+    window.dispatchEvent(window.CustomEvent.new('smartpyio_ready'))
