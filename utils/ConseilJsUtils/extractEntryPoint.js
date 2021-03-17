@@ -7,7 +7,7 @@ require.extensions['.tz'] = function (module, filename) {
 
 const conseiljs = require("conseiljs");
 conseiljs.setLogLevel("debug");
-const contract_code = require(`../../contract_build/${config.deploy_config.contract_code}`);
+const contract_code = require(`../../contract_build/${config.deploy_config.build_name}/${config.deploy_config.contract_code}`);
 
 async function interrogateContract() {
     const entryPoints = await conseiljs.TezosContractIntrospector.generateEntryPointsFromCode(contract_code);

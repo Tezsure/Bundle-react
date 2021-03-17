@@ -6,8 +6,8 @@ require.extensions['.tz'] = function (module, filename) {
 };
 
 const conseiljs = require("conseiljs");
-const contract_code = require(`../../contract_build/${config.deploy_config.contract_code}`);
-const contract_storage = require(`../../contract_build/${config.deploy_config.contract_storage}`);
+const contract_code = require(`../../contract_build/${config.deploy_config.build_name}/${config.deploy_config.contract_code}`);
+const contract_storage = require(`../../contract_build/${config.deploy_config.build_name}/${config.deploy_config.contract_storage}`);
 const tezosNode = config.deploy_config.node;
 const keystore = require(`./../../keystore/${config.deploy_config.key}`)
 
