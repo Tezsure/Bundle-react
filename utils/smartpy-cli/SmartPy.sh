@@ -9,58 +9,94 @@ export smartml_app_name=SmartPy.sh
 install_path=$(dirname "$0")
 export smartpy_install_path="$install_path"
 
-call_app () {
-    export NODE_PATH=$smartpy_install_path/node_modules:$NODE_PATH
-    node "$smartpy_install_path/smartml-cli.js" "$@"
+usage () {
+    echo "Usage:"
+    echo "   $0 <target> <script> <output> [--purge] [--html]"
+    echo "         <target>                         : a target, compile or test"
+    echo "         <script>                         : a python script containing SmartPy code"
+    echo "         <output>                         : a directory for the results"
+    echo "         --purge                          : optional, clean output_directory before running"
+    echo "         --html                           : optional, add html logs and outputs"
+    echo "         --protocol <delphi|edo|florence> : optional, select target protocol"
+    echo "         --<flag> <arguments>             : optional, set some flag with arguments"
+    echo "         --<flag>                         : optional, activate some boolean flag"
+    echo "         --no-<flag>                      : optional, deactivate some boolean flag"
 }
+
+
+protocol=PtEdo2ZkT9oKpimTah6x2embF25oss54njMuPzkJTEi5RqfdZFA
+
+native=no
+args="$@"
+set --
+for arg in $args
+do
+    if [[ "$arg" == --native ]]; then
+        native=yes
+    elif [[ "$arg" == --no-native ]]; then
+        native=no
+    elif [[ "$arg" == florence ]]; then
+        protocol=PsFLorBArSaXjuy9oP76Qv1v2FRYnUs7TFtteK5GkRBC24JvbdE
+        set -- "$@" "$arg"
+    elif [[ "$arg" == florenceNoBa ]]; then
+        protocol=PsFLorenaUUuikDWvMDr6fGBRG8kt3e3D3fHoXK1j1BFRxeSH4i
+        set -- "$@" "$arg"
+    else
+        set -- "$@" "$arg"
+    fi
+done
+
+
+if [[ "$native" == yes ]]; then
+    smartpyc="$install_path/smartpyc"
+else
+    smartpyc="node $install_path/smartpyc.js"
+fi
 
 case "$1" in
     "" | "help" | "--help" | "-h")
-        call_app --help ;;
+        usage
+        ;;
     # Aliases to cli-js commands:
     # If you add more, please update Meta.smartpy_dot_sh_aliases
     # in smartML/cli_js/node_main.ml
-    "compile" | "compile-smartpy-class")
-        if [ "$#" -lt 4 ]; then
-            # Let node_main.ml print the error message:
-            shift
-            call_app compile-smartpy-class "$@"
-        else
-            script="$2"
-            init="$3"
-            output="$4"/$(basename "$4").smlse
-            shift 4
-            node $install_path/smartpyc.js "$script" --init "$init" --output "$output" "$@"
-        fi
+    "compile")
+        [ "$#" -lt 3 ] && { usage; exit 1; }
+        script="$2"
+        output="$3"
+        shift 3
+        $smartpyc "$script" --comp --output "$output" --install $install_path "$@"
         ;;
-    "test" )
-        if [ "$#" -lt 3 ]; then
-            # Let node_main.ml print the error message:
-            shift
-            call_app run-smartpy-test-in-interpreter "$@"
-        else
-            script="$2"
-            output="$3"
-            shift 3
-            node $install_path/smartpyc.js "$script" --output "$output" "$@"
-        fi
+    "test")
+        [ "$#" -lt 3 ] && { usage; exit 1; }
+        script="$2"
+        output="$3"
+        shift 3
+        $smartpyc "$script" --output "$output" --install $install_path "$@"
         ;;
-    "run" )
-        shift
-        export NODE_PATH=$smartpy_install_path/node_modules:$NODE_PATH
-        python3 $install_path/smartpy_cli.py "$@" ;;
     "test-sandbox" )
-        shift
-        call_app run-smartpy-test-in-interpreter "$@"
-        $install_path/sandbox-scenarios.sh run_scenario_dir $2/*sc $2
+        [ "$#" -lt 3 ] && { usage; exit 1; }
+        script="$2"
+        output="$3"
+        shift 3
+        scripts/with_sandbox.sh sh -c \
+          "$smartpyc $script --output $output --sandbox \$SANDBOX_PORT $@"
         ;;
-    # Non-advertised alias for now:
-    "test-local-sandbox" )
-        if [ -d _build/tezos-bin/ ] ; then
-            export PATH=$PWD/_build/tezos-bin:$PATH
-        fi
-        shift
-        call_app run-smartml-scenario-with-local-sandbox "$@" ;;
+    "test-mockup" )
+        [ "$#" -lt 3 ] && { usage; exit 1; }
+        script="$2"
+        output="$3"
+        shift 3
+        MOCKUP=$(mktemp -d "_mockup.XXXXXX")
+        _build/tezos-bin/tezos-client \
+          --protocol $protocol \
+          --base-dir $MOCKUP \
+          create mockup
+        $smartpyc $script --output $output --mockup $MOCKUP $@ \
+          && rm -rf $MOCKUP
+        ;;
     * )
-        call_app "$@" ;;
+        echo "SmartPy.sh. Unknown argument: $*"
+        usage
+        exit 1
 esac

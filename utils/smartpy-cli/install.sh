@@ -52,23 +52,24 @@ download () {
 }
 
 files_to_install="
+SmartPy.sh
+asciidoctor.css
+browser.py
+coderay-asciidoctor.css
+install.sh
+reference.css
+reference.html
+smart.css
+smart.js
 smartpy.py
-smartpyio.py
 smartpy_michelson.py
-smartpy_cli.py
-smartpyc
 smartpyc.js
 smartpyc.py
-browser.py
-version.py
-SmartPy.sh
-install.sh
-smartml-cli.js
-reference.html
-asciidoctor.css
-coderay-asciidoctor.css
-scripts/demo.py
+smartpyio.py
 templates/welcome.py
+theme.js
+typography.css
+version.py
 "
 
 install_from () {
@@ -98,10 +99,14 @@ install_from () {
     fi
 
     mkdir -p $path/scripts
+    mkdir -p $path/templates
     for f in $files_to_install ; do
-        mkdir -p "$(dirname "$path/$f")"
         $method "$from/$f" "$path/$f"
     done
+    if [ "$native" = "1" ]; then
+        $method "$from/smartpyc" "$path/smartpyc"
+        chmod +x "$path/smartpyc"
+    fi
     ( cd "$path" ;
       npm init --yes ;
       npm install libsodium-wrappers-sumo bs58check chalk ; )
@@ -109,10 +114,21 @@ install_from () {
     say "Installation successful in $path"
 }
 
+native=0
+for var in "$@"
+do
+    case "$var" in
+        "--native")
+            native=1;;
+        * )
+        ;;
+    esac
+done
+
 case "$1" in
     "help" | "--help" | "-h")
         usage ;;
-    "" | "local-install" )
+    "" | "local-install" | "--native")
         install_from download https://smartpy.io/cli "$2" ;;
     "local-install-custom" )
         install_from download "$2" "$3" ;;

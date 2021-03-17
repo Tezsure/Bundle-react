@@ -1,79 +1,11 @@
 ## Copyright 2019-2020 Smart Chain Arena LLC. ##
 
 from browser import alert, window
+import os
 
 window.activeScenario = None
 window.contracts = {}
-
-class Test:
-    def __init__(self, name, shortname, f, profile, is_default):
-        self.name = name
-        self.shortname = shortname
-        self.profile = profile
-        self.f = f
-        self.is_default = is_default
-
-    def eval(self):
-        import smartpy
-
-        smartpy.setProfiling(self.profile)
-        smartpy.profile("start")
-        window.activeScenario = None
-        window.smartpyContext.contractNextId = 0
-        window.lambdaNextId = 0
-        window.contracts = {}
-        window.validityErrors = []
-        try:
-            self.f()
-        finally:
-            if window.activeScenario is not None:
-                window.activeScenario.pp()
-                for e in window.activeScenario.exceptions:
-                    raise e
-            if window.validityErrors:
-                badValidityText = (
-                    "Bad validity for some transactions %s\nPlease use c.entryPoint.run(valid = ..expected validation..)"
-                    % (
-                        " ".join(
-                            " <button class=\"text-button\" onClick='showLine(%s)'>(line %s)</button>"
-                            % (lineId, lineId)
-                            for lineId in window.validityErrors
-                        )
-                    )
-                )
-                raise Exception(badValidityText)
-        smartpy.profile("end")
-        if self.profile:
-            window.smartpyContext.addOutput(
-                "<hr/><h4>Profiling</h4>" + "<br>".join(smartpy.sp.profilingLogs)
-            )
-
-
 window.pythonTests = []
-
-
-def add_test(name, shortname=None, profile=False, is_default=True):
-    if shortname is None:
-        shortname = name.replace(" ", "_")
-    if any(x.shortname == shortname for x in window.pythonTests):
-        raise Exception("Already defined test %s" % shortname)
-    for x in shortname:
-        if not (x in "_-" or x.isalnum()):
-            raise Exception(
-                "Bad test name: '%s', '%s' is forbidden\nTo solve the issue, you can add a shortname by doing, e.g.,\n\nsp.add_test(name = '%s', shortname='%s')"
-                % (
-                    shortname,
-                    x,
-                    name,
-                    "".join(x for x in shortname if x in "_-" or x.isalnum()),
-                )
-            )
-
-    def r(f):
-        window.pythonTests.append(Test(name, shortname, f, profile, is_default))
-
-    return r
-
 
 import traceback
 
@@ -96,23 +28,20 @@ def showTraceback(title, trace):
     title = "Error: " + str(title)
     lines = []
     skip = False
+    print(trace)
     for line in trace.split("\n"):
         if not line:
             continue
         if skip:
             skip = False
             continue
-        skip = (
-            (
-                "module smartpy line" in line
-                and ("in runScenario" in line or "in pp" in line)
-            )
-            or (
-                "module smartpyio line" in line
-                and ("in run" in line or "in eval" in line or "in toException" in line or "in $$eval" in line)
-            )
-            or ("module __main__" in line and "in run" in line)
+        skip = ("module smartpy line" in line
+                or "module smartpyio.py line" in line
+                or "module smartpyio line" in line
+                or ("module __main__" in line and "in run" in line)
         )
+        if "Traceback (most recent call last):" in line:
+            line = ""
         if not skip:
             lineStrip = line.strip()
             lineId = None
@@ -241,6 +170,7 @@ def adaptBlocks(code):
             line += "\r"
         newLines.append(NewLine(lineId, line))
     result = "\n".join(line.line for line in newLines)
+    result = result.rstrip() + "\n"
     global reverseLines
     reverseLines.clear()
     for i in range(len(newLines)):
@@ -299,6 +229,7 @@ def run(withTests):
                 )
     code = adaptBlocks(code)
     env = context.copy()
+    env['__name__'] = '__main__'
     exec(code, env)
     window.smartpyContext.clearOutputs()
     for test in window.pythonTests:

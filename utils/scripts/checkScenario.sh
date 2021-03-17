@@ -11,7 +11,7 @@ printf "
  Test Scenarios :
 ";
 echo " -------------------"
-cat ./test-build/Welcome_interpreted/scenario-interpreter-log.txt;
+cat ./test-build/Welcome/log.txt;
 printf "
 
 "

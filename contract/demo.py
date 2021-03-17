@@ -40,3 +40,5 @@ def test():
     c2 = MyContract(1, c1.data.myParameter1)
     scenario += c2
     scenario.verify(c2.data.myParameter2 == 151)
+
+sp.add_compilation_target("demo", MyContract(12, 123))

@@ -1,17 +1,14 @@
 {
-    "compile_config": {
-        "contract_name": "demo.py",
-        "class_name": "MyContract(12, 123)"
-    },
-    "test_config": {
+   "test_config": {
         "contract_name": "demo.py",
         "test_name": "Welcome"
     },
     "deploy_config": {
         "node": "https://testnet.tezster.tech",
-        "contract_code": "contract_build_compiled.tz",
-        "contract_storage": "contract_build_storage_init.tz",
-        "key": "test_key1",
+        "build_name": "demo",
+        "contract_code": "step_000_cont_0_contract.tz",
+        "contract_storage": "step_000_cont_0_storage.tz",
+        "key": "test_key2",
         "amount": 1,
         "delegate_address": "",
         "fee": 100000,

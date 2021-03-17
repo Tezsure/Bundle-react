@@ -8,6 +8,7 @@ import sys
 import datetime
 from types import FunctionType
 import json
+import os
 import smartpyio
 
 pyRange = range
@@ -33,9 +34,22 @@ def get_line_no(line_no = None):
         return -1
     else:
         for x in inspect.stack():
-            if x.filename == smartpyio.script_filename:
+            if ("smartpy.py" not in x.filename
+                and "<frozen " not in x.filename
+                and "smartpyc.py" not in x.filename
+                and "init" != x.filename):
                 return x.lineno
         return -1
+
+
+class Helpers:
+    def areBytesValid(x):
+        return (
+            isinstance(x, str)
+            and x.startswith("0x")
+            and all(c in _hex_digits for c in x[2:])
+            and pyLen(x) % 2 == 0
+        )
 
 
 class Expr:
@@ -273,6 +287,9 @@ class Expr:
         b.value.__asBlock = b
         return b
 
+    def is_none(self):
+        return self.is_variant("None")
+
     def is_some(self):
         return self.is_variant("Some")
 
@@ -335,13 +352,15 @@ class Expr:
             return "(%s %s)" % (self._f, " ".join(ppe(x) for x in self._l))
         return "(%s)" % (self._f)
 
-
 def literal(t, l):
     return Expr("literal", [Expr(t, [l]), get_line_no()])
 
 
 def key_hash(s):
     return literal("key_hash", s)
+
+def baker_hash(h):
+    return literal("baker_hash", h)
 
 
 def variant(cons, x):
@@ -375,12 +394,7 @@ _hex_digits = set("0123456789abcdefABCDEF")
 
 
 def bytes(x):
-    if (
-        isinstance(x, str)
-        and x.startswith("0x")
-        and all(c in _hex_digits for c in x[2:])
-        and pyLen(x) % 2 == 0
-    ):
+    if Helpers.areBytesValid(x):
         return literal("bytes", x)
     raise Exception(
         "sp.bytes('0x...') awaits a string in hexadecimal format and got '%s' line %i."
@@ -389,21 +403,13 @@ def bytes(x):
 
 
 def chain_id_cst(x):
-    if (
-        isinstance(x, str)
-        and x.startswith("0x")
-        and all(c in _hex_digits for c in x[2:])
-        and pyLen(x) % 2 == 0
-    ):
+    if Helpers.areBytesValid(x):
         return literal("chain_id_cst", x)
     raise Exception(
         "sp.chain_id_cst('0x...') awaits a string in hexadecimal format and got '%s' line %i."
         % (str(x), get_line_no())
     )
 
-
-chain_id = Expr("chain_id", [])
-none = Expr("variant", ["None", unit, -1])
 
 def some(x):
     return Expr("variant", ["Some", spExpr(x), get_line_no()])
@@ -461,6 +467,42 @@ def secret_key(s):
 def signature(sig):
     return literal("signature", sig)
 
+
+"""
+* bls12_381_g1 and bls12_381_g2 are written as their raw bytes, using a big-endian point encoding, as specified here.
+* bls12_381_fr is written in raw bytes, using a little-endian encoding.
+
+bls12-381 Serialization: https://docs.rs/bls12_381/0.3.1/bls12_381/notes/serialization/index.html#bls12-381-serialization
+"""
+def bls12_381_g1(raw_bytes):
+    if Helpers.areBytesValid(raw_bytes):
+        return literal("bls12_381_g1", raw_bytes);
+
+    raise Exception(
+        "sp.bls12_381_g1('0x...') awaits a string in hexadecimal format and got '%s' line %i."
+        % (str(raw_bytes), get_line_no())
+    )
+
+def bls12_381_g2(raw_bytes):
+    if Helpers.areBytesValid(raw_bytes):
+        return literal("bls12_381_g2", raw_bytes);
+
+    raise Exception(
+        "sp.bls12_381_g2('0x...') awaits a string in hexadecimal format and got '%s' line %i."
+        % (str(raw_bytes), get_line_no())
+    )
+
+def bls12_381_fr(raw_bytes):
+    if Helpers.areBytesValid(raw_bytes):
+        return literal("bls12_381_fr", raw_bytes);
+
+    raise Exception(
+        "sp.bls12_381_fr('0x...') awaits a string in hexadecimal format and got '%s' line %i."
+        % (str(raw_bytes), get_line_no())
+    )
+
+def pairing_check(pairs):
+    return Expr("pairing_check", [spExpr(pairs), get_line_no()])
 
 def hash_key(x):
     return Expr("hash_key", [spExpr(x), get_line_no()])
@@ -713,7 +755,7 @@ class TSaplingState(TType):
 
 class TSaplingTransaction(TType):
     def __init__(self, memo_size = None):
-        self.name = "sapling_state"
+        self.name = "sapling_transaction"
         self.memo_size = memo_size
 
     def export(self):
@@ -732,8 +774,12 @@ TAddress = TSimple("address")
 TKey = TSimple("key")
 TSecretKey = TSimple("secret_key")
 TKeyHash = TSimple("key_hash")
+TBakerHash = TSimple("baker_hash")
 TSignature = TSimple("signature")
 TChainId = TSimple("chain_id")
+TBls12_381_g1 = TSimple("bls12_381_g1") # Points on the BLS12-381 curve G1
+TBls12_381_g2 = TSimple("bls12_381_g2") # Points on the BLS12-381 curve G2
+TBls12_381_fr = TSimple("bls12_381_fr") # An element of the scalar field Fr, used for scalar multiplication on the BLS12-381 curves G1 and G2.
 TOperation = TSimple("operation")
 TNever = TSimple("never")
 
@@ -753,6 +799,12 @@ class TList(TType):
     def export(self):
         return "(list %s)" % self.t.export()
 
+class TTicket(TType):
+    def __init__(self, t):
+        self.t = sp.types.conv(t)
+
+    def export(self):
+        return "(ticket %s)" % self.t.export()
 
 class TMap(TType):
     def __init__(self, k, v):
@@ -887,16 +939,17 @@ class Data:
 class TreeBlock:
     def __init__(self):
         self.commands = []
-        self.locals = []
 
-    def append(self, command):
-        self.commands.append(command)
-
-    def addLocal(self, var):
-        self.locals.append(var)
+    def append(self, name, command):
+        self.commands.append((name,command))
 
     def export(self):
-        return "(%s)" % (" ".join(x.export() for x in self.commands))
+        def f(n,c):
+            if n is None:
+                return c.export()
+            else:
+                return Expr("bind", [n, c]).export()
+        return "(%s)" % (" ".join(f(n,c) for (n,c) in self.commands))
 
 
 class CommandBlock:
@@ -939,9 +992,11 @@ class Sp:
     def cons(self, x, xs):
         return Expr("cons", [spExpr(x), spExpr(xs), get_line_no()])
 
-    def newCommand(self, command):
+    def newCommand(self, command, name=None):
         if hasattr(self, "mb") and self.mb is not None:
-            self.mb.append(command)
+            line_no = get_line_no()
+            self.mb.append(name,command)
+            return Expr("variant_arg", [name, line_no])
         else:
             raise Exception("New command outside of contract (line %i):\n%s" % (get_line_no(), str(command)))
 
@@ -957,7 +1012,6 @@ class Sp:
 
     def defineLocal(self, local, name, value):
         self.newCommand(Expr("defineLocal", [name, value, get_line_no()]))
-        self.mb.addLocal(local)
 
     def getData(self):
         return Expr("data", [])
@@ -974,11 +1028,8 @@ class MessageBuilder:
         self.commands = TreeBlock()
         self.currentBlock = self.commands
 
-    def append(self, command):
-        self.currentBlock.append(command)
-
-    def addLocal(self, var):
-        self.currentBlock.addLocal(var)
+    def append(self, name, command):
+        self.currentBlock.append(name, command)
 
     def export(self):
         return self.commands.export()
@@ -1015,10 +1066,11 @@ class PreparedMessage:
     def html(self):
         data = {}
         data["action"] = "message"
-        data["id"] = self.contractId
+        data["id"] = self.contractId.export()
+        data["dynamic"] = self.dynamic
         data["message"] = self.message
         data["params"] = self.params
-        data["line_no"] = self.lineNo
+        data["line_no"] = self.line_no
         data["title"] = self.title
         data["messageClass"] = self.messageClass
         data["source"] = self.source
@@ -1029,6 +1081,8 @@ class PreparedMessage:
         data["level"] = self.level
         data["show"] = self.show
         data["valid"] = self.valid
+        data["voting_powers"] = self.voting_powers
+        data["export"] = self.export
         return [data]
 
 
@@ -1071,7 +1125,7 @@ def parse_account_or_address(account):
     return spExpr(account).export()
 
 class ExecMessage:
-    def __init__(self, _contract, _message, params, kargs):
+    def __init__(self, _contract, _message, params, kargs, contractId = None):
         self.message = _message
         self.params = None if pyLen(params) == 0 else spExpr(params[0])
         self.kargs = (
@@ -1081,9 +1135,20 @@ class ExecMessage:
             raise Exception(
                 "Message execution uses either one args or **kargs syntax, not both."
             )
-        self.contract = _contract
-        self.smartml = _contract.smartml
-        self.lineNo = get_line_no()
+        self.title = ""
+        self.execMessageClass = ""
+        self.smartml = None
+        self.contractId = contractId
+        self.contract = None
+
+        if _contract is not None:
+            self.contract = _contract
+            self.smartml = self.contract.smartml
+            self.contractId = _contract.smartml.contractId
+            self.title = self.contract.title if self.contract.title else ""
+            self.execMessageClass = self.contract.execMessageClass
+
+        self.line_no = get_line_no()
 
     def html(self):
         return self.run().html()
@@ -1098,40 +1163,60 @@ class ExecMessage:
         valid=True,
         show=True,
         chain_id=None,
+        voting_powers=None,
+        export=True,
     ):
         sp.profile(self.message + " begin " + str(get_line_no()))
         if isinstance(amount, pyInt):
             raise Exception(
                 "Amount should be in tez or mutez and not int (use sp.tez(..) or sp.mutez(..))"
             )
-        if now is not None:
-            self.smartml.setNow(spExpr(now))
-        if level is not None:
-            self.smartml.setLevel(spExpr(level))
+        if self.contract is not None:
+            self.contract.data = contract_data(self.contractId)
+        if self.smartml is not None:
+            if now is not None:
+                self.smartml.setNow(spExpr(now))
+            if level is not None:
+                self.smartml.setLevel(spExpr(level))
+            if voting_powers is not None:
+                self.smartml.setVotingPowers(spExpr(voting_powers))
+            now = self.smartml.time
+            level = self.smartml.level
+            voting_powers = self.smartml.voting_powers
+        else:
+            if now is None:
+                now = timestamp(0)
+            if level is None:
+                level = 0
+            if voting_powers is None:
+                voting_powers = {}
+
         if self.params is None:
             self.params = record(**self.kargs)
         if chain_id is None:
             chain_id = ""
         else:
             chain_id = spExpr(chain_id).export()
-        self.contract.data = Expr(
-            "contractData", [self.smartml.contractId, get_line_no()]
-        )
+
+
         result = PreparedMessage()
-        result.lineNo = self.lineNo
-        result.title = self.contract.title if self.contract.title else ""
-        result.messageClass = self.contract.execMessageClass
+        result.dynamic = self.contract is None
+        result.line_no = self.line_no
+        result.title = self.title
+        result.messageClass = self.execMessageClass
         result.source = parse_account_or_address(source)
         result.sender = parse_account_or_address(sender)
         result.chain_id = chain_id
-        result.time = spExpr(self.smartml.time).export()
+        result.time = spExpr(now).export()
         result.amount = spExpr(amount).export()
-        result.level = spExpr(self.smartml.level).export()
-        result.contractId = self.smartml.contractId
+        result.level = spExpr(level).export()
+        result.contractId = self.contractId
         result.message = self.message
         result.params = spExpr(self.params).export()
         result.valid = spExpr(valid).export()
         result.show = show
+        result.voting_powers = spExpr(voting_powers).export()
+        result.export = export
         sp.profile(self.message + " end")
         return result
 
@@ -1152,11 +1237,11 @@ class record(WouldBeValue):
         self.fields = {k: spExpr(v) for (k, v) in fields.items()}
         for (k, v) in self.fields.items():
             setattr(self, k, v)
-        self.lineNo = get_line_no()
+        self.line_no = get_line_no()
 
     def export(self):
         return "(record %i %s)" % (
-            self.lineNo,
+            self.line_no,
             " ".join(
                 "(%s %s)" % (k, v.export()) for (k, v) in sorted(self.fields.items())
             ),
@@ -1168,11 +1253,11 @@ class tuple(WouldBeValue):
         if l is None:
             l = []
         self.l = l
-        self.lineNo = get_line_no()
+        self.line_no = get_line_no()
 
     def export(self):
         return "(tuple %s %s)" % (
-            self.lineNo,
+            self.line_no,
             " ".join(spExpr(x).export() for x in self.l),
         )
 
@@ -1186,7 +1271,7 @@ class build_list(WouldBeValue):
         if l is None:
             l = []
         self.l = l
-        self.lineNo = get_line_no()
+        self.line_no = get_line_no()
 
     def push(self, other):
         return sp.set(self, sp.cons(spExpr(other), self))
@@ -1196,7 +1281,7 @@ class build_list(WouldBeValue):
 
     def export(self):
         return "(list %s %s)" % (
-            self.lineNo,
+            self.line_no,
             " ".join(spExpr(x).export() for x in self.l),
         )
 
@@ -1212,7 +1297,7 @@ class build_set(WouldBeValue):
         if l is None:
             l = []
         self.l = l
-        self.lineNo = get_line_no()
+        self.line_no = get_line_no()
 
     def contains(self, value):
         return Expr("contains", [self, spExpr(value), get_line_no()])
@@ -1233,7 +1318,7 @@ class build_set(WouldBeValue):
 
     def export(self):
         return "(set %s %s)" % (
-            self.lineNo,
+            self.line_no,
             " ".join(spExpr(x).export() for x in self.l),
         )
 
@@ -1243,7 +1328,7 @@ class mapOrBigMap(WouldBeValue):
         if l is None:
             l = {}
         self.l = l
-        self.lineNo = get_line_no()
+        self.line_no = get_line_no()
 
     def contains(self, value):
         return Expr("contains", [self, spExpr(value), get_line_no()])
@@ -1254,7 +1339,7 @@ class mapOrBigMap(WouldBeValue):
     def export(self):
         return "(%s %s %s)" % (
             self.name(),
-            self.lineNo,
+            self.line_no,
             " ".join(
                 "(%s %s)" % (spExpr(k).export(), spExpr(v).export())
                 for (k, v) in self.l.items()
@@ -1315,10 +1400,11 @@ class Smartml:
         self.ctx = window.smartmlCtx
         self.time = timestamp(0)
         self.level = 0
+        self.voting_powers = {}
         if contract is not None:
             sp.profile("smartml linking")
             sp.profile("smartml export")
-            self.contractId = window.smartpyContext.nextId()
+            self.contractId = static_contract_id(window.smartpyContext.nextId())
             window.contracts[self.contractId] = self
             self.contract = contract
             sp.profile("smartml link")
@@ -1334,21 +1420,24 @@ class Smartml:
         self.level = level
         return "Setting level to [%s].<br>" % level
 
+    def setVotingPowers(self, powers):
+        self.voting_powers = powers
+        return "Setting voting power: [%s].<br>" % powers
 
 class Contract:
     def __init__(self, **kargs):
         self.init_type(t = sp.types.unknown())
 
     def add_flag_lazy_entry_points(self):
-        self.add_flag("lazy_entry_points")
+        self.add_flag("lazy_entry_points", "single")
 
     def add_flag_lazy_entry_points_multiple(self):
-        self.add_flag("lazy_entry_points_multiple")
+        self.add_flag("lazy_entry_points", "multiple")
 
-    def add_flag(self, flag):
+    def add_flag(self, flag, *args):
         if not hasattr(self, "flags"):
-            self.flags = pySet()
-        self.flags.update([flag])
+            self.flags = []
+        self.flags += [[flag] + pyList(args)]
 
     def global_lambda(self, name, f):
         return self.global_variable(name, build_lambda(f, global_name=name))
@@ -1393,7 +1482,7 @@ class Contract:
         if not hasattr(self, "offchain_views"):
             self.offchain_views = []
         if not hasattr(self, "flags"):
-            self.flags = pySet()
+            self.flags = []
         if not hasattr(self, "execMessageClass"):
             self.execMessageClass = ""
         if not hasattr(self, "title"):
@@ -1414,8 +1503,8 @@ class Contract:
             self.initial_metadata = {}
         if not hasattr(self, "smartml"):
             self.smartml = Smartml(self)
-        self.address = contract_address(self)
-        self.typed = literal("local-contract-typed", self.smartml.contractId)
+        self.address = contract_address(self.smartml.contractId)
+        self.typed = contract_typed(self.smartml.contractId)
 
     def init_type(self, t):
         self.init_internal()
@@ -1446,9 +1535,9 @@ class Contract:
         sp.setMB(mb)
         args = inspect.getargs(addedMessage.f.__code__).args
         nargs = pyLen(args)
-        params = Expr("params", [addedMessage.lineNo])
+        params = Expr("params", [addedMessage.line_no])
         if nargs == 0:
-            raise Exception("Entry point '%s' is missing a self parameter (line %i)." % (addedMessage.name, addedMessage.lineNo))
+            raise Exception("Entry point '%s' is missing a self parameter (line %i)." % (addedMessage.name, addedMessage.line_no))
         elif nargs == 1:
             x = addedMessage.f(self)
         elif nargs == 2:
@@ -1461,7 +1550,7 @@ class Contract:
         if x is not None:
             raise Exception(
                 "Entry point failure for %s (line %i): entry points cannot have return statements."
-                % (addedMessage.name, addedMessage.lineNo)
+                % (addedMessage.name, addedMessage.line_no)
             )
         self.mb = None
         sp.setMB(None)
@@ -1491,7 +1580,6 @@ class Contract:
             if hasattr(attr, "__addedMessage"):
                 added_message = getattr(attr, "__addedMessage")
                 added_message.contract = self
-                added_message.collected = False
         for f in dir(self):
             attr = getattr(self, f)
             if isinstance(attr, GlobalLambda):
@@ -1508,19 +1596,15 @@ class Contract:
             if hasattr(attr, "__addedMessage"):
                 attr = getattr(attr, "__addedMessage")
                 self.addMessage(
-                    AddedMessage(attr.name, attr.f, attr.originate, attr.lineNo)
+                    AddedMessage(attr.name, attr.f, attr.originate, attr.line_no)
                 )
         self.buildExtraMessages()
-        for f in dir(self):
-            attr = getattr(self, f)
-            if isinstance(attr, AddedMessage):
-                attr.collected = True
         # self.smartml = window.buildSmartlmJS(self)
         sp.profile("CollectMessages smartml " + self.__class__.__name__)
-        self.data = Expr("contractData", [self.smartml.contractId, get_line_no()])
-        self.balance = Expr("contractBalance", [self.smartml.contractId, get_line_no()])
+        self.data = contract_data(self.smartml.contractId)
+        self.balance = contract_balance(self.smartml.contractId)
         sp.profile("CollectMessages end " + self.__class__.__name__)
-        self.baker = contract_baker(self)
+        self.baker = contract_baker(self.smartml.contractId)
 
     def init_metadata(self, filename, metadata):
         if not hasattr(self, "initial_metadata"):
@@ -1534,11 +1618,11 @@ class Contract:
             if message.addedMessage.name is not None:
                 name = message.addedMessage.name
                 if name in messages:
-                    raise Exception("Two entry points are called %s (line %i)" % (name, message.addedMessage.lineNo))
+                    raise Exception("Two entry points are called %s (line %i)" % (name, message.addedMessage.line_no))
                 messages[name] = message
 
         if self.exception_optimization_level is not None:
-            self.add_flag("Exception_%s" % self.exception_optimization_level)
+            self.add_flag("exceptions", self.exception_optimization_level)
         result = "(storage %s\nstorage_type (%s)\nmessages (%s)\nflags (%s)\nglobals (%s)\nviews (%s)\nentry_points_layout %s\ninitial_metadata (%s)\nbalance %s)" % (
             (self.storage.export() if self.storage is not None else "()"),
             ("%s" % (self.storage_type.export()) if self.storage_type is not None else "()"),
@@ -1548,7 +1632,7 @@ class Contract:
                     for (k, v) in sorted(messages.items())
                 )
             ),
-            (" ".join(str(flag) for flag in sorted(self.flags))),
+            (" ".join("(" + " ".join(str(x) for x in call) + ")" for call in self.flags)),
             (
                 " ".join(
                     "(%s %s)" % (name, variable.export())
@@ -1578,28 +1662,21 @@ class Contract:
         self.collectMessages()
         data = {}
         data["action"] = "newContract"
-        data["id"] = self.smartml.contractId
+        data["id"] = self.smartml.contractId.export()
         data["export"] = self.smartml.contract.export()
         data["line_no"] = get_line_no()
         data["show"] = True
         data["accept_unknown_types"] = accept_unknown_types
         return [data]
 
-exception_optimization_levels = ["FullDebug", "DebugMessage", "VerifyOrLine", "DefaultLine", "Line", "DefaultUnit", "Unit"]
-
-def contract_address(c):
-    return literal("local-address", c.smartml.contractId)
-
-def contract_baker(c):
-    return reduce(Expr("contract_baker", [c.smartml.contractId, get_line_no()]))
+exception_optimization_levels = ["full-debug", "debug-message", "verify-or-line", "default-line", "line", "default-unit", "unit"]
 
 class AddedMessage:
-    def __init__(self, name, f, originate, lineNo):
+    def __init__(self, name, f, originate, line_no):
         self.name = name
         self.f = f
         self.originate = originate
-        self.lineNo = lineNo
-        self.collected = False
+        self.line_no = line_no
 
     def __call__(self, *args, **kargs):
         return ExecMessage(self.contract, self.name, args, kargs)
@@ -1622,23 +1699,36 @@ class GlobalLambda:
     def __init__(self, name, f, lineNo):
         self.name = name
         self.f = f
-        self.lineNo = lineNo
+        self.line_no = lineNo
 
     def __call__(self, x):
         return self._l(x)
 
 class OffchainView:
-    def __init__(self, name, f, lineNo):
+    def __init__(self, name, f, pure, doc, lineNo):
         self.name = name
         self.f = f
-        self.doc = f.__doc__ if f.__doc__ is not None else ""
-        self.lineNo = lineNo
+        self.pure = pure if pure is not None else False
+        if doc is not None:
+            self.doc = doc
+        elif f.__doc__ is not None:
+            self.doc = f.__doc__
+        else:
+            self.doc = ""
+        self.line_no = lineNo
 
     def export(self):
-        return (Expr("meta_offchain_view", [self.name, self.lineNo])).export()
+        return (Expr("meta_offchain_view", [self.name, self.line_no])).export()
 
     def exportDef(self, contract):
-        sp.mb = MessageBuilder(None)
+        prev = sp.mb
+        newMB = sp.mb is None
+        if newMB:
+            sp.setMB(MessageBuilder(None))
+        currentBlock = sp.mb.currentBlock
+        commands = TreeBlock()
+        sp.mb.currentBlock = commands
+
         contract.data = sp.getData()
         import inspect
         args = inspect.getargs(self.f.__code__).args
@@ -1646,11 +1736,19 @@ class OffchainView:
         if nargs == 1:
             r = self.f(contract)
         else:
-            r = self.f(contract, Expr("params", [self.lineNo]))
+            r = self.f(contract, Expr("params", [self.line_no]))
         if r is not None:
             raise Exception("Please use 'sp.result' instead of 'return' in views.")
-        commands = " ".join(c.export() for c in sp.mb.commands.commands)
-        return "(%s %s %d %s (%s))" % (self.name, nargs > 1, self.lineNo, json.dumps(self.doc), commands)
+        commands = commands.export()
+
+        sp.mb.currentBlock = currentBlock
+        self.mb = prev
+        if newMB:
+            sp.setMB(None)
+
+        contract.data = contract_data(contract.smartml.contractId)
+
+        return "(%s %s %d %s %s %s)" % (self.name, nargs > 1, self.line_no, self.pure, json.dumps(self.doc), commands)
 
     def __call__(self, x):
         return self._l(x)
@@ -1661,16 +1759,18 @@ def global_lambda(f, name=None):
         name = f.__name__
     return GlobalLambda(name, f, get_line_no())
 
-def offchain_view(f, name=None):
-    if name is None:
-        name = f.__name__
-    return OffchainView(name, f, get_line_no()) # .export()
+def offchain_view(pure = None, doc = None):
+    def apply_offchain_view(f, name=None):
+        if name is None:
+            name = f.__name__
+        return OffchainView(name, f, pure, doc, get_line_no())
+    return apply_offchain_view
 
 class SubEntryPoint:
-    def __init__(self, name, f, lineNo):
+    def __init__(self, name, f, line_no):
         self.name = name
         self.fg = f
-        self.lineNo = lineNo
+        self.line_no = line_no
 
     def __call__(self, x):
         data = Expr("data",[])
@@ -1683,11 +1783,10 @@ def sub_entry_point(f, name=None):
     def f_wrapped(self,x):
         ops     = local("__operations__", [], t = TList(TOperation))
         storage = local("__storage__", x.in_storage, t = sp.types.unknown())
-        y = seq()
+        y = bind_block()
         with y:
             f(self, x.in_param)
-        with bind(y):
-            result(record(result = y.value, operations = ops.value, storage = storage.value))
+        result(record(result = y.value, operations = ops.value, storage = storage.value))
     if name is None:
         name = f.__name__
     return SubEntryPoint(name, f_wrapped, get_line_no())
@@ -1700,7 +1799,13 @@ amount = Expr("amount", [])
 balance = Expr("balance", [])
 now = Expr("now", [])
 level = Expr("level", [])
+chain_id = Expr("chain_id", [])
+none = Expr("variant", ["None", unit, -1])
+total_voting_power = Expr("total_voting_power", [])
 
+
+def voting_power(address):
+   return Expr("voting_power", [spExpr(address), get_line_no()])
 
 def self_entry_point(entry_point=""):
     return Expr("self_entry_point", [entry_point, get_line_no()])
@@ -1718,26 +1823,21 @@ def implicit_account(key_hash):
 default_verify_message = None
 wrap_verify_messages = None
 
-def verify(cond, message=None, ghost=False):
+def verify(cond, message=None):
     if message is None:
         message = default_verify_message
     if wrap_verify_messages is not None and message is not None:
         message = wrap_verify_messages(message)
     if message is None:
-        sp.newCommand(Expr("verify", [spExpr(cond), ghost, get_line_no()]))
+        sp.newCommand(Expr("verify", [spExpr(cond), get_line_no()]))
     else:
         sp.newCommand(
-            Expr("verify", [spExpr(cond), ghost, spExpr(message), get_line_no()])
+            Expr("verify", [spExpr(cond), spExpr(message), get_line_no()])
         )
 
 
-def verify_equal(v1, v2, ghost=False, message=None):
-    verify(poly_equal_expr(v1, v2), ghost, message)
-
-
-def ghostVerify(cond, message=None):
-    return verify(cond, True, message)
-
+def verify_equal(v1, v2, message=None):
+    verify(poly_equal_expr(v1, v2), message)
 
 def failwith(message):
     sp.newCommand(Expr("failwith", [spExpr(message), get_line_no()]))
@@ -1792,9 +1892,11 @@ def for_(name, value):
     b.value = value
     return value
 
-
 def update_map(map, key, value):
     return Expr("update_map", [spExpr(map), spExpr(key), spExpr(value), get_line_no()])
+
+def get_and_update(map, key, value = none):
+    return match_pair(Expr("get_and_update", [spExpr(map), spExpr(key), spExpr(value), get_line_no()]))
 
 def ediv(num, den):
     return Expr("ediv", [spExpr(num), spExpr(den), get_line_no()])
@@ -1818,6 +1920,12 @@ def sha512(value):
 
 def sha256(value):
     return Expr("hashCrypto", ["SHA256", spExpr(value), get_line_no()])
+
+def keccak(value):
+    return Expr("hashCrypto", ["KECCAK", spExpr(value), get_line_no()])
+
+def sha3(value):
+    return Expr("hashCrypto", ["SHA3", spExpr(value), get_line_no()])
 
 
 def range(a, b, step=1):
@@ -1872,6 +1980,8 @@ def setInt(v):
 def to_int(v):
     return Expr("toInt", [spExpr(v), get_line_no()])
 
+def mul(e1, e2):
+    return Expr("mul_overloaded", [spExpr(e1), spExpr(e2), get_line_no()])
 
 def is_nat(v):
     return Expr("isNat", [spExpr(v), get_line_no()])
@@ -2077,7 +2187,6 @@ def len(e):
 types = sp.types
 
 normalMax = max
-smartpyio.mymax = spmax
 max = spmax
 min = spmin
 
@@ -2086,6 +2195,16 @@ def poly_equal_expr(a, b):
     t = sp.types.unknown()
     return pack(set_type_expr(a, t)) == pack(set_type_expr(b, t))
 
+class Dynamic_contract:
+    def __init__(self, id):
+        self.contractId = dynamic_contract_id(id)
+        self.data = contract_data(self.contractId)
+        self.balance = contract_balance(self.contractId)
+        self.address = contract_address(self.contractId)
+        self.baker = contract_baker(self.contractId)
+        self.typed = contract_typed(self.contractId)
+    def call(self, entry_point, parameters):
+        return ExecMessage(None, entry_point, [parameters], None, contractId = self.contractId)
 
 class Scenario:
     def __init__(self):
@@ -2120,14 +2239,30 @@ class Scenario:
             self.register(element, True)
         return self
 
+    def dynamic_contract(self, contract_id, tcontract, tparameter):
+        data = {}
+        data["action"] = "dynamic_contract"
+        data["id"] = dynamic_contract_id(contract_id).export()
+        data["tparameter"] = sp.types.conv(tparameter).export()
+        data["tcontract"] = sp.types.conv(tcontract).export()
+        data["line_no"] = get_line_no()
+        self.messages += [data]
+        return Dynamic_contract(contract_id)
+
+
     def pp(self):
         if window.in_browser:
             import javascript
-
             sp.profile("scenario - clean ui " + self.__class__.__name__)
             window.smartpyContext.setOutput("")
             sp.profile("scenario - prepare messages " + self.__class__.__name__)
-            messages = javascript.JSON.stringify(self.messages)
+            messages = {
+                'scenario': self.messages,
+                'shortname': 'aaa',
+                'decompile': False,
+                'kind': 'test'
+                }
+            messages = javascript.JSON.stringify(messages)
             sp.profile("scenario - run " + self.__class__.__name__)
             self.smartml.runScenario(messages)
             sp.profile("scenario - done " + self.__class__.__name__)
@@ -2166,12 +2301,13 @@ class Scenario:
         self.nextId += 1
         return Expr("scenario_var", [id, get_line_no()])
 
-    def show(self, expression, html=True, stripStrings=False):
+    def show(self, expression, html=True, stripStrings=False, compile=False):
         data = {}
         data["action"] = "show"
         data["html"] = html
         data["stripStrings"] = stripStrings
         data["expression"] = spExpr(expression).export()
+        data["compile"] = compile
         data["line_no"] = get_line_no()
         self.messages += [data]
         return self
@@ -2203,11 +2339,18 @@ class Scenario:
         self.messages += [data]
         return self
 
+    def add_flag(self, flag, *args):
+        data = {}
+        data["action"] = "flag"
+        data["flag"] = [flag] + pyList(args)
+        data["line_no"] = get_line_no()
+        self.messages += [data]
+
     def simulation(self, c):
         if window.in_browser:
             data = {}
             data["action"] = "simulation"
-            data["id"] = c.smartml.contractId
+            data["id"] = c.smartml.contractId.export()
             data["line_no"] = get_line_no()
             self.messages += [data]
         else:
@@ -2262,16 +2405,108 @@ def cube(xs, tkey = TIntOrNat, tvalue = None):
 
 in_browser = window.in_browser
 
+class Test:
+    def __init__(self, name, shortname, f, profile, is_default, decompile, kind):
+        self.name = name
+        self.shortname = shortname
+        self.profile = profile
+        self.f = f
+        self.is_default = is_default
+        self.decompile = decompile
+        self.kind = kind
 
-def add_test(*args, **kargs):
-    return smartpyio.add_test(*args, **kargs)
+    def eval(self):
+        setProfiling(self.profile)
+        profile("start")
+        window.activeScenario = None
+        window.smartpyContext.contractNextId = 0
+        window.lambdaNextId = 0
+        window.contracts = {}
+        window.validityErrors = []
+        try:
+            self.f()
+        finally:
+            if window.activeScenario is not None:
+                window.activeScenario.pp()
+                for e in window.activeScenario.exceptions:
+                    raise e
+            if window.validityErrors:
+                badValidityText = (
+                    "Bad validity for some transactions %s\nPlease use c.entryPoint.run(valid = ..expected validation..)"
+                    % (
+                        " ".join(
+                            " <button class=\"text-button\" onClick='showLine(%s)'>(line %s)</button>"
+                            % (lineId, lineId)
+                            for lineId in window.validityErrors
+                        )
+                    )
+                )
+                raise Exception(badValidityText)
+        profile("end")
+        if self.profile:
+            window.smartpyContext.addOutput(
+                "<hr/><h4>Profiling</h4>" + "<br>".join(sp.profilingLogs)
+            )
 
-def show(contract, name="Simulation", shortname=None, profile=False, is_default=True):
+def add_test(name, shortname=None, profile=False, is_default=True, decompile=False, kind="test"):
+    if shortname is None:
+        shortname = name.replace(" ", "_")
+    if any(x.shortname == shortname for x in window.pythonTests):
+        raise Exception("Already defined scenario %s" % shortname)
+    for x in shortname:
+        if not (x in "_-" or x.isalnum()):
+            raise Exception(
+                "Bad test name: '%s', '%s' is forbidden\nTo solve the issue, you can add a shortname by doing, e.g.,\n\nsp.add_test(name = '%s', shortname='%s')"
+                % (
+                    shortname,
+                    x,
+                    name,
+                    "".join(x for x in shortname if x in "_-" or x.isalnum()),
+                )
+            )
+
+    def r(f):
+        window.pythonTests.append(Test(name, shortname, f, profile, is_default, decompile, kind))
+
+    return r
+
+def add_simulation_target(contract, name="Simulation", shortname=None, profile=False, is_default=False, flags=[]):
     def test():
         scenario = test_scenario()
+        for flag in flags:
+            if isinstance(flag, str):
+                scenario.add_flag(flag)
+            else:
+                scenario.add_flag(*flag)
         scenario += contract
         scenario.simulation(contract)
-    return smartpyio.add_test(name = name, shortname = shortname, profile = profile, is_default = is_default)(test)
+    return add_test(name = name, shortname = shortname, profile = profile, is_default = is_default)(test)
+
+def add_compilation_target(name, contract, storage=None, parameters=[], shortname=None, is_default=False, decompile=False, flags=[]):
+    if storage is not None:
+        contract.storage = storage
+    def f():
+        scenario = test_scenario()
+        for flag in flags:
+            if isinstance(flag, str):
+                scenario.add_flag(flag)
+            else:
+                scenario.add_flag(*flag)
+        scenario += contract
+        for (f, params) in parameters:
+            scenario += getattr(contract, f)(params).run(export = True)
+    add_test(name=name, shortname=shortname, is_default=is_default, decompile=decompile, kind="compilation")(f)
+
+def add_expression_compilation_target(name, expression, shortname=None, is_default=False, flags=[]):
+    def f():
+        scenario = test_scenario()
+        for flag in flags:
+            if isinstance(flag, str):
+                scenario.add_flag(flag)
+            else:
+                scenario.add_flag(*flag)
+        scenario.show(expression, compile=True)
+    add_test(name=name, shortname=shortname, is_default=is_default, decompile=False, kind="compilation")(f)
 
 def import_script_from_script(name, script):
     import smartpyio
@@ -2364,46 +2599,34 @@ class Lazy_strings(build_big_map):
         m = Verbatim(super().export())
         return set_type_expr(m, TBigMap(TNat, TString)).export()
 
-class seq__(object):
-    def __init__(self, name, b):
-        self.name = name
-        self.__asBlock = b
+class bind_block:
+    __slots__ = ['name', 'inner', 'value']
+
+    def __init__(self, name=None):
+        line_no = get_line_no()
+        self.name = "__s%d" % sp.types.seqNo() if name is None else name
 
     def __enter__(self):
-        return self.__asBlock.__enter__()
+        self.inner = CommandBlock(sp)
+        self.inner.__enter__()
 
     def __exit__(self, type, value, traceback):
-        return self.__asBlock.__exit__(type, value, traceback)
+        self.inner.__exit__(type, value, traceback)
+        sp.newCommand(self.inner, self.name)
 
-    def __getattr__(self, attr):
-        if attr == "value":
+    def __getattribute__(self, name):
+        if name == "value":
             return Expr("getLocal", [self.name, get_line_no()])
-        raise AttributeError(
-            "seq '%s' doesn't have attribute %s. Use '%s.value' to access its result."
-            % (self.name, attr, self.name)
-        )
+        return object.__getattribute__(self, name)
 
-    def export(self):
-        return "(%s)" % (" ".join(c.export() for c in self.commands))
+    def __setattribute__(self, name, value):
+        if name == "value":
+            raise Exception(f"Cannot assign to variable '{self.name}'")
+        self.__dict__[name] = value
 
-class wrapper(object):
-    def __init__(self,cs): self.cs = cs
-    def export(self): return "(%s)" % " ".join(c.export() for c in self.cs)
 
 def trace(expression):
     sp.newCommand(Expr("trace", [spExpr(expression), get_line_no()]))
-
-def seq(name = None):
-    name = "__s%d" % sp.types.seqNo() if name is None else name
-    b = CommandBlock(sp)
-    sp.newCommand(Expr("seq", [name, b, get_line_no()]))
-    return seq__(name, b)
-
-def bind(c1):
-    name = c1.name
-    b = CommandBlock(sp)
-    sp.newCommand(Expr("bind", [name, b, get_line_no()]))
-    return b
 
 def add_operations(l):
     with for_('op', l) as op:
@@ -2412,11 +2635,10 @@ def add_operations(l):
 def lambda_with_operations(f, params="", tParams = None, global_name=None):
     def f_wrapped(x):
         ops = local("__operations__", [], t = TList(TOperation))
-        y = seq()
+        y = bind_block()
         with y:
             f(x)
-        with bind(y):
-            result(pair(ops.value, y.value))
+        result(pair(ops.value, y.value))
     return build_lambda(f_wrapped, params, tParams, global_name)
 
 def lambda_operations_only(f, params="", tParams = None, global_name=None):
@@ -2457,15 +2679,14 @@ def view(t, message = None):
     def app(f):
         line_no = get_line_no()
         def ep(self, params):
-            view_result = seq()
+            view_result = bind_block()
             with view_result:
                 f(self, fst(params))
-            with bind(view_result):
-                set_type(snd(params), TContract(t))
-                transfer(view_result.value,
-                         tez(0),
-                         snd(params),
-                         line_no = line_no)
+            set_type(snd(params), TContract(t))
+            transfer(view_result.value,
+                     tez(0),
+                     snd(params),
+                     line_no = line_no)
         return entry_point(ep, name = f.__name__, line_no = line_no)
     return app
 
@@ -2476,3 +2697,138 @@ def bytes_of_string(s):
 
 def metadata_of_url(url):
     return big_map({"" : bytes_of_string(url)})
+
+def set_result_type(t):
+    b = CommandBlock(sp)
+    sp.newCommand(Expr("set_result_type", [b, t, get_line_no()]))
+    return b
+
+def inline_result(f):
+    def inner(*args, **kwargs):
+        b = bind_block()
+        with b:
+            f(*args, **kwargs)
+        return b.value
+    return inner
+
+def ticket(content, amount):
+    line_no = get_line_no()
+    x = local('ticket_%i' % line_no, Expr("ticket", [spExpr(content), spExpr(amount), line_no]))
+    return x.value
+
+def read_ticket_raw(ticket):
+    return Expr("read_ticket", [spExpr(ticket), get_line_no()])
+
+def split_ticket_raw(ticket, amounts):
+    return Expr("split_ticket", [spExpr(ticket), spExpr(amounts), get_line_no()])
+
+def join_tickets_raw(tickets):
+    return Expr("join_tickets", [spExpr(tickets), get_line_no()])
+
+class Read_ticket:
+    def __init__(self, ticketer, content, amount, copy):
+        self.ticketer = ticketer
+        self.content = content
+        self.amount = amount
+        self.copy = copy
+
+def read_ticket(ticket):
+    line_no = get_line_no()
+    data     = 'ticket_%i_data'     % line_no
+    ticketer = 'ticket_%i_ticketer' % line_no
+    content  = 'ticket_%i_content'  % line_no
+    amount   = 'ticket_%i_amount'   % line_no
+    copy     = 'ticket_%i_copy'     % line_no
+    r = read_ticket_raw(ticket)
+    (data,copy) = match_tuple(r, data, copy)
+    (ticketer, content, amount) = match_tuple(data, ticketer, content, amount)
+    return Read_ticket(ticketer, content, amount, copy)
+
+def split_ticket(ticket, amount1, amount2):
+    line_no = get_line_no()
+    ticket1 = 'ticket1_%i' % line_no
+    ticket2 = 'ticket2_%i' % line_no
+    r = split_ticket_raw(ticket, (amount1, amount2)).open_some()
+    return match_tuple(r, ticket1, ticket2)
+
+def join_tickets(ticket1, ticket2):
+    return join_tickets_raw((ticket1, ticket2)).open_some()
+
+def match_record(x, *fields):
+    line_no = get_line_no()
+    bs  = [[f"{fld}_{line_no}", fld] for fld in fields]
+    bse = [Expr("binding", b) for b in bs]
+    sp.newCommand(Expr("match_record", [line_no, x] + bse))
+    r = [ Expr("variant_arg", [b[0], line_no]) for b in bs ]
+    return pyTuple(r)
+
+def match_tuple(x, *names):
+    names = pyList(names)
+    line_no = get_line_no()
+    sp.newCommand(Expr("match_tuple", [line_no, x] + names))
+    r = [ Expr("variant_arg", [n, line_no]) for n in names ]
+    return pyTuple(r)
+
+def match_pair(x):
+    line_no = get_line_no()
+    fst = 'match_pair_%i_fst' % line_no
+    snd = 'match_pair_%i_snd' % line_no
+    return match_tuple(x, *[fst, snd])
+
+def modify_record(x, *fields):
+    x = spExpr(x)
+    fields = pyList(fields)
+    line_no = get_line_no()
+    body = CommandBlock(sp)
+    bs  = [[f"{fld}_{line_no}", fld] for fld in fields]
+    sp.newCommand(Expr("modify_record", [line_no, x, body] + [Expr("binding", b) for b in bs]))
+    value = pyTuple([ Expr("getLocal", [fld[0], line_no]) for fld in bs])
+    if pyLen(value) == 1:
+        value = value[0]
+    body.value = value
+    return body
+
+def modify_tuple(x, *variables):
+    variables = pyList(variables)
+    x = spExpr(x)
+    line_no = get_line_no()
+    body = CommandBlock(sp)
+    sp.newCommand(Expr("modify_tuple", [line_no, x, body] + variables))
+    value = pyTuple([ Expr("getLocal", [fld, line_no]) for fld in variables])
+    body.value = value
+    return body
+
+def modify(x, variable):
+    x = spExpr(x)
+    line_no = get_line_no()
+    body = CommandBlock(sp)
+    sp.newCommand(Expr("modify", [line_no, x, body, variable]))
+    value = Expr("getLocal", [variable, line_no])
+    body.value = value
+    return body
+
+def test_ticket(ticketer, content, amount):
+    line_no = get_line_no()
+    cid = ticketer.smartml.contractId
+    return Expr("test_ticket", [cid, spExpr(content), spExpr(amount), line_no])
+
+def contract_data(contractId):
+    return Expr("contractData", [contractId, get_line_no()])
+
+def contract_balance(contractId):
+    return Expr("contractBalance", [contractId, get_line_no()])
+
+def contract_address(contractId):
+    return literal("local-address", contractId)
+
+def contract_baker(contractId):
+    return reduce(Expr("contract_baker", [contractId, get_line_no()]))
+
+def contract_typed(contractId):
+    return literal("local-contract-typed", contractId)
+
+def dynamic_contract_id(id):
+    return Expr("dynamic_id", [id, get_line_no()])
+
+def static_contract_id(id):
+    return Expr("static_id", [id, get_line_no()])
